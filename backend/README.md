@@ -3,6 +3,6 @@
 Subfolder for each microservice
 
 - Authentication
-- Defect Management Service
+- Property Management Service
 - Infrastructure Administration Service
 - Parking Management Service
