@@ -1,9 +1,9 @@
 
-export class OccupancyStatus {
+export class Garage {
     garageId: string;
     isOpen: boolean;
-    spacesCount: number;
-    spacesOccupied: number;
+    parkingSpacesCount: number;
+    parkingSpacesOccupied: number;
     chargingStationsCount: number;
     chargingStationsOccupied: number;
 }
