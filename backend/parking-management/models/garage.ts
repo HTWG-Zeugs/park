@@ -1,9 +1,10 @@
+import { ChargingStation } from "./chargingStation";
+import { OccupancyStatus } from "./occupancyStatus";
 
 export class Garage {
     garageId: string;
     isOpen: boolean;
-    parkingSpacesCount: number;
-    parkingSpacesOccupied: number;
-    chargingStationsCount: number;
-    chargingStationsOccupied: number;
+    parkingStatus: OccupancyStatus;
+    chargingStatus: OccupancyStatus;
+    chargingStations: ChargingStation[];
 }

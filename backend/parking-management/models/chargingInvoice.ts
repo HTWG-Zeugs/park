@@ -2,6 +2,8 @@
 export class ChargingInvoice {
     id: string;
     userId: string;
+    garageId: string;
+    chargingStationId: string;
     sessionStartedTimestamp: Date;
     sessionFinishedTimestamp: Date;
     kWhConsumed: number;

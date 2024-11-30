@@ -1,4 +1,4 @@
 export class OccupancyStatus {
-    total: number;
-    occupied: number;
+    totalSpaces: number;
+    occupiedSpaces: number;
 }

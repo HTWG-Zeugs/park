@@ -22,6 +22,12 @@ app.post('/garage/exit/:garageId', (req, res) => {
     res.status(200).send('POST garage/exit');
 });
 
+app.post('/garage/handlePayment/:ticketId', (req, res) => {
+    const ticketId = req.params.ticketId;
+    // handle ticket payment (necessary for mayExit)
+    res.status(200).send('POST handlePayment')
+})
+
 app.get('/garage/mayExit/:ticketId', (req, res) => {
     // check if car has payed and may exit
     res.status(200).send('GET garage/mayExit');
