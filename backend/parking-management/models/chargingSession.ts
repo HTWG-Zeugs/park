@@ -6,5 +6,5 @@ export class ChargingSession {
     chargingStationId: string;
     sessionStartedTimestamp: Date;
     sessionFinishedTimestamp: Date | undefined;
-    kWhConsumed: number;
+    kWhConsumed: number | undefined;
 }

@@ -1,10 +1,9 @@
 
 export class ParkingInvoice {
     id: string;
-    userId: string;
+    ticketId: string;
     entryTimestamp: Date;
     exitTimestamp: Date;
     paymentTimestamp: Date;
     total: number;
-    isPayed: boolean;
 }

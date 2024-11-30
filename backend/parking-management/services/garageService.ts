@@ -1,4 +1,3 @@
-import { OccupancyStatus } from "../models/occupancyStatus";
 
 export class GarageService {
     getParkingOccupancy(garageId: string) {}

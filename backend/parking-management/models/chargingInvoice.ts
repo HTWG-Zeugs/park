@@ -1,6 +1,7 @@
 
 export class ChargingInvoice {
     id: string;
+    sessionId: string;
     userId: string;
     garageId: string;
     chargingStationId: string;

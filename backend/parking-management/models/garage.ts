@@ -2,7 +2,7 @@ import { ChargingStation } from "./chargingStation";
 import { OccupancyStatus } from "./occupancyStatus";
 
 export class Garage {
-    garageId: string;
+    id: string;
     isOpen: boolean;
     parkingStatus: OccupancyStatus;
     chargingStatus: OccupancyStatus;
