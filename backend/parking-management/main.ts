@@ -1,43 +1,77 @@
-const express = require('express')
+import { JsonFileRepository } from "./repositories/jsonFileRepository";
+import { Repository } from "./repositories/repository";
+import { GarageService } from "./services/garageService";
+
+const express = require('express');
 const app = express();
 const port = 8081;
 
-app.use(express.json())
+app.use(express.json());
+
+const repo: Repository = new JsonFileRepository();
+const garageService: GarageService = new GarageService(repo);
 
 app.get('/garage/parking/occupancy/:garageId', (req, res) => {
-    const garageId = req.params.garageId;
-    // check the occupancy status of the garage
-    res.status(200).send(garageId);
+    try {
+        const garageId = req.params.garageId;
+        const occupancy = garageService.getParkingOccupancy(garageId);
+        res.status(200).send(occupancy);
+    } catch (e) {
+        res.status(500).send("Getting parking occupancy failed: " + e);
+    }
 });
 
 app.post('/garage/enter/:garageId', (req, res) => {
-    const garageId = req.params.garageId;
-    // record entry of a car
-    res.status(200).send('POST garage/enter');
+    try {
+        const garageId = req.params.garageId;
+        garageService.handleCarEntry(garageId);
+        res.status(200).send('success');
+    } catch (e) {
+        res.status(500).send('Handling car entry failed: ' + e);
+    }
 });
 
 app.post('/garage/exit/:garageId', (req, res) => {
-    const garageId = req.params.garageId;
-    // record exit of a car
-    res.status(200).send('POST garage/exit');
+    try {
+        const garageId = req.params.garageId;
+        garageService.handleCarExit(garageId);
+        res.status(200).send('success');
+    } catch (e) {
+        res.status(500).send('Handling car exit failed: ' + e);
+    }
 });
 
 app.post('/garage/handlePayment/:ticketId', (req, res) => {
-    const ticketId = req.params.ticketId;
-    // handle ticket payment (necessary for mayExit)
-    res.status(200).send('POST handlePayment')
+    try {
+        const ticketId = req.params.ticketId;
+        garageService.handleTicketPayment(ticketId);
+        res.status(200).send('success')
+    } catch (e) {
+        res.status(500).send('Handling ticket payment failed: ' + e);
+    }
 })
 
 app.get('/garage/mayExit/:ticketId', (req, res) => {
-    // check if car has payed and may exit
-    res.status(200).send('GET garage/mayExit');
+    try {
+        const ticketId = req.params.ticketId;
+        const mayExit = garageService.mayExit(ticketId);
+        res.status(200).send(mayExit);
+    } catch (e) {
+        res.status(500).send("Retrieving exit permission failed: " + e);
+    }
 });
 
 app.get('/garage/charging/occupancy/:garageId', (req, res) => {
-    // get status (occupancy) of e-charging stations
-    res.status(200).send('GET charging/stations');
+    try {
+        const garageId = req.params.garageId;
+        const occupancy = garageService.getChargingOccupancy(garageId);
+        res.status(200).send(occupancy);
+    } catch (e) {
+        res.status(500).send("Getting charging occupancy failed: " + e);
+    }
 });
 
+//discuss the charging session endpoints with the team
 app.post('/garage/charging/startSession/:garageId/:stationId', (req, res) => {
     const garageId = req.params.garageId;
     const stationId = req.params.stationId;
@@ -59,8 +93,13 @@ app.get('/garage/charging/session/:sessionId', (req, res) => {
 });
 
 app.get('/garage/charging/invoice/:sessionId', (req, res) => {
-    // retrieve invoice for finished charging session
-    res.status(200).send('GET charging/invoice');
+    try {
+        const sessionId = req.params.sessionId;
+        const invoice = garageService.getChargingInvoice(sessionId);
+        res.status(200).send(invoice);
+    } catch (e) {
+        res.status(500).send('Getting charging invoice failed: ' + e);
+    }
 });
 
 app.listen(port, () => {

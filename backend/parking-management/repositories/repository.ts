@@ -5,6 +5,7 @@ import { ParkingInvoice } from "../models/parkingInvoice";
 import { Ticket } from "../models/ticket";
 
 export interface Repository {
+    getIsOpen(garageId: string): boolean;
     getParkingOccupancy(garageId: string): OccupancyStatus;
     getChargingOccupancy(garageId: string): OccupancyStatus;
     increaseParkingOccupancy(garageId: string): void;
@@ -13,7 +14,6 @@ export interface Repository {
     vacateChargingStation(garageId: string, stationId: string): void;
     getTicket(ticketId: string): Ticket
     addPaymentTimestamp(ticketId: string, timestamp: Date): void;
-    getPaymentTimestamp(ticketId: string): Date;
     addChargingSession(session: ChargingSession): void;
     endChargingSession(sessionId: string, timestamp: Date, kWhConsumed: number): void;
     getChargingInvoice(sessionId: string): ChargingInvoice;

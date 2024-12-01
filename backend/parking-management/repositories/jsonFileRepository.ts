@@ -16,6 +16,11 @@ const parkingInvoicesRepo = location + 'parkingInvoices.json';
 const ticketsRepo = location + 'tickets.json';
 
 export class JsonFileRepository implements Repository {
+    getIsOpen(garageId: string): boolean {
+        const garage = this.getGarage(garageId);
+        return garage.isOpen;
+    }
+
     getParkingOccupancy(garageId: string): OccupancyStatus {
         const garage = this.getGarage(garageId);
         const occupancyStatus = garage.parkingStatus as OccupancyStatus
@@ -106,10 +111,6 @@ export class JsonFileRepository implements Repository {
             jsonData[index] = { ...jsonData[index], ...ticket };
             writeFileSync(ticketsRepo, JSON.stringify(jsonData), 'utf-8');
         }
-    }
-
-    getPaymentTimestamp(ticketId: string): Date {
-        return this.getTicket(ticketId).paymentTimestamp;
     }
 
     addChargingSession(session: ChargingSession): void {
