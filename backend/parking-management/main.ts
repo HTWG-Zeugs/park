@@ -24,8 +24,8 @@ app.get('/garage/parking/occupancy/:garageId', (req, res) => {
 app.post('/garage/enter/:garageId', (req, res) => {
     try {
         const garageId = req.params.garageId;
-        garageService.handleCarEntry(garageId);
-        res.status(200).send('success');
+        const ticketId = garageService.handleCarEntry(garageId);
+        res.status(200).send(ticketId);
     } catch (e) {
         res.status(500).send('Handling car entry failed: ' + e);
     }
@@ -72,24 +72,29 @@ app.get('/garage/charging/occupancy/:garageId', (req, res) => {
 });
 
 //discuss the charging session endpoints with the team
+//create session here and return id
 app.post('/garage/charging/startSession/:garageId/:stationId', (req, res) => {
-    const garageId = req.params.garageId;
-    const stationId = req.params.stationId;
-    const userId = req.body;
-    // start charging session at an e-charging station
-    res.status(200).send('POST charging/startSession');
+    try {
+        const garageId = req.params.garageId;
+        const stationId = req.params.stationId;
+        const userId = req.body;
+        const sessionId = garageService.startChargingSession(garageId, stationId, userId);
+        res.status(200).send(sessionId);
+    } catch (e) {
+        res.status(500).send("Starting charging session failed: " + e);
+    }
 });
 
 app.post('/garage/charging/endSession/:sessionId', (req, res) => {
     const sessionId = req.params.sessionId;
     // end charging session at an e-charging station
-    res.status(200).send('POST charging/endSession');
+    res.status(200).send('POST end session');
 });
 
 app.get('/garage/charging/session/:sessionId', (req, res) => {
     const sessionId = req.params.sessionId;
     // get session information for analytics (duration, user ID, session ID ...)
-    res.status(200).send('GET charging/session');
+    res.status(200).send('GET get session');
 });
 
 app.get('/garage/charging/invoice/:sessionId', (req, res) => {

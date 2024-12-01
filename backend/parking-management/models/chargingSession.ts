@@ -5,6 +5,6 @@ export class ChargingSession {
     garageId: string;
     chargingStationId: string;
     sessionStartedTimestamp: Date;
-    sessionFinishedTimestamp: Date | undefined;
-    kWhConsumed: number | undefined;
+    sessionFinishedTimestamp: Date | null;
+    kWhConsumed: number | null;
 }

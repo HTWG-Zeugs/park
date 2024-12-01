@@ -12,9 +12,10 @@ export interface Repository {
     decreaseParkingOccupancy(garageId: string): void;
     occupyChargingStation(garageId: string, stationId: string): void;
     vacateChargingStation(garageId: string, stationId: string): void;
-    getTicket(ticketId: string): Ticket
+    createTicket(ticket: Ticket): void;
+    getTicket(ticketId: string): Ticket;
     addPaymentTimestamp(ticketId: string, timestamp: Date): void;
-    addChargingSession(session: ChargingSession): void;
+    createChargingSession(session: ChargingSession): void;
     endChargingSession(sessionId: string, timestamp: Date, kWhConsumed: number): void;
     getChargingInvoice(sessionId: string): ChargingInvoice;
     getParkingInvoice(ticketId: string): ParkingInvoice;
