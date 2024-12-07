@@ -1,7 +1,7 @@
-import { CreateDefectRequestObject } from "../../../shared/CreateDefectRequestObject";
-import { DefectResponseObject } from "../../../shared/DefectResponseObject";
-import { CreateDefectResponseObject } from "../../../shared/CreateDefectResponseObject";
-import { UpdateDefectRequestObject } from "../../../shared/UpdateDefectRequestObject";
+import { CreateDefectRequestObject } from "../../../../shared/CreateDefectRequestObject";
+import { DefectResponseObject } from "../../../../shared/DefectResponseObject";
+import { CreateDefectResponseObject } from "../../../../shared/CreateDefectResponseObject";
+import { UpdateDefectRequestObject } from "../../../../shared/UpdateDefectRequestObject";
 import type { ObjectStorageRepo } from "../infrastructure/ObjectStorageRepo";
 import { Defect } from "../models/defectAggregate/Defect";
 import { DefectReportStatus } from "../models/defectAggregate/DefectReportStatus";
