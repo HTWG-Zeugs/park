@@ -1,0 +1,54 @@
+.thumbsContainer {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  gap: 16px;
+}
+
+.thumb {
+  display: inline-flex;
+  position: relative;
+}
+
+.errorOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 0, 0, 0.6); /* Semi-transparent red */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9em;
+  border-radius: 10px; /* Match the border-radius of thumbInner */
+  text-align: center;
+}
+
+.thumbInner {
+  display: block;
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 3px solid black;
+}
+
+.removeButton {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  border: none;
+  background: gray;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
