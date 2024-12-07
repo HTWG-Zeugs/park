@@ -1,0 +1,33 @@
+.img {
+  display: block;
+  width: auto;
+  height: 100%;
+}
+
+.baseStyle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  border-width: 2px;
+  border-radius: 2px;
+  border-color: #eeeeee;
+  border-style: dashed;
+  background-color: #fafafa;
+  color: #bdbdbd;
+  outline: none;
+  transition: border 0.24s ease-in-out;
+  cursor: pointer;
+}
+
+.focusedStyle {
+  border-color: #2196f3;
+}
+
+.acceptStyle {
+  border-color: #00e676;
+}
+
+.rejectStyle {
+  border-color: #ff1744;
+}

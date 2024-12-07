@@ -10,5 +10,5 @@ export class ChargingInvoice {
     kWhConsumed: number;
     total: number;
     isPayed: boolean;
-    paymentTimestamp: Date | undefined;
+    paymentTimestamp: Date | null;
 }

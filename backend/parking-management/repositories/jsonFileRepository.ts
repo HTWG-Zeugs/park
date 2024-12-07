@@ -6,7 +6,7 @@ import { OccupancyStatus } from "../models/occupancyStatus";
 import { ParkingInvoice } from "../models/parkingInvoice";
 import { Ticket } from "../models/ticket";
 import { Repository } from "./repository";
-import { readFileSync, stat, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 
 const location = '../mocks/json-collections/';
 const chargingInvoicesRepo = location + 'chargingInvoices.json';
@@ -95,6 +95,13 @@ export class JsonFileRepository implements Repository {
         }
     }
 
+    createTicket(ticket: Ticket): void {
+        const data = readFileSync(ticketsRepo, 'utf-8');
+        const tickets = JSON.parse(data) as Ticket[];
+        tickets.push(ticket);
+        writeFileSync(ticketsRepo, JSON.stringify(tickets), 'utf-8');
+    }
+
     getTicket(ticketId: string): Ticket {
         const data = readFileSync(ticketsRepo, 'utf-8');
         const jsonData = JSON.parse(data);
@@ -113,7 +120,7 @@ export class JsonFileRepository implements Repository {
         }
     }
 
-    addChargingSession(session: ChargingSession): void {
+    createChargingSession(session: ChargingSession): void {
         const data = readFileSync(chargingSessionsRepo, 'utf-8');
         const sessions = JSON.parse(data) as ChargingSession[];
         sessions.push(session);

@@ -1,0 +1,117 @@
+{
+  "component_contact": {
+    "headline": "Contact Us",
+    "p1_1": "This project is part of the",
+    "p1_strong": "Cloud Application Development",
+    "p1_2": " course at HTWG Konstanz.",
+    "p2_1": "If you have any questions or feedback, feel free to contact us.",
+    "li1_name": "Lukas Benner:",
+    "li1_mail": "lukas.benner@htwg-konstanz.de",
+    "li2_name": "Lukas Epple:",
+    "li2_mail": "lukas.epple@htwg-konstanz.de",
+    "li3_name": "Jonas Elsper:",
+    "li3_mail": "jonas.elsper@htwg-konstanz.de"
+  },
+  "component_defectList": {
+    "error_fetching_data": "No data received",
+    "table": {
+      "column_id": "Id",
+      "column_object": "Object",
+      "column_location": "Location",
+      "column_short_desc": "Short Description",
+      "column_detailed_desc": "Detailed Description",
+      "column_reporting_date": "Reported at",
+      "column_last_modified": "Last modified at",
+      "column_status": "Status",
+      "column_actions": "Actions"
+    }
+  },
+  "component_dropzone": {
+    "drop_files_here": "Drag 'n' drop images here, or click to select images"
+  },
+  "component_header": {
+    "sign_out": "Sign out",
+    "sign_in": "Sign in"
+  },
+  "component_sign_in": {
+    "title": "Sign-In",
+    "email": "E-Mail:",
+    "password": "Password:",
+    "sign_in": "Sign In",
+    "sign_up": "Sign Up",
+    "forgot_password": "Forgot password?"
+  },
+  "route_add_defect": {
+    "upload_failed": "Upload failed",
+    "add_defect": "Add defect",
+    "grid_object": "Object *",
+    "grid_location": "Location *",
+    "grid_short_desc": "Short Description",
+    "grid_detailed_desc": "Detailed Description",
+    "grid_status": "Status *",
+    "save_button": "Save"
+  },
+  "route_defect_details": {
+    "img_not_available": "Image not available",
+    "defect_details": "Defect Details",
+    "object": "Object",
+    "location": "Location",
+    "short_desc": "Short Description",
+    "detailed_desc": "Detailed Description",
+    "status": "Status",
+    "reported_at": "Reported at",
+    "last_modified_at": "Last modified at"
+  },
+  "route_home": {
+    "title": "Park",
+    "intro": "We aim to develop a Software-as-a-Service (SaaS) application designed to manage parking facilities for municipalities and corporations. The application will offer a comprehensive set of features to streamline parking operations, improve user experience, and optimize the management of parking infrastructure.",
+    "objectivesTitle": "Key Objectives:",
+    "objectives": {
+      "integration": {
+        "title": "Integration with Parking Equipment",
+        "description": "The application will interface with parking area and garage equipment to enable automated entry and exit of vehicles. This will include the verification of payments to ensure smooth and efficient vehicle access."
+      },
+      "management": {
+        "title": "Parking Infrastructure Management",
+        "description": "The application will allow for the management of parking property assets, including: Inventory tracking of equipment and resources. Scheduling and tracking of maintenance tasks. Defect detection, management, and reporting to maintain operational efficiency."
+      },
+      "analytics": {
+        "title": "Analytics and Reporting",
+        "description": "The application will offer detailed analytics and reporting features to provide insights into parking utilization, financial performance, and operational metrics, helping stakeholders make data-driven decisions."
+      },
+      "charging": {
+        "title": "Management of E-Charging Infrastructure",
+        "description": "The platform will support the management of electric vehicle (EV) charging stations, enabling monitoring, maintenance, and reporting related to e-charging infrastructure."
+      },
+      "deployment": {
+        "title": "Global Deployment",
+        "description": "The SaaS application will be designed for global scalability, allowing deployment across different geographic regions and supporting various regulatory requirements, currencies, and languages."
+      }
+    }
+  },
+  "route_protected_route": {
+    "loading": "Loading..."
+  },
+  "route_sign_in": {
+      "user_is_null": "Sign in failed. User is null.",
+      "user_not_found": "No account found with this email address.",
+      "wrong_password": "Incorrect password.",
+      "sign_in_failed": "Sign in failed. Please try again.",
+      "email_required": "Please enter your email address.",
+      "password_reset_email_sent": "An email to reset your password has been sent.",
+      "password_reset_failed": "Password reset failed. Please try again."
+  },
+  "route_sing_up": {
+      "passwords_do_not_match": "Passwords do not match.",
+      "user_is_null": "Registration failed. User is null.",
+      "email_already_exists": "This email address is already in use",
+      "invalid_email": "Invalid email address.",
+      "weak_password": "Password is too weak.",
+      "sign_up_failed": "Registration failed. Please try again.",
+      "title": "Sign Up",
+      "email": "E-Mail:",
+      "password": "Password:",
+      "confirm_password": "Confirm Password:",
+      "sign_up_button": "Sign Up"
+  }
+}

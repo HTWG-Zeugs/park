@@ -1,0 +1,17 @@
+.App {
+  text-align: center;
+}
+
+.main-heading {
+  scale: 3;
+  color: #015da6;
+  padding-right: 3px;
+  margin-bottom: 10px;
+}
+
+.MuiCard-root {
+  margin: 50px;
+  @media screen and (max-width: 600px) {
+    margin: 10px;
+  }
+}

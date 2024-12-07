@@ -1,3 +1,5 @@
+import { ChargingSession } from "../models/chargingSession";
+import { Ticket } from "../models/ticket";
 import { Repository } from "../repositories/repository";
 
 export class GarageService {
@@ -19,10 +21,18 @@ export class GarageService {
         return this.repo.getChargingOccupancy(garageId);
     };
 
-    handleCarEntry(garageId: string) {
+    handleCarEntry(garageId: string): string {
         const isOpen = this.repo.getIsOpen(garageId);
         if (isOpen) {
+            const ticket: Ticket = {
+                id: crypto.randomUUID(),
+                garageId: garageId,
+                entryTimestamp: new Date(),
+                paymentTimestamp: null
+            };
+            this.repo.createTicket(ticket);
             this.repo.increaseParkingOccupancy(garageId);
+            return ticket.id;
         } else {
             throw Error('Cannot enter because garage is closed.');
         }
@@ -51,23 +61,34 @@ export class GarageService {
         }
     };
 
-    // is the session created in the frontend? then change the endpoint and the methods
-    startChargingSession(garageId: string, stationId: string, userId: string) {
+    startChargingSession(garageId: string, stationId: string, userId: string): string {
         const isOpen = this.repo.getIsOpen(garageId);
-        if (isOpen) { 
-
+        if (isOpen) {
+            const session: ChargingSession = {
+                id: crypto.randomUUID(),
+                userId: userId,
+                garageId: garageId,
+                chargingStationId: stationId,
+                sessionStartedTimestamp: null,
+                sessionFinishedTimestamp: null,
+                kWhConsumed: null
+            }
+            this.repo.createChargingSession(session);
+            return session.id;
         } else {
             throw Error('Cannot start charging session because garage is closed.');
         }
     };
 
-    // is the session created in the frontend? then change the endpoint and the methods
+    // define how the kWhConsumed are handled
     endChargingSession(garageId: string, stationId: string) {
 
     };
 
     // maybe also change that to get session by id
-    getCurrentSession(garageId: string, stationId: string) {};
+    getCurrentSession(garageId: string, stationId: string) {
+        
+    };
 
     getChargingInvoice(sessionId: string) {
         this.repo.getChargingInvoice(sessionId);

@@ -1,0 +1,44 @@
+/* Contact.css */
+h1 {
+  font-size: 2rem;
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.course-info,
+.contact-info {
+  font-size: 1.1rem;
+  color: #666;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.contact-list {
+  list-style: none;
+  padding: 0;
+  font-size: 1.1rem;
+}
+
+.contact-list li {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.contact-list a {
+  color: #0077cc;
+  text-decoration: none;
+  font-weight: bold;
+  margin-left: 10px;
+}
+
+.contact-list a:hover {
+  text-decoration: underline;
+}
+
+.icon {
+  color: #0077cc;
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
