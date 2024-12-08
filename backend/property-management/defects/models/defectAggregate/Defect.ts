@@ -2,16 +2,20 @@ import type { DefectState } from "./DefectState";
 import { DefectReportStatus } from "./DefectReportStatus";
 
 export class Defect {
+  private _Id: string;
   private _Status: DefectReportStatus;
   private _ImageNames: string[];
   private _LastModifiedAt: Date;
   private _ReportingDate: Date;
-
-  Id: string;
+  
   Object: string;
   Location: string;
   ShortDesc: string;
   DetailedDesc: string;
+
+  public get Id(): string {
+    return this._Id;
+  }
 
   public get ReportingDate(): Date {
     return this._ReportingDate;
@@ -31,7 +35,7 @@ export class Defect {
 
   constructor(object: string, location: string) {
     const date = new Date();
-    this.Id = crypto.randomUUID();
+    this._Id = crypto.randomUUID();
     this._ImageNames = [];
     this.Object = object;
     this.Location = location;
@@ -74,7 +78,7 @@ export class Defect {
       dto.Object,
       dto.Location
     );
-    defect.Id = dto.Id;
+    defect._Id = dto.Id;
     defect.ShortDesc = dto.ShortDesc;
     defect.DetailedDesc = dto.DetailedDesc;
     defect._Status = DefectReportStatus[dto.Status as keyof typeof DefectReportStatus]
