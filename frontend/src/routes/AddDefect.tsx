@@ -28,14 +28,12 @@ interface FormData {
   location: string;
   shortDescription: string;
   detailedDescription: string;
-  status: string;
 }
 
 interface FormErrors {
   object: string;
   location: string;
   shortDescription: string;
-  status: string;
 }
 
 export default function AddDefect() {
@@ -52,15 +50,13 @@ export default function AddDefect() {
     object: "",
     location: "",
     shortDescription: "",
-    detailedDescription: "",
-    status: "",
+    detailedDescription: ""
   });
 
   const [formErrors, setFormErrors] = useState<FormErrors>({
     object: "",
     location: "",
-    shortDescription: "",
-    status: "",
+    shortDescription: ""
   });
 
   const [images, setImages] = useState<ImageFile[]>([]);
@@ -206,7 +202,6 @@ export default function AddDefect() {
       Location: formData.location,
       ShortDesc: formData.shortDescription,
       DetailedDesc: formData.detailedDescription,
-      Status: formData.status,
       ImageNames: images.map((image) => image.uploadedName), // use the uploaded name because the uploaded name is unique
     };
 
@@ -334,25 +329,6 @@ export default function AddDefect() {
                     <div className="thumbsContainer">{thumbs}</div>
                   )}
                 </div>
-              </Grid>
-
-              <Grid size={12}>
-                <TextField
-                  fullWidth
-                  select
-                  label={t("route_add_defect.grid_status")}
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  error={!!formErrors.status}
-                  helperText={formErrors.status}
-                >
-                  {Object.values(DefectReportStatus).map((option) => (
-                    <MenuItem key={option} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
-                </TextField>
               </Grid>
 
               <Grid size={12}>

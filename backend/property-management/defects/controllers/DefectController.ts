@@ -153,10 +153,7 @@ export class DefectController {
 }
 
 function toDefect(request: CreateDefectRequestObject): Defect {
-  const status: DefectReportStatus =
-    DefectReportStatus[request.Status as keyof typeof DefectReportStatus];
-
-  const defect: Defect = new Defect(request.Object, request.Location, status);
+  const defect: Defect = new Defect(request.Object, request.Location);
 
   defect.ShortDesc = request.ShortDesc;
   defect.DetailedDesc = request.DetailedDesc;

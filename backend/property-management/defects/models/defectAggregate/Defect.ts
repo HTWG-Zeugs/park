@@ -29,14 +29,14 @@ export class Defect {
     return this._LastModifiedAt;
   }
 
-  constructor(object: string, location: string, status: DefectReportStatus) {
+  constructor(object: string, location: string) {
     const date = new Date();
     this.Id = crypto.randomUUID();
     this._ImageNames = [];
     this.Object = object;
     this.Location = location;
     this._ReportingDate = date;
-    this._Status = status;
+    this._Status = DefectReportStatus.Open;
     this.ShortDesc = "";
     this.DetailedDesc = "";
     this._LastModifiedAt = date;
@@ -72,12 +72,12 @@ export class Defect {
   static fromState(dto: DefectState): Defect {
     const defect = new Defect(
       dto.Object,
-      dto.Location,
-      DefectReportStatus[dto.Status as keyof typeof DefectReportStatus]
+      dto.Location
     );
     defect.Id = dto.Id;
     defect.ShortDesc = dto.ShortDesc;
     defect.DetailedDesc = dto.DetailedDesc;
+    defect._Status = DefectReportStatus[dto.Status as keyof typeof DefectReportStatus]
     defect._setImageNames(dto.ImageNames);
     defect._LastModifiedAt = new Date(dto.LastModifiedAt);
     defect._ReportingDate = new Date(dto.ReportingDate);
