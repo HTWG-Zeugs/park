@@ -1,4 +1,7 @@
+import { GarageDto } from "../../shared/garageDto";
 import { ChargingSession } from "../models/chargingSession";
+import { Garage } from "../models/garage";
+import { OccupancyStatus } from "../models/occupancyStatus";
 import { Ticket } from "../models/ticket";
 import { Repository } from "../repositories/repository";
 
@@ -7,6 +10,16 @@ export class GarageService {
 
     constructor(repository: Repository) {
         this.repo = repository;
+    }
+
+    createGarage(garageDto: GarageDto) {
+        const garage = this.getGarageFromDto(garageDto);
+        this.repo.createGarage(garage);
+    }
+
+    updateGarage(garageDto: GarageDto) {
+        const garage = this.getGarageFromDto(garageDto);
+        this.repo.updateGarage(garage);
     }
 
     getIsOpen(garageId: string) {
@@ -93,4 +106,18 @@ export class GarageService {
     getChargingInvoice(sessionId: string) {
         this.repo.getChargingInvoice(sessionId);
     };
+
+    private getGarageFromDto(garageDto: GarageDto): Garage {
+        return new Garage(
+            garageDto.id,
+            garageDto.isOpen,
+            new OccupancyStatus(
+                garageDto.totalParkingSpaces, 0
+            ),
+            new OccupancyStatus(
+                garageDto.totalChargingSpaces, 0
+            ),
+            garageDto.chargingStations
+        );
+    }
 }

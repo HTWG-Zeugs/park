@@ -16,6 +16,14 @@ const parkingInvoicesRepo = location + 'parkingInvoices.json';
 const ticketsRepo = location + 'tickets.json';
 
 export class JsonFileRepository implements Repository {
+    createGarage(garage: Garage): void {
+        
+    }
+
+    updateGarage(garage: Garage): void {
+        
+    }
+
     getIsOpen(garageId: string): boolean {
         const garage = this.getGarage(garageId);
         return garage.isOpen;

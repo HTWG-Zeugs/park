@@ -1,10 +1,13 @@
 import { ChargingInvoice } from "../models/chargingInvoice";
 import { ChargingSession } from "../models/chargingSession";
+import { Garage } from "../models/garage";
 import { OccupancyStatus } from "../models/occupancyStatus";
 import { ParkingInvoice } from "../models/parkingInvoice";
 import { Ticket } from "../models/ticket";
 
 export interface Repository {
+    createGarage(garage: Garage): void;
+    updateGarage(garage: Garage): void;
     getIsOpen(garageId: string): boolean;
     getParkingOccupancy(garageId: string): OccupancyStatus;
     getChargingOccupancy(garageId: string): OccupancyStatus;

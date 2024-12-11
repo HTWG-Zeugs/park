@@ -1,3 +1,5 @@
+import { GarageDto } from "../shared/garageDto";
+import { Garage } from "./models/garage";
 import { JsonFileRepository } from "./repositories/jsonFileRepository";
 import { Repository } from "./repositories/repository";
 import { GarageService } from "./services/garageService";
@@ -11,9 +13,29 @@ app.use(express.json());
 const repo: Repository = new JsonFileRepository();
 const garageService: GarageService = new GarageService(repo);
 
+app.put('/garage/create', (req, res) => {
+    try {
+        const garageDto: GarageDto = req.body;
+        garageService.createGarage(garageDto)
+        res.status(200).send('success')
+    } catch (e) {
+        res.status(500).send("creating garage failed: " + e)
+    }
+})
+
+app.put('/garage/update', (req, res) => {
+    try {
+        const garageDto: GarageDto = req.body;
+        garageService.updateGarage(garageDto)
+        res.status(200).send('success')
+    } catch (e) {
+        res.status(500).send("updating garage failed: " + e)
+    }
+})
+
 app.get('/garage/parking/occupancy/:garageId', (req, res) => {
     try {
-        const garageId = req.params.garageId;
+        const garageId: string = req.params.garageId;
         const occupancy = garageService.getParkingOccupancy(garageId);
         res.status(200).send(occupancy);
     } catch (e) {
@@ -23,7 +45,7 @@ app.get('/garage/parking/occupancy/:garageId', (req, res) => {
 
 app.post('/garage/enter/:garageId', (req, res) => {
     try {
-        const garageId = req.params.garageId;
+        const garageId: string = req.params.garageId;
         const ticketId = garageService.handleCarEntry(garageId);
         res.status(200).send(ticketId);
     } catch (e) {
@@ -33,7 +55,7 @@ app.post('/garage/enter/:garageId', (req, res) => {
 
 app.post('/garage/exit/:garageId', (req, res) => {
     try {
-        const garageId = req.params.garageId;
+        const garageId: string = req.params.garageId;
         garageService.handleCarExit(garageId);
         res.status(200).send('success');
     } catch (e) {
@@ -43,7 +65,7 @@ app.post('/garage/exit/:garageId', (req, res) => {
 
 app.post('/garage/handlePayment/:ticketId', (req, res) => {
     try {
-        const ticketId = req.params.ticketId;
+        const ticketId: string = req.params.ticketId;
         garageService.handleTicketPayment(ticketId);
         res.status(200).send('success')
     } catch (e) {
@@ -53,7 +75,7 @@ app.post('/garage/handlePayment/:ticketId', (req, res) => {
 
 app.get('/garage/mayExit/:ticketId', (req, res) => {
     try {
-        const ticketId = req.params.ticketId;
+        const ticketId: string = req.params.ticketId;
         const mayExit = garageService.mayExit(ticketId);
         res.status(200).send(mayExit);
     } catch (e) {
@@ -63,7 +85,7 @@ app.get('/garage/mayExit/:ticketId', (req, res) => {
 
 app.get('/garage/charging/occupancy/:garageId', (req, res) => {
     try {
-        const garageId = req.params.garageId;
+        const garageId: string = req.params.garageId;
         const occupancy = garageService.getChargingOccupancy(garageId);
         res.status(200).send(occupancy);
     } catch (e) {
@@ -75,9 +97,9 @@ app.get('/garage/charging/occupancy/:garageId', (req, res) => {
 //create session here and return id
 app.post('/garage/charging/startSession/:garageId/:stationId', (req, res) => {
     try {
-        const garageId = req.params.garageId;
-        const stationId = req.params.stationId;
-        const userId = req.body;
+        const garageId: string = req.params.garageId;
+        const stationId: string = req.params.stationId;
+        const userId: string = req.body;
         const sessionId = garageService.startChargingSession(garageId, stationId, userId);
         res.status(200).send(sessionId);
     } catch (e) {
@@ -99,7 +121,7 @@ app.get('/garage/charging/session/:sessionId', (req, res) => {
 
 app.get('/garage/charging/invoice/:sessionId', (req, res) => {
     try {
-        const sessionId = req.params.sessionId;
+        const sessionId: string = req.params.sessionId;
         const invoice = garageService.getChargingInvoice(sessionId);
         res.status(200).send(invoice);
     } catch (e) {
