@@ -1,4 +1,8 @@
+import { GarageDto } from "../../shared/garageDto";
+import { ChargingInvoice } from "../models/chargingInvoice";
 import { ChargingSession } from "../models/chargingSession";
+import { Garage } from "../models/garage";
+import { OccupancyStatus } from "../models/occupancyStatus";
 import { Ticket } from "../models/ticket";
 import { Repository } from "../repositories/repository";
 
@@ -9,20 +13,26 @@ export class GarageService {
         this.repo = repository;
     }
 
-    getIsOpen(garageId: string) {
-        return this.repo.getIsOpen(garageId);
+    async createGarage(garageDto: GarageDto): Promise<void> {
+        const garage = this.getGarageFromDto(garageDto);
+        await this.repo.createGarage(garage);
     }
 
-    getParkingOccupancy(garageId: string) {
+    async updateGarage(garageDto: GarageDto): Promise<void>  {
+        const garage = this.getGarageFromDto(garageDto);
+        this.repo.updateGarage(garage);
+    }
+
+    async getParkingOccupancy(garageId: string): Promise<OccupancyStatus> {
         return this.repo.getParkingOccupancy(garageId);
     };
 
-    getChargingOccupancy(garageId: string) {
+    async getChargingOccupancy(garageId: string): Promise<OccupancyStatus> {
         return this.repo.getChargingOccupancy(garageId);
     };
 
-    handleCarEntry(garageId: string): string {
-        const isOpen = this.repo.getIsOpen(garageId);
+    async handleCarEntry(garageId: string): Promise<string> {
+        const isOpen = await this.getIsOpen(garageId);
         if (isOpen) {
             const ticket: Ticket = {
                 id: crypto.randomUUID(),
@@ -38,16 +48,16 @@ export class GarageService {
         }
     };
 
-    handleCarExit(garageId: string) {
+    async handleCarExit(garageId: string): Promise<void> {
         this.repo.decreaseParkingOccupancy(garageId);
     };
 
-    handleTicketPayment(ticketId: string) {
+    async handleTicketPayment(ticketId: string): Promise<void> {
         this.repo.addPaymentTimestamp(ticketId, new Date());
     };
 
-    mayExit(ticketId: string) {
-        const ticket = this.repo.getTicket(ticketId);
+    async mayExit(ticketId: string): Promise<boolean> {
+        const ticket = await this.repo.getTicket(ticketId);
         // check if payment was more than 15 minutes ago
         const currentDate = new Date();
         const payDate = ticket.paymentTimestamp;
@@ -61,8 +71,8 @@ export class GarageService {
         }
     };
 
-    startChargingSession(garageId: string, stationId: string, userId: string): string {
-        const isOpen = this.repo.getIsOpen(garageId);
+    async startChargingSession(garageId: string, stationId: string, userId: string): Promise<string> {
+        const isOpen = await this.getIsOpen(garageId);
         if (isOpen) {
             const session: ChargingSession = {
                 id: crypto.randomUUID(),
@@ -81,16 +91,35 @@ export class GarageService {
     };
 
     // define how the kWhConsumed are handled
-    endChargingSession(garageId: string, stationId: string) {
+    async endChargingSession(garageId: string, stationId: string): Promise<void> {
 
     };
 
     // maybe also change that to get session by id
-    getCurrentSession(garageId: string, stationId: string) {
-        
+    async getCurrentSession(garageId: string, stationId: string): Promise<ChargingSession> {
+        return Promise.reject()
     };
 
-    getChargingInvoice(sessionId: string) {
-        this.repo.getChargingInvoice(sessionId);
+    async getChargingInvoice(sessionId: string): Promise<ChargingInvoice> {
+        return this.repo.getChargingInvoice(sessionId);
     };
+
+    private async getIsOpen(garageId: string): Promise<boolean> {
+        const garage = await this.repo.getGarage(garageId)
+        return garage.isOpen;
+    }
+
+    private getGarageFromDto(garageDto: GarageDto): Garage {
+        return new Garage(
+            garageDto.id,
+            garageDto.isOpen,
+            new OccupancyStatus(
+                garageDto.totalParkingSpaces, 0
+            ),
+            new OccupancyStatus(
+                garageDto.totalChargingSpaces, 0
+            ),
+            garageDto.chargingStations
+        );
+    }
 }

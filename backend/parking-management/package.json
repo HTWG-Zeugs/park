@@ -5,17 +5,22 @@
   "main": "main.ts",
   "scripts": {
     "start": "cross-env GOOGLE_APPLICATION_CREDENTIALS=./../../certs/service-account-credentials.json nodemon",
+    "test": "npx jest",
     "build": "npx tsc"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@jest/globals": "^29.7.0",
     "nodemon": "^3.1.7",
+    "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2",
     "cross-env": "^7.0.3"
   },
   "dependencies": {
-    "express": "^4.21.1"
+    "dotenv": "^16.4.7",
+    "express": "^4.21.1",
+    "firebase-admin": "^13.0.1"
   }
 }
