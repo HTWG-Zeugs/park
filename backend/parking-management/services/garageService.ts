@@ -14,26 +14,30 @@ export class GarageService {
     }
 
     async createGarage(garageDto: GarageDto): Promise<void> {
-        const garage = this.getGarageFromDto(garageDto);
+        const garage: Garage = this.getGarageFromDto(garageDto);
         await this.repo.createGarage(garage);
     }
 
     async updateGarage(garageDto: GarageDto): Promise<void>  {
-        const garage = this.getGarageFromDto(garageDto);
+        const garage: Garage = this.getGarageFromDto(garageDto);
         this.repo.updateGarage(garage);
     }
 
     async getParkingOccupancy(garageId: string): Promise<OccupancyStatus> {
-        return this.repo.getParkingOccupancy(garageId);
+        const garage: Garage = await this.repo.getGarage(garageId);
+        return garage.parkingStatus;
     };
 
     async getChargingOccupancy(garageId: string): Promise<OccupancyStatus> {
-        return this.repo.getChargingOccupancy(garageId);
+        const garage: Garage = await this.repo.getGarage(garageId);
+        return garage.chargingStatus;
     };
 
     async handleCarEntry(garageId: string): Promise<string> {
-        const isOpen = await this.getIsOpen(garageId);
-        if (isOpen) {
+        const garage = await this.repo.getGarage(garageId);;
+        const isFree = garage.parkingStatus.occupiedSpaces < garage.parkingStatus.totalSpaces
+
+        if (garage.isOpen && isFree) {
             const ticket: Ticket = {
                 id: crypto.randomUUID(),
                 garageId: garageId,
@@ -41,7 +45,8 @@ export class GarageService {
                 paymentTimestamp: null
             };
             this.repo.createTicket(ticket);
-            this.repo.increaseParkingOccupancy(garageId);
+            garage.parkingStatus.occupiedSpaces++;
+            this.repo.updateGarage(garage);
             return ticket.id;
         } else {
             throw Error('Cannot enter because garage is closed.');
@@ -49,11 +54,15 @@ export class GarageService {
     };
 
     async handleCarExit(garageId: string): Promise<void> {
-        this.repo.decreaseParkingOccupancy(garageId);
+        const garage = await this.repo.getGarage(garageId);
+        garage.parkingStatus.occupiedSpaces--;
+        this.repo.updateGarage(garage)
     };
 
     async handleTicketPayment(ticketId: string): Promise<void> {
-        this.repo.addPaymentTimestamp(ticketId, new Date());
+        const ticket = await this.repo.getTicket(ticketId);
+        ticket.paymentTimestamp = new Date();
+        await this.repo.updateTicket(ticket);
     };
 
     async mayExit(ticketId: string): Promise<boolean> {
@@ -72,8 +81,8 @@ export class GarageService {
     };
 
     async startChargingSession(garageId: string, stationId: string, userId: string): Promise<string> {
-        const isOpen = await this.getIsOpen(garageId);
-        if (isOpen) {
+        const garage = await this.repo.getGarage(garageId);
+        if (garage.isOpen) {
             const session: ChargingSession = {
                 id: crypto.randomUUID(),
                 userId: userId,
@@ -104,10 +113,56 @@ export class GarageService {
         return this.repo.getChargingInvoice(sessionId);
     };
 
-    private async getIsOpen(garageId: string): Promise<boolean> {
-        const garage = await this.repo.getGarage(garageId)
-        return garage.isOpen;
-    }
+    // async occupyChargingStation(garageId: string, stationId: string): Promise<void> {
+    //     const data = readFileSync(garagesRepo, 'utf-8');
+    //     const jsonData = JSON.parse(data);
+    //     const index = jsonData.findIndex((garage: Garage) => garage.id === garageId);
+    //     if (index !== -1) {
+    //         const garage: Garage = jsonData[index];
+    //         const stationIndex = garage.chargingStations
+    //             .findIndex((station: ChargingStation) => station.id === stationId);
+    //         if(stationIndex !== -1) {
+    //             if (!garage.chargingStations[stationIndex].isOccupied) {
+    //                 garage.chargingStations[stationIndex].isOccupied = true;
+    //                 garage.chargingStatus.occupiedSpaces++;
+    //             }
+    //         }
+    //         jsonData[index] = { ...jsonData[index], ...garage };
+    //         writeFileSync(garagesRepo, JSON.stringify(jsonData), 'utf-8');
+    //     }
+    // }
+
+    // async vacateChargingStation(garageId: string, stationId: string): Promise<void> {
+    //     const data = readFileSync(garagesRepo, 'utf-8');
+    //     const jsonData = JSON.parse(data);
+    //     const index = jsonData.findIndex((garage: Garage) => garage.id === garageId);
+    //     if (index !== -1) {
+    //         const garage: Garage = jsonData[index];
+    //         const stationIndex = garage.chargingStations
+    //         .findIndex((station: ChargingStation) => station.id === stationId);
+    //         if(stationIndex !== -1) {
+    //             if (garage.chargingStations[stationIndex].isOccupied) {
+    //                 garage.chargingStations[stationIndex].isOccupied = false;
+    //                 garage.chargingStatus.occupiedSpaces--;
+    //             }
+    //         }
+    //         jsonData[index] = { ...jsonData[index], ...garage };
+    //         writeFileSync(garagesRepo, JSON.stringify(jsonData), 'utf-8');
+    //     }
+    // }
+
+    // async endChargingSession(sessionId: string, timestamp: Date, kWhConsumed: number): Promise<void> {
+    //     const data = readFileSync(chargingSessionsRepo, 'utf-8');
+    //     const jsonData = JSON.parse(data);
+    //     const index = jsonData.findIndex((session: ChargingSession) => session.id === sessionId);
+    //     if (index !== -1) {
+    //         const session: ChargingSession = jsonData[index];
+    //         session.sessionFinishedTimestamp = timestamp;
+    //         session.kWhConsumed = kWhConsumed;
+    //         jsonData[index] = { ...jsonData[index], ...session };
+    //         writeFileSync(chargingSessionsRepo, JSON.stringify(jsonData), 'utf-8');
+    //     }
+    // }
 
     private getGarageFromDto(garageDto: GarageDto): Garage {
         return new Garage(
