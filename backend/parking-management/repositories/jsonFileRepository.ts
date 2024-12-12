@@ -24,19 +24,20 @@ export class JsonFileRepository implements Repository {
         return Promise.reject();
     }
 
-    async getIsOpen(garageId: string): Promise<boolean> {
-        const garage = this.getGarage(garageId);
-        return garage.isOpen;
+    async getGarage(garageId: string): Promise<Garage> {
+        const data = readFileSync(garagesRepo, 'utf-8');
+        const jsonData = JSON.parse(data) as Garage[];
+        return jsonData.find((garage: Garage) => garage.id === garageId);
     }
 
     async getParkingOccupancy(garageId: string): Promise<OccupancyStatus> {
-        const garage = this.getGarage(garageId);
+        const garage = await this.getGarage(garageId);
         const occupancyStatus = garage.parkingStatus as OccupancyStatus
         return occupancyStatus;
     }
 
     async getChargingOccupancy(garageId: string): Promise<OccupancyStatus> {
-        const garage = this.getGarage(garageId);
+        const garage = await this.getGarage(garageId);
         const occupancyStatus = garage.chargingStatus as OccupancyStatus
         return occupancyStatus;
     }
@@ -158,11 +159,5 @@ export class JsonFileRepository implements Repository {
         const data = readFileSync(parkingInvoicesRepo, 'utf-8');
         const jsonData = JSON.parse(data);
         return jsonData.find((invoice: ParkingInvoice) => invoice.ticketId === ticketId);
-    }
-
-    private getGarage(garageId: string): Garage {
-        const data = readFileSync(garagesRepo, 'utf-8');
-        const jsonData = JSON.parse(data) as Garage[];
-        return jsonData.find((garage: Garage) => garage.id === garageId);
     }
 }

@@ -8,7 +8,7 @@ import { Ticket } from "../models/ticket";
 export interface Repository {
     createGarage(garage: Garage): Promise<void>;
     updateGarage(garage: Garage): Promise<void>;
-    getIsOpen(garageId: string): Promise<boolean>;
+    getGarage(garageId: string): Promise<Garage>;
     getParkingOccupancy(garageId: string): Promise<OccupancyStatus>;
     getChargingOccupancy(garageId: string): Promise<OccupancyStatus>;
     increaseParkingOccupancy(garageId: string): Promise<void>;

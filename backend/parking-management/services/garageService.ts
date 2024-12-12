@@ -23,10 +23,6 @@ export class GarageService {
         this.repo.updateGarage(garage);
     }
 
-    async getIsOpen(garageId: string): Promise<boolean> {
-        return this.repo.getIsOpen(garageId)
-    }
-
     async getParkingOccupancy(garageId: string): Promise<OccupancyStatus> {
         return this.repo.getParkingOccupancy(garageId);
     };
@@ -36,7 +32,7 @@ export class GarageService {
     };
 
     async handleCarEntry(garageId: string): Promise<string> {
-        const isOpen = await this.repo.getIsOpen(garageId);
+        const isOpen = await this.getIsOpen(garageId);
         if (isOpen) {
             const ticket: Ticket = {
                 id: crypto.randomUUID(),
@@ -76,7 +72,7 @@ export class GarageService {
     };
 
     async startChargingSession(garageId: string, stationId: string, userId: string): Promise<string> {
-        const isOpen = await this.repo.getIsOpen(garageId);
+        const isOpen = await this.getIsOpen(garageId);
         if (isOpen) {
             const session: ChargingSession = {
                 id: crypto.randomUUID(),
@@ -107,6 +103,11 @@ export class GarageService {
     async getChargingInvoice(sessionId: string): Promise<ChargingInvoice> {
         return this.repo.getChargingInvoice(sessionId);
     };
+
+    private async getIsOpen(garageId: string): Promise<boolean> {
+        const garage = await this.repo.getGarage(garageId)
+        return garage.isOpen;
+    }
 
     private getGarageFromDto(garageDto: GarageDto): Garage {
         return new Garage(

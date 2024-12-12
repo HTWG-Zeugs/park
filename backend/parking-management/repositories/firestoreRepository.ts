@@ -47,7 +47,7 @@ export class FirestoreRepository implements Repository {
         return Promise.resolve();
     }
     
-    async getIsOpen(garageId: string): Promise<boolean> {
+    async getGarage(garageId: string): Promise<Garage> {
         const doc = await this.firestore
             .collection(this.garagesCollection)
             .doc(garageId)
@@ -55,7 +55,7 @@ export class FirestoreRepository implements Repository {
 
         if (doc.exists) {
             const garage: Garage = doc.data() as Garage;
-            return Promise.resolve(garage.isOpen);
+            return Promise.resolve(garage);
         } else {
             return Promise.reject(new Error("Garage not found"));
         }
