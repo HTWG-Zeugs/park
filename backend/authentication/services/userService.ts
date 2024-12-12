@@ -22,8 +22,9 @@ export class UserService {
    * @param {number} userId The id of the user to get.
    * @returns Returns the user with the given id.
    */
-  getUser(userId: string): User {
-    return this.repo.getUser(userId);
+  async getUser(userId: string): Promise<User> {
+    const user = await this.repo.getUser(userId);
+    return user;
   }
 
   /**

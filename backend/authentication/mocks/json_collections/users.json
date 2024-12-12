@@ -1,8 +1,1 @@
-[
-  {
-    "id": "92429d82",
-    "role": "200",
-    "email": "jonas.elsper@htwg-konstanz.de",
-    "tenant_id": "free-qxita"
-  }
-]
+[{"id":"92429d82","email":"jonas.elsper@htwg-konstanz.de","tenantId":"free-qxita","role":300}]

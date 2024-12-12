@@ -7,6 +7,6 @@ dotenv.config();
  * @Elsper01
  */
 export class Config {
-    static readonly PORT = process.env.PORT;
-    static readonly API_KEY = process.env.IDENTITY_PLATFORM_API_KEY;
+  static readonly PORT = process.env.PORT;
+  static readonly API_KEY = process.env.IDENTITY_PLATFORM_API_KEY;
 }

@@ -16,14 +16,11 @@ export enum Role {
 }
 
 /**
- * Get the role name for a given role ID.
- * @param role_id The numeric ID of the role.
+ * Get the Role for a given numeric ID.
+ * @param roleId The numeric ID of the role.
  * @returns The corresponding Role, or undefined if the ID is invalid.
  */
-export function getRoleById(role_id: number): Role {
-  const role = Object.values(Role).find((value) => value === role_id);
-  if (role === undefined) {
-    throw new Error(`Invalid role ID: ${role_id}`);
-  }
-  return role as Role;
+export function getRoleById(roleId: number): Role | undefined {
+  const role = Object.values(Role).find((value) => value === roleId);
+  return role as Role | undefined;
 }

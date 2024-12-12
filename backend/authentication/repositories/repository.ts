@@ -6,8 +6,8 @@ import { Role } from "../models/role";
  * @Elsper01
  */
 export interface Repository {
-  getUser(userId: string): User;
-  setUserRole(user: User, role: Role): void;
-  deleteUser(user: User): void;
-  createUser(user: User): void;
+  getUser(userId: string): Promise<User>;
+  setUserRole(user: User, role: Role): Promise<void>;
+  deleteUser(user: User): Promise<void>;
+  createUser(user: User): Promise<void>;
 }
