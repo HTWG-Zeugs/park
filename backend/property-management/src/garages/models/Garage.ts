@@ -1,13 +1,15 @@
-import { Floor } from "./Floor";
-
 export class Garage {
   private _Id: string;
   private _CreatedAt: Date;
   private _LastModifiedAt: Date;
-  private _Floors: Floor[] = [];
-
+  private _NumberParkingSpots: number;
+  private _PricePerHour: number;
+  private _OpeningTime: Date;
+  private _ClosingTime: Date;
+  
   Name: string;
-    
+  IsOpen: boolean;
+  
   public get Id(): string {
       return this._Id;
   }
@@ -20,41 +22,56 @@ export class Garage {
       return this._LastModifiedAt;
   }
 
+  public get NumberParkingSpots(): number {
+    return this._NumberParkingSpots;
+  }
+
+  public get PricePerHourInEuros(): number {
+    return this._PricePerHour;
+  }
+
+  public get OpeningTime(): Date {
+    return this._OpeningTime;
+  }
+
+  public get ClosingTime(): Date {
+    return this._ClosingTime;
+  }
+
   constructor(name: string) {
       const date = new Date();
       this._Id = crypto.randomUUID();
       this.Name = name;
+      this.IsOpen = true;
       this._CreatedAt = date;
       this._LastModifiedAt = date;
   }
 
-  public get Floors(): Floor[] {
-    return this._Floors;
-  }
-
-  public addFloor(floorId: string, numberParkingSpots: number): void {
-    if(this._Floors.some(floor => floor.Id === floorId)) {
-      throw new Error(`Floor with id ${floorId} already exists`);
+  public setNumberParkingSpots(numberParkingSpots: number) {
+    if(numberParkingSpots < 0) {
+      throw new Error("Number of parking spots cannot be negative");
     }
 
-    const floor = new Floor(floorId, numberParkingSpots);
-    this._Floors.push(floor);
+    this._NumberParkingSpots = numberParkingSpots;
   }
 
-  public removeFloor(floorId: string): void {
-    this._Floors = this._Floors.filter(floor => floor.Id !== floorId);
-  }
-
-  public updateFloor(updatedFloor: Floor): void {
-    if(!this._Floors.some(floor => floor.Id === updatedFloor.Id)) {
-      throw new Error(`Floor with id ${updatedFloor.Id} does not exist`);
+  public setPricePerHourInEuros(pricePerHour: number) {
+    if(pricePerHour <= 0) {
+      throw new Error("Price per hour must be greater than 0");
     }
 
-    this._Floors = this._Floors.map(floor => {
-      if (floor.Id === updatedFloor.Id) {
-        return updatedFloor;
-      }
-      return floor;
-    });
+    this._PricePerHour = pricePerHour;
+  }
+
+  public setOpeningTimes(openingTimeIso: string, closingTimeIso: string) {
+    const openingTime = new Date(openingTimeIso);
+    const closingTime = new Date(closingTimeIso);
+
+    if(openingTime > closingTime) {
+      throw new Error("Opening time cannot be after closing time");
+    }
+
+    this._OpeningTime = openingTime;
+    this._ClosingTime = closingTime;
   }
 }
