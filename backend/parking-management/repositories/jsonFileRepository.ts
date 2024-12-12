@@ -15,6 +15,13 @@ const garagesRepo = location + 'garages.json';
 const parkingInvoicesRepo = location + 'parkingInvoices.json';
 const ticketsRepo = location + 'tickets.json';
 
+const path = require('path');
+console.log(process.cwd())
+const filePath = path.resolve(__dirname, '../mocks/json-collections/garages.json');
+console.log(filePath)
+const data = require(filePath);
+
+
 export class JsonFileRepository implements Repository {
     getIsOpen(garageId: string): boolean {
         const garage = this.getGarage(garageId);
