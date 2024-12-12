@@ -11,6 +11,12 @@ import { Ticket } from "../models/ticket";
 export class FirestoreRepository implements Repository {
     firestore: Firestore;
 
+    private garagesCollection = 'garages';
+    private ticketsCollection = 'tickets';
+    private parkingInvoicesCollection = 'parking-invoices';
+    private chargingInvoicesCollection = 'charging-invoices';
+    private chargingSessionsCollection = 'charging-sessions';
+
     constructor() {
         initializeApp({
             credential: applicationDefault()
@@ -24,15 +30,35 @@ export class FirestoreRepository implements Repository {
     }
 
     async createGarage(garage: Garage): Promise<void> {
-        throw new Error("Method not implemented.");
+        await this.firestore
+            .collection(this.garagesCollection)
+            .doc(garage.id)
+            .set(garage)
+
+        return Promise.resolve();
     }
 
     async updateGarage(garage: Garage): Promise<void> {
-        throw new Error("Method not implemented.");
+        await this.firestore
+            .collection(this.garagesCollection)
+            .doc(garage.id)
+            .set(garage)
+
+        return Promise.resolve();
     }
     
     async getIsOpen(garageId: string): Promise<boolean> {
-        throw new Error("Method not implemented.");
+        const doc = await this.firestore
+            .collection(this.garagesCollection)
+            .doc(garageId)
+            .get()
+
+        if (doc.exists) {
+            const garage: Garage = doc.data() as Garage;
+            return Promise.resolve(garage.isOpen);
+        } else {
+            return Promise.reject(new Error("Garage not found"));
+        }
     }
     
     async getParkingOccupancy(garageId: string): Promise<OccupancyStatus> {
