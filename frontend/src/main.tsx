@@ -10,7 +10,7 @@ import Home from "src/routes/Home";
 import Contact from "src/routes/Contact";
 import AddDefect from "src/routes/AddDefect";
 import DefectDetails from "src/routes/DefectDetails";
-import "firebase/auth";
+// import "firebase/auth";
 import "src/common/i18n/i18n.ts";
 
 import ProtectedRoute from "src/routes/ProtectedRoutes";

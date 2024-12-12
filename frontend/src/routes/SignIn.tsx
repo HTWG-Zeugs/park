@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { auth } from "src/services/FirebaseConfig";
 import SignInForm from "src/components/sign-in/SignInForm";
 import "src/components/sign-in/SignInForm.css";
+import axios from "axios";
 import { useTranslation } from "react-i18next";
 
 const SignIn: React.FC = () => {
@@ -10,6 +10,8 @@ const SignIn: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const { t } = useTranslation();
+  const AUTHENTICATION_SERVICE_URL = import.meta.env.VITE_AUTHENTICATION_SERVICE_URL;
+  const TENANT_ID = import.meta.env.VITE_TENANT_ID;
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,44 +19,26 @@ const SignIn: React.FC = () => {
     setMessage(null);
 
     try {
-      const userCredential = await auth.signInWithEmailAndPassword(
-        email,
-        password
-      );
+      const response = await axios.post(AUTHENTICATION_SERVICE_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          email,
+          password,
+          tenant_id: TENANT_ID,
+        }),
+      });
 
-      const user = userCredential.user;
-
-      if (user) {
-        const idToken = await user.getIdToken();
-        localStorage.setItem("jwt_token", idToken);
+      if (response.status === 200) {
         window.location.href = "/home";
       } else {
-        setError(t("route_sign_in.user_is_null"));
+        setError(response.data.error || t("route_sign_in.sign_in_failed"));
       }
-
-      window.location.href = "/home";
-    } catch (error: any) {
-      if (error.code === "auth/user-not-found") {
-        setError(t("route_sign_in.user_not_found"));
-      } else if (error.code === "auth/wrong-password") {
-        setError(t("route_sign_in.wrong_password"));
-      } else {
-        setError(t("route_sign_in.sign_in_failed"));
-      }
-    }
-  };
-
-  const handlePasswordReset = async () => {
-    if (!email) {
-      setError(t("route_sign_in.email_required"));
-      return;
-    }
-
-    try {
-      await auth.sendPasswordResetEmail(email);
-      setMessage(t("route_sign_in.password_reset_email_sent"));
-    } catch (error: any) {
-      setError(t("route_sign_in.password_reset_failed"));
+    } catch (err) {
+      setError(t("route_sign_in.sign_in_failed"));
     }
   };
 
@@ -67,7 +51,7 @@ const SignIn: React.FC = () => {
       setEmail={setEmail}
       setPassword={setPassword}
       handleSignIn={handleSignIn}
-      handlePasswordReset={handlePasswordReset}
+      handlePasswordReset={() => setError(t("route_sign_in.feature_not_supported"))}
     />
   );
 };

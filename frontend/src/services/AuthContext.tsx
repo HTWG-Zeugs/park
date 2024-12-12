@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth } from './FirebaseConfig';
+import axios from 'axios';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -8,19 +8,46 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const AUTHENTICATION_SERVICE_URL = import.meta.env.VITE_AUTHENTICATION_SERVICE_URL;
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setIsAuthenticated(!!user);
-    });
-    return unsubscribe;
-  }, [auth]);
+    const checkAuthStatus = async () => {
+      try {
+        const response = await axios.post(AUTHENTICATION_SERVICE_URL, {}, { withCredentials: true });
+
+        if (response.status === 200) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.error('Error validating auth token:', error);
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkAuthStatus();
+  }, []);
 
   const logout = async () => {
-    await auth.signOut();
-    setIsAuthenticated(false);
+    throw new Error('Not implemented');
+    // try {
+    //   const response = await fetch('/auth/logout', {
+    //     method: 'POST',
+    //     credentials: 'include',
+    //   });
+
+    //   if (response.ok) {
+    //     setIsAuthenticated(false);
+    //   } else {
+    //     console.error('Failed to log out');
+    //   }
+    // } catch (error) {
+    //   console.error('Error logging out:', error);
+    // }
   };
 
   return (
