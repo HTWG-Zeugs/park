@@ -1,8 +1,11 @@
 import { GarageDto } from "../shared/garageDto";
-import { Garage } from "./models/garage";
+import { FirestoreRepository } from "./repositories/firestoreRepository";
 import { JsonFileRepository } from "./repositories/jsonFileRepository";
 import { Repository } from "./repositories/repository";
 import { GarageService } from "./services/garageService";
+import "dotenv/config"
+
+console.log(process.env.ASDF);
 
 const express = require('express');
 const app = express();
