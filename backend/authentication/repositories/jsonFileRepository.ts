@@ -43,7 +43,6 @@ export class JsonFileRepository implements Repository {
     const index = jsonData.findIndex((u: User) => u.id === user.id);
     if (index !== -1) {
       jsonData[index].role = role;
-      console.log(jsonData[index]);
       await promises.writeFile(
         USER_COLLECTION_PATH,
         JSON.stringify(jsonData),

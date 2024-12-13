@@ -3,17 +3,23 @@ import { Repository } from "./repositories/repository";
 import { UserService } from "./services/userService";
 import { Config } from "./config";
 import { getRoleById } from "./models/role";
+import validateFirebaseIdToken from "./middleware/validateFirebaseIdToken";
+import { initializeApp, applicationDefault } from "firebase-admin/app";
 
 const express = require("express");
 const app = express();
 const port = Config.PORT;
+
+initializeApp({
+    credential: applicationDefault(),
+  });
 
 app.use(express.json());
 
 const repo: Repository = new JsonFileRepository();
 const userService: UserService = new UserService(repo);
 
-app.get("/user/:userId", async (req, res) => {
+app.get("/user/:userId", validateFirebaseIdToken, async (req, res) => {
   try {
     const userId = req.params.userId;
     let user;
@@ -29,7 +35,7 @@ app.get("/user/:userId", async (req, res) => {
   }
 });
 
-app.post("/user", async (req, res) => {
+app.post("/user", validateFirebaseIdToken,  async (req, res) => {
   try {
     const user = req.body;
     try {
@@ -44,7 +50,7 @@ app.post("/user", async (req, res) => {
   }
 });
 
-app.put("/user/:userId/role/:role", async (req, res) => {
+app.put("/user/:userId/role/:role", validateFirebaseIdToken, async (req, res) => {
   try {
     const userId = req.params.userId;
     let user;
@@ -66,7 +72,7 @@ app.put("/user/:userId/role/:role", async (req, res) => {
   }
 });
 
-app.delete("/user/:userId", async (req, res) => {
+app.delete("/user/:userId", validateFirebaseIdToken, async (req, res) => {
   try {
     const userId = req.params.userId;
     let user;
@@ -82,11 +88,11 @@ app.delete("/user/:userId", async (req, res) => {
   }
 });
 
-app.get("/health", (req, res) => {
+app.get("/health", validateFirebaseIdToken, (req, res) => {
   res.status(200).send("Authentication service is running.");
 });
 
-app.get("/help", (req, res) => {
+app.get("/help", validateFirebaseIdToken, (req, res) => {
   res.status(200).send(`
         <h1>Authentication Service API</h1>
         <p>GET /user/:userId - Get user by ID</p>

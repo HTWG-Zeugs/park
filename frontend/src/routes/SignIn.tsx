@@ -17,6 +17,7 @@ const SignIn: React.FC = () => {
     setMessage(null);
 
     try {
+      auth.tenantId = "free-qxita";
       const userCredential = await auth.signInWithEmailAndPassword(
         email,
         password
@@ -51,6 +52,7 @@ const SignIn: React.FC = () => {
     }
 
     try {
+      auth.tenantId = "free-qxita";
       await auth.sendPasswordResetEmail(email);
       setMessage(t("route_sign_in.password_reset_email_sent"));
     } catch (error: any) {
