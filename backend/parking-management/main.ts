@@ -95,13 +95,11 @@ app.get('/garage/charging/occupancy/:garageId', async (req, res) => {
     }
 });
 
-//discuss the charging session endpoints with the team
-//create session here and return id
-app.post('/garage/charging/startSession/:garageId/:stationId', async (req, res) => {
+app.post('/garage/charging/startSession/:garageId/:stationId/:userId', async (req, res) => {
     try {
         const garageId: string = req.params.garageId;
         const stationId: string = req.params.stationId;
-        const userId: string = req.body;
+        const userId: string = req.params.userId;
         const sessionId = await garageService.startChargingSession(garageId, stationId, userId);
         res.status(200).send(sessionId);
     } catch (e) {
@@ -109,16 +107,26 @@ app.post('/garage/charging/startSession/:garageId/:stationId', async (req, res) 
     }
 });
 
-app.post('/garage/charging/endSession/:sessionId', async (req, res) => {
-    const sessionId = req.params.sessionId;
-    // end charging session at an e-charging station
-    res.status(200).send('POST end session');
+app.post('/garage/charging/endSession/:garageId/:sessionId', async (req, res) => {
+    try {
+        const garageId = req.params.garageId;
+        const sessionId = req.params.sessionId;
+        await garageService.endChargingSession(garageId, sessionId);
+        res.status(200).send('success');
+    } catch(e) {
+        res.status(500).send(`Unable to end session with id ${req.params.sessionId}: ${e}`);
+    }
 });
 
-app.get('/garage/charging/session/:sessionId', async (req, res) => {
-    const sessionId = req.params.sessionId;
-    // get session information for analytics (duration, user ID, session ID ...)
-    res.status(200).send('GET get session');
+app.get('/garage/charging/session/:garageId/:sessionId', async (req, res) => {
+    try {
+        const garageId = req.params.garageId;
+        const sessionId = req.params.sessionId;
+        const session = await garageService.getChargingSession(garageId, sessionId);
+        res.status(200).send(session);
+    } catch (e) {
+        res.status(500).send(`Getting session with id ${req.params.sessionId} failed: ${e}`);
+    }
 });
 
 app.get('/garage/charging/invoice/:sessionId', async (req, res) => {

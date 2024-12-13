@@ -78,7 +78,7 @@ export class GarageService {
         } else {
             return false;
         }
-    };
+    }
 
     async startChargingSession(garageId: string, stationId: string, userId: string): Promise<string> {
         let garage = await this.repo.getGarage(garageId);
@@ -107,8 +107,36 @@ export class GarageService {
         } else {
             throw Error('Cannot start charging session because garage is closed.');
         }
-    };
+    }
+    
+    async endChargingSession(garageId: string, sessionId: string): Promise<void> {
+        let garage = await this.repo.getGarage(garageId);
+        const garageRollback = garage;
+        let session = await this.repo.getChargingSession(sessionId);
+        
+        if (session.sessionFinishedTimestamp) {
+            throw new Error(`Session with ID ${sessionId} has already ended`);
+        } else {
+            session.sessionFinishedTimestamp = new Date();
+            session.kWhConsumed = this.getConsumedKwhForSession(garage, session)
+            garage = this.setChargingOccupancy(garage, garage.chargingStatus.occupiedSpaces -1);
+            garage = this.setChargingStationOccupied(garage, session.chargingStationId, false);
+            await this.repo.updateGarage(garage)
+            await this.repo.updateChargingSession(session).catch(async () => {
+                await this.repo.updateGarage(garageRollback);
+                throw Error('Unable to create the charging session in the database');
+            })
+        }
+    }
 
+    async getChargingSession(garageId: string, sessionId: string): Promise<ChargingSession> {
+        return await this.repo.getChargingSession(sessionId);
+    }
+    
+    async getChargingInvoice(sessionId: string): Promise<ChargingInvoice> {
+        return await this.repo.getChargingInvoice(sessionId);
+    }
+    
     private setChargingOccupancy(garage: Garage, newValue: number): Garage {
         garage.chargingStatus.occupiedSpaces = newValue;
 
@@ -134,37 +162,12 @@ export class GarageService {
         }
     }
 
-    async endChargingSession(garageId: string, sessionId: string): Promise<void> {
-        let garage = await this.repo.getGarage(garageId);
-        const garageRollback = garage;
-        let session = await this.repo.getChargingSession(sessionId);
-
-        if (session.sessionFinishedTimestamp) {
-            throw new Error(`Session with ID ${sessionId} has already ended`);
-        } else {
-            session.sessionFinishedTimestamp = new Date();
-            session.kWhConsumed = this.getConsumedKwhForSession(garage, session)
-            garage = this.setChargingOccupancy(garage, garage.chargingStatus.occupiedSpaces -1);
-            garage = this.setChargingStationOccupied(garage, session.chargingStationId, false);
-            await this.repo.updateGarage(garage)
-            await this.repo.updateChargingSession(session).catch(async () => {
-                await this.repo.updateGarage(garageRollback);
-                throw Error('Unable to create the charging session in the database');
-            })
-        }
-    };
-
     private getConsumedKwhForSession(garage: Garage, session: ChargingSession): number {
         const station = garage.chargingStations.find(station => {station.id == session.chargingStationId});
         const chargedHours = (session.sessionFinishedTimestamp.getTime() - 
-            session.sessionStartedTimestamp.getTime()) / (1000 * 60 * 60);
+        session.sessionStartedTimestamp.getTime()) / (1000 * 60 * 60);
         return chargedHours * station.chargingSpeedInKw;
-
     }
-
-    async getChargingInvoice(sessionId: string): Promise<ChargingInvoice> {
-        return this.repo.getChargingInvoice(sessionId);
-    };
 
     private getGarageFromDto(garageDto: GarageDto): Garage {
         return new Garage(
