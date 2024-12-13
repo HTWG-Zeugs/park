@@ -5,21 +5,37 @@ import { GarageDto } from "../../shared/garageDto";
 export class Garage {
   id: string;
   isOpen: boolean;
-  parkingStatus: OccupancyStatus;
-  chargingStatus: OccupancyStatus;
+  parkingPlacesTotal: number;
+  parkingPlacesOccupied: number;
+  chargingPlacesTotal: number;
+  chargingPlacesOccupied: number;
   chargingStations: ChargingStation[];
 
   constructor(
     id: string,
     isOpen: boolean,
-    parkingStatus: OccupancyStatus,
-    chargingStatus: OccupancyStatus,
+    totalParkingPlaces: number,
+    occupiedParkingPlaces: number,
+    totalChargingPlaces: number,
+    occupiedChargingPlaces: number,
     chargingStations: ChargingStation[]
   ) {
     this.id = id;
     this.isOpen = isOpen;
-    this.parkingStatus = parkingStatus;
-    this.chargingStatus = chargingStatus;
+    this.parkingPlacesTotal = totalParkingPlaces;
+    this.parkingPlacesOccupied = occupiedParkingPlaces;
+    this.chargingPlacesTotal = totalChargingPlaces;
+    this.chargingPlacesOccupied = occupiedChargingPlaces;
     this.chargingStations = chargingStations;
   }
+}
+
+export class asdf {
+  id: string;
+  isOpen: boolean;
+  parkingPlacesTotal: number;
+  parkingPlacesOccupied: number;
+  chargingPlacesTotal: number;
+  chargingPlacesOccupied: number;
+  chargingStations: ChargingStation[];
 }

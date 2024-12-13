@@ -25,18 +25,22 @@ export class GarageService {
 
   async getParkingOccupancy(garageId: string): Promise<OccupancyStatus> {
     const garage: Garage = await this.repo.getGarage(garageId);
-    return garage.parkingStatus;
+    return new OccupancyStatus(
+      garage.parkingPlacesTotal, garage.parkingPlacesOccupied
+    );
   }
 
   async getChargingOccupancy(garageId: string): Promise<OccupancyStatus> {
     const garage: Garage = await this.repo.getGarage(garageId);
-    return garage.chargingStatus;
+    return new OccupancyStatus(
+      garage.chargingPlacesTotal, garage.chargingPlacesOccupied
+    );
   }
 
   async handleCarEntry(garageId: string): Promise<string> {
     const garage = await this.repo.getGarage(garageId);
     const isFree =
-      garage.parkingStatus.occupiedSpaces < garage.parkingStatus.totalSpaces;
+      garage.parkingPlacesOccupied < garage.parkingPlacesTotal;
 
     if (garage.isOpen && isFree) {
       const ticket: Ticket = {
@@ -46,7 +50,7 @@ export class GarageService {
         paymentTimestamp: null,
       };
       this.repo.createTicket(ticket);
-      garage.parkingStatus.occupiedSpaces++;
+      garage.parkingPlacesOccupied++;
       this.repo.updateGarage(garage);
       return ticket.id;
     } else {
@@ -56,7 +60,7 @@ export class GarageService {
 
   async handleCarExit(garageId: string): Promise<void> {
     const garage = await this.repo.getGarage(garageId);
-    garage.parkingStatus.occupiedSpaces--;
+    garage.parkingPlacesOccupied--;
     this.repo.updateGarage(garage);
   }
 
@@ -97,7 +101,7 @@ export class GarageService {
       };
       garage = this.setChargingOccupancy(
         garage,
-        garage.chargingStatus.occupiedSpaces + 1
+        garage.chargingPlacesOccupied + 1
       );
       garage = this.setChargingStationOccupied(garage, stationId, true);
       await this.repo.updateGarage(garage).catch(() => {
@@ -128,7 +132,7 @@ export class GarageService {
       session.kWhConsumed = this.getConsumedKwhForSession(garage, session);
       garage = this.setChargingOccupancy(
         garage,
-        garage.chargingStatus.occupiedSpaces - 1
+        garage.chargingPlacesOccupied - 1
       );
       garage = this.setChargingStationOccupied(
         garage,
@@ -152,9 +156,9 @@ export class GarageService {
   }
 
   private setChargingOccupancy(garage: Garage, newValue: number): Garage {
-    garage.chargingStatus.occupiedSpaces = newValue;
+    garage.chargingPlacesOccupied = newValue;
 
-    if (garage.chargingStatus.occupiedSpaces > garage.chargingStatus.totalSpaces) {
+    if (garage.chargingPlacesOccupied > garage.chargingPlacesTotal) {
       throw new Error("All charging stations are occupied already");
     } else {
       return garage;
@@ -200,8 +204,10 @@ export class GarageService {
     return new Garage(
       garageDto.id,
       garageDto.isOpen,
-      new OccupancyStatus(garageDto.totalParkingSpaces, 0),
-      new OccupancyStatus(garageDto.totalChargingSpaces, 0),
+      garageDto.totalParkingSpaces,
+      0,
+      garageDto.totalChargingSpaces,
+      0,
       garageDto.chargingStations
     );
   }
