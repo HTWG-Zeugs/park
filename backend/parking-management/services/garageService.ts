@@ -81,7 +81,8 @@ export class GarageService {
     };
 
     async startChargingSession(garageId: string, stationId: string, userId: string): Promise<string> {
-        const garage = await this.repo.getGarage(garageId);
+        let garage = await this.repo.getGarage(garageId);
+        const garageRollback = garage;
         if (garage.isOpen) {
             const session: ChargingSession = {
                 id: crypto.randomUUID(),
@@ -92,77 +93,78 @@ export class GarageService {
                 sessionFinishedTimestamp: null,
                 kWhConsumed: null
             }
-            this.repo.createChargingSession(session);
+            garage = this.setChargingOccupancy(garage, garage.chargingStatus.occupiedSpaces+1);
+            garage = this.setChargingStationOccupied(garage, stationId, true);
+            await this.repo.updateGarage(garage).catch(() => {
+                throw new Error(`Unable to update charging stations occupancy for garage ${garageId}`);
+            })
+            await this.repo.createChargingSession(session).catch(async () => {
+                await this.repo.updateGarage(garageRollback);
+                throw Error('Unable to create the charging session in the database');
+            });
+
             return session.id;
         } else {
             throw Error('Cannot start charging session because garage is closed.');
         }
     };
 
-    // define how the kWhConsumed are handled
-    async endChargingSession(garageId: string, stationId: string): Promise<void> {
+    private setChargingOccupancy(garage: Garage, newValue: number): Garage {
+        garage.chargingStatus.occupiedSpaces = newValue;
 
+        if (garage.chargingStatus.occupiedSpaces > garage.chargingStatus.totalSpaces) {
+            throw new Error('All charging stations are occupied already');
+        } else {
+            return garage;
+        }
+    }
+
+    private setChargingStationOccupied(garage: Garage, stationId: string, occupied: boolean): Garage {
+        let stationIndex = garage.chargingStations.findIndex(station => station.id == stationId)
+
+        if (stationIndex !== -1) {
+            if(garage.chargingStations[stationIndex].isOccupied == occupied) {
+                throw Error(`Cannot change occupation for charging station with ID ${stationId} to same value`);
+            } else {
+                garage.chargingStations[stationIndex].isOccupied = occupied;
+                return garage
+            }
+        } else {
+            throw new Error(`Charging station with ID ${stationId} does not exist for garage with ID ${garage.id}`);
+        }
+    }
+
+    async endChargingSession(garageId: string, sessionId: string): Promise<void> {
+        let garage = await this.repo.getGarage(garageId);
+        const garageRollback = garage;
+        let session = await this.repo.getChargingSession(sessionId);
+
+        if (session.sessionFinishedTimestamp) {
+            throw new Error(`Session with ID ${sessionId} has already ended`);
+        } else {
+            session.sessionFinishedTimestamp = new Date();
+            session.kWhConsumed = this.getConsumedKwhForSession(garage, session)
+            garage = this.setChargingOccupancy(garage, garage.chargingStatus.occupiedSpaces -1);
+            garage = this.setChargingStationOccupied(garage, session.chargingStationId, false);
+            await this.repo.updateGarage(garage)
+            await this.repo.updateChargingSession(session).catch(async () => {
+                await this.repo.updateGarage(garageRollback);
+                throw Error('Unable to create the charging session in the database');
+            })
+        }
     };
 
-    // maybe also change that to get session by id
-    async getCurrentSession(garageId: string, stationId: string): Promise<ChargingSession> {
-        return Promise.reject()
-    };
+    private getConsumedKwhForSession(garage: Garage, session: ChargingSession): number {
+        const station = garage.chargingStations.find(station => {station.id == session.chargingStationId});
+        const chargedHours = (session.sessionFinishedTimestamp.getTime() - 
+            session.sessionStartedTimestamp.getTime()) / (1000 * 60 * 60);
+        return chargedHours * station.chargingSpeedInKw;
+
+    }
 
     async getChargingInvoice(sessionId: string): Promise<ChargingInvoice> {
         return this.repo.getChargingInvoice(sessionId);
     };
-
-    // async occupyChargingStation(garageId: string, stationId: string): Promise<void> {
-    //     const data = readFileSync(garagesRepo, 'utf-8');
-    //     const jsonData = JSON.parse(data);
-    //     const index = jsonData.findIndex((garage: Garage) => garage.id === garageId);
-    //     if (index !== -1) {
-    //         const garage: Garage = jsonData[index];
-    //         const stationIndex = garage.chargingStations
-    //             .findIndex((station: ChargingStation) => station.id === stationId);
-    //         if(stationIndex !== -1) {
-    //             if (!garage.chargingStations[stationIndex].isOccupied) {
-    //                 garage.chargingStations[stationIndex].isOccupied = true;
-    //                 garage.chargingStatus.occupiedSpaces++;
-    //             }
-    //         }
-    //         jsonData[index] = { ...jsonData[index], ...garage };
-    //         writeFileSync(garagesRepo, JSON.stringify(jsonData), 'utf-8');
-    //     }
-    // }
-
-    // async vacateChargingStation(garageId: string, stationId: string): Promise<void> {
-    //     const data = readFileSync(garagesRepo, 'utf-8');
-    //     const jsonData = JSON.parse(data);
-    //     const index = jsonData.findIndex((garage: Garage) => garage.id === garageId);
-    //     if (index !== -1) {
-    //         const garage: Garage = jsonData[index];
-    //         const stationIndex = garage.chargingStations
-    //         .findIndex((station: ChargingStation) => station.id === stationId);
-    //         if(stationIndex !== -1) {
-    //             if (garage.chargingStations[stationIndex].isOccupied) {
-    //                 garage.chargingStations[stationIndex].isOccupied = false;
-    //                 garage.chargingStatus.occupiedSpaces--;
-    //             }
-    //         }
-    //         jsonData[index] = { ...jsonData[index], ...garage };
-    //         writeFileSync(garagesRepo, JSON.stringify(jsonData), 'utf-8');
-    //     }
-    // }
-
-    // async endChargingSession(sessionId: string, timestamp: Date, kWhConsumed: number): Promise<void> {
-    //     const data = readFileSync(chargingSessionsRepo, 'utf-8');
-    //     const jsonData = JSON.parse(data);
-    //     const index = jsonData.findIndex((session: ChargingSession) => session.id === sessionId);
-    //     if (index !== -1) {
-    //         const session: ChargingSession = jsonData[index];
-    //         session.sessionFinishedTimestamp = timestamp;
-    //         session.kWhConsumed = kWhConsumed;
-    //         jsonData[index] = { ...jsonData[index], ...session };
-    //         writeFileSync(chargingSessionsRepo, JSON.stringify(jsonData), 'utf-8');
-    //     }
-    // }
 
     private getGarageFromDto(garageDto: GarageDto): Garage {
         return new Garage(
