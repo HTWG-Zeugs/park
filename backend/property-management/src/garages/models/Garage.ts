@@ -1,50 +1,65 @@
+import { ChargingStation } from "./ChargingStation";
+import { GarageState } from "./GarageState";
+
 export class Garage {
-  private _Id: string;
-  private _CreatedAt: Date;
-  private _LastModifiedAt: Date;
-  private _NumberParkingSpots: number;
-  private _PricePerHour: number;
-  private _OpeningTime: Date;
-  private _ClosingTime: Date;
-  
+  Id: string;
   Name: string;
   IsOpen: boolean;
+  CreatedAt: Date;
+  LastModifiedAt: Date;
+  NumberParkingSpots: number;
+  PricePerHour: number;
+  OpeningTime: string;
+  ClosingTime: string;
+  ChargingStations: ChargingStation[];
   
-  public get Id(): string {
-      return this._Id;
-  }
-
-  public get CreatedAt(): Date {
-      return this._CreatedAt;
-  }
-
-  public get LastModifiedAt(): Date {
-      return this._LastModifiedAt;
-  }
-
-  public get NumberParkingSpots(): number {
-    return this._NumberParkingSpots;
-  }
-
-  public get PricePerHourInEuros(): number {
-    return this._PricePerHour;
-  }
-
-  public get OpeningTime(): Date {
-    return this._OpeningTime;
-  }
-
-  public get ClosingTime(): Date {
-    return this._ClosingTime;
-  }
 
   constructor(name: string) {
       const date = new Date();
-      this._Id = crypto.randomUUID();
+      this.Id = crypto.randomUUID();
       this.Name = name;
       this.IsOpen = true;
-      this._CreatedAt = date;
-      this._LastModifiedAt = date;
+      this.CreatedAt = date;
+      this.LastModifiedAt = date;
+  }
+
+  public State(): GarageState {
+    return {
+      id: this.Id,
+      name: this.Name,
+      isOpen: this.IsOpen,
+      numberParkingSpots: this.NumberParkingSpots,
+      pricePerHourInEuros: this.PricePerHour,
+      openingTime: this.OpeningTime,
+      closingTime: this.ClosingTime,
+      createdAt: this.CreatedAt.toISOString(),
+      lastModifiedAt: this.LastModifiedAt.toISOString(),
+      chargingStations: this.ChargingStations.map(cs => cs.State())
+    }
+  }
+
+  public static fromState(state: GarageState): Garage {
+    const garage = new Garage(state.name);
+    garage.Id = state.id;
+    garage.CreatedAt = new Date(state.createdAt);
+    garage.LastModifiedAt = new Date(state.lastModifiedAt);
+    garage.NumberParkingSpots = state.numberParkingSpots;
+    garage.PricePerHour = state.pricePerHourInEuros;
+    garage.OpeningTime = state.openingTime;
+    garage.ClosingTime = state.closingTime;
+    garage.ChargingStations = state.chargingStations.map(cs => ChargingStation.fromState(cs));
+    return garage;
+  }
+
+  update(garage: Garage) {
+    this.Name = garage.Name;
+    this.IsOpen = garage.IsOpen;
+    this.NumberParkingSpots = garage.NumberParkingSpots;
+    this.PricePerHour = garage.PricePerHour;
+    this.OpeningTime = garage.OpeningTime;
+    this.ClosingTime = garage.ClosingTime;
+    this.ChargingStations = garage.ChargingStations;
+    this.LastModifiedAt = new Date();
   }
 
   public setNumberParkingSpots(numberParkingSpots: number) {
@@ -52,7 +67,7 @@ export class Garage {
       throw new Error("Number of parking spots cannot be negative");
     }
 
-    this._NumberParkingSpots = numberParkingSpots;
+    this.NumberParkingSpots = numberParkingSpots;
   }
 
   public setPricePerHourInEuros(pricePerHour: number) {
@@ -60,18 +75,38 @@ export class Garage {
       throw new Error("Price per hour must be greater than 0");
     }
 
-    this._PricePerHour = pricePerHour;
+    this.PricePerHour = pricePerHour;
   }
 
-  public setOpeningTimes(openingTimeIso: string, closingTimeIso: string) {
-    const openingTime = new Date(openingTimeIso);
-    const closingTime = new Date(closingTimeIso);
+  public setOpeningTimes(openingTime: string, closingTime: string) {
 
-    if(openingTime > closingTime) {
-      throw new Error("Opening time cannot be after closing time");
+    if (this.isValidTime(openingTime) && this.isValidTime(closingTime)) {
+      const openingTimeInMinutes = this.convertToMinutes(openingTime);
+      const closingTimeInMinutes = this.convertToMinutes(closingTime);
+
+      if (openingTimeInMinutes >= closingTimeInMinutes) {
+        throw new Error("Opening time must be before closing time");
+      } 
+    }
+    else {
+      throw new Error("Invalid time format. Please use HH:mm");
     }
 
-    this._OpeningTime = openingTime;
-    this._ClosingTime = closingTime;
+    this.OpeningTime = openingTime;
+    this.ClosingTime = closingTime;
+  }
+
+  public setChargingStations(chargingStations: ChargingStation[]) {
+    this.ChargingStations = chargingStations;
+  }
+
+  private isValidTime(time: string): boolean {
+    return /^\d{2}:\d{2}$/.test(time);
+  }
+
+  // Convert HH:mm to minutes since midnight
+  private convertToMinutes(time: string): number {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 60 + minutes;
   }
 }

@@ -1,3 +1,5 @@
+import { ChargingStationResponseObject } from './ChargingStationResponseObject';
+
 export type GarageResponseObject = {
   Id: string;
   Name: string;
@@ -8,4 +10,5 @@ export type GarageResponseObject = {
   ClosingTime: string;
   CreatedAt: string;
   LastModifiedAt: string;
+  ChargingStations: ChargingStationResponseObject[];
 };

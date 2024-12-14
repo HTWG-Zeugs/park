@@ -1,34 +1,58 @@
 import { Garage } from "./models/Garage";
+import { Firestore } from "firebase-admin/firestore";
+import "dotenv/config";
+import { GarageState } from "./models/GarageState";
+
 
 export class GarageRepository{
-  async getAllGarages(): Promise<Garage[]> {
-    // Get all garages from database
+  firestore: Firestore;
+  private garagesCollection = 'garages';
+  
+  constructor(firestore: Firestore) {
+    this.firestore = firestore;
+  }
 
-    // For now, just return
-    return [];
+  async getAllGarages(): Promise<Garage[]> {
+    const snapshot = await this.firestore
+    .collection(this.garagesCollection)
+    .get();
+
+    const garages: Garage[] = [];
+    snapshot.forEach(doc => {
+      const garageState = doc.data() as GarageState;
+      garages.push(Garage.fromState(garageState));
+    });
+    return garages
   }
 
   async addGarage(garage: Garage): Promise<void> {
-    // Add garage to database
-
-    // For now, just return
-
-    // publish event to parking management service
-
-    return;
+    const state = garage.State();
+    this.createOrUpdate(state, this.garagesCollection);
   }
 
-  async getGarageById(id: string): Promise<Garage | null> {
-    // Get garage from database
+  async getGarage(id: string): Promise<Garage | null> {
+    const doc = await this.firestore
+    .collection(this.garagesCollection)
+      .doc(id)
+      .get();
 
-    // For now, just return
-    return null;
+    if (doc.exists) {
+        const state = doc.data() as GarageState;
+        return Garage.fromState(state);
+    } else {
+        return null;
+    }
   }
 
   async updateGarage(garage: Garage): Promise<void> {
-    // Update garage in database
-
-    // For now, just return
-    return;
+    const state = garage.State();
+    this.createOrUpdate(state, this.garagesCollection);
   }
+
+  private async createOrUpdate(obj: any, collection: string): Promise<void> {
+    await this.firestore
+        .collection(collection)
+        .doc(obj.id)
+        .set(JSON.parse(JSON.stringify((obj))))
+}
 }
