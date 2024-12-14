@@ -4,7 +4,8 @@ import { UserService } from "./services/userService";
 import { Config } from "./config";
 import { getRoleById } from "./models/role";
 import validateFirebaseIdToken from "./middleware/validateFirebaseIdToken";
-import { initializeApp, applicationDefault } from "firebase-admin/app";
+import { initializeApp, applicationDefault} from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
 import { User } from "./models/user";
 import { Role } from "./models/role";
 
@@ -13,8 +14,21 @@ const app = express();
 const port = Config.PORT;
 
 initializeApp({
-    credential: applicationDefault(),
-  });
+  credential: applicationDefault(),
+});
+
+const db = getFirestore("authentication");
+const cityRef = db.collection('users').doc('cWHxtWFYSDgI46WeWW2TIMTHrQm1');
+
+(async () => {
+  const doc = await cityRef.get();
+  if (!doc.exists) {
+    console.log('No such document!');
+  } else {
+    console.log('Document data:', doc.data());
+  }
+})();
+
 
 app.use(express.json());
 
@@ -39,7 +53,7 @@ app.get("/user/:userId", validateFirebaseIdToken, async (req, res) => {
 /**
  * Create a new user.
  */
-app.post("/user", validateFirebaseIdToken,  async (req, res) => {
+app.post("/user", validateFirebaseIdToken, async (req, res) => {
   const signedInUser: User = res.user;
   try {
     const userToCreate: User = req.body;
@@ -53,30 +67,34 @@ app.post("/user", validateFirebaseIdToken,  async (req, res) => {
 /**
  * Set user role.
  */
-app.put("/user/:userId/role/:role", validateFirebaseIdToken, async (req, res) => {
-  // check if all parameters are valid
-  const signedInUser: User = res.user;
-  try {
-    const userId: string = req.params.userId;
-    let user: User;
+app.put(
+  "/user/:userId/role/:role",
+  validateFirebaseIdToken,
+  async (req, res) => {
+    // check if all parameters are valid
+    const signedInUser: User = res.user;
     try {
-      user = await userService.getUser(signedInUser, userId);
-    } catch (e) {
-      return res.status(404).send("User not found");
-    }
-    let roleId: number = parseInt(req.params.role, 10);
-    if (isNaN(roleId)) {
-      return res.status(400).send("Invalid role ID");
-    }
-    const role: Role = getRoleById(roleId);
+      const userId: string = req.params.userId;
+      let user: User;
+      try {
+        user = await userService.getUser(signedInUser, userId);
+      } catch (e) {
+        return res.status(404).send("User not found");
+      }
+      let roleId: number = parseInt(req.params.role, 10);
+      if (isNaN(roleId)) {
+        return res.status(400).send("Invalid role ID");
+      }
+      const role: Role = getRoleById(roleId);
 
-    // all roles are valid, now set the role
-    await userService.setUserRole(signedInUser, user, role);
-    res.status(200).send("User role updated");
-  } catch (e) {
-    res.status(500).send("Setting user role failed: " + e);
+      // all roles are valid, now set the role
+      await userService.setUserRole(signedInUser, user, role);
+      res.status(200).send("User role updated");
+    } catch (e) {
+      res.status(500).send("Setting user role failed: " + e);
+    }
   }
-});
+);
 
 /**
  * Delete user.
