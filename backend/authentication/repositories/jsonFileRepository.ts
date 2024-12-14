@@ -10,6 +10,21 @@ const USER_COLLECTION_PATH = "./mocks/json_collections/users.json";
  * @Elsper01
  */
 export class JsonFileRepository implements Repository {
+  private static instance: JsonFileRepository;
+
+  private constructor() {}
+
+  /**
+   * Gets the singleton instance of the repository.
+   * @returns Returns the singleton instance.
+   */
+  public static getInstance(): JsonFileRepository {
+    if (!JsonFileRepository.instance) {
+      JsonFileRepository.instance = new JsonFileRepository();
+    }
+    return JsonFileRepository.instance;
+  }
+
   /**
    * Gets a user by its id.
    * @param userId The id of the user to get.
@@ -20,13 +35,13 @@ export class JsonFileRepository implements Repository {
     const jsonData = JSON.parse(data);
     const index = jsonData.findIndex((u: User) => u.id === userId);
     if (index !== -1) {
-      const user = new User(
+      const userToGet = new User(
         jsonData[index].id,
         getRoleById(jsonData[index].role),
         jsonData[index].tenantId,
         jsonData[index].email
       );
-      return user;
+      return userToGet;
     } else {
       throw new Error("User not found");
     }

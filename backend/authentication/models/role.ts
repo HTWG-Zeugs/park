@@ -3,16 +3,16 @@
  * @Elsper01
  */
 export enum Role {
-  // admin of a tenant instance
-  tenant_admin = 100,
   // admin of all tenants
-  solution_admin = 200,
+  solution_admin = 500,
+  // admin of a tenant instance
+  tenant_admin = 400,
   // staff of a tenant
   operational_manager = 300,
   // customer of a tenant
-  customer = 400,
+  customer = 200,
   // third party software, e.g. a payment provider that needs to access the data of a tenant customer
-  third_party = 500,
+  third_party = 100,
 }
 
 /**
