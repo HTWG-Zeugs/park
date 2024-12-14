@@ -42,8 +42,6 @@ export class JsonFileRepository implements Repository {
         jsonData[index].email
       );
       return userToGet;
-    } else {
-      throw new Error("User not found");
     }
   }
 
