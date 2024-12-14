@@ -11,13 +11,15 @@ const SignIn: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
   const { t } = useTranslation();
 
+  const tenantId = import.meta.env.VITE_TENANT_ID;
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setMessage(null);
 
     try {
-      auth.tenantId = "free-qxita";
+      auth.tenantId = tenantId;
       const userCredential = await auth.signInWithEmailAndPassword(
         email,
         password
@@ -52,7 +54,7 @@ const SignIn: React.FC = () => {
     }
 
     try {
-      auth.tenantId = "free-qxita";
+      auth.tenantId = tenantId;
       await auth.sendPasswordResetEmail(email);
       setMessage(t("route_sign_in.password_reset_email_sent"));
     } catch (error: any) {
