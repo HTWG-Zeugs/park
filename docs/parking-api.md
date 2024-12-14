@@ -2,27 +2,27 @@
 
 ### GET
 get parking occupancy
-`http://localhost:8081/garage/parking/occupancy/6df541559918a808c2402bba5012f6c60b27661c`
+`http://<host>:8081/garage/parking/occupancy/<garage_id>`
 
 ### GET
 get charging occupancy
-`http://localhost:8081/garage/charging/occupancy/6df541559918a808c2402bba5012f6c60b27661c`
+`http://<host>:8081/garage/charging/occupancy/<garage_id>`
 
 ### PUT
 create garage
-`http://localhost:8081/garage/create`
+`http://<host>:8081/garage/create`
 
 **Example request body:**
 raw (json)
 ```json
 {
-    "id": "6df541559918a808c2402bba5012f6c60b27661c",
+    "id": "03a8a43f-ec66-49a0-9d63-5933309729c0",
     "isOpen": true,
     "totalParkingSpaces": 120,
     "totalChargingSpaces": 10,
     "chargingStations": [
         {
-            "id": "92429d82a418a808c2402bba5012f6f9c0669b97",
+            "id": "e4a49acd-d010-4c41-a44b-b197c31afaac",
             "isOccupied": false,
             "chargingSpeedInKw": 350,
             "pricePerKwh": 0.25
@@ -33,19 +33,19 @@ raw (json)
 
 ### PUT
 update garage
-`http://localhost:8081/garage/update`
+`http://<host>:8081/garage/update`
 
 **Example request body:**
 raw (json)
 ```json
 {
-    "id": "6df541559918a808c2402bba5012f6c60b27661c",
+    "id": "03a8a43f-ec66-49a0-9d63-5933309729c0",
     "isOpen": true,
     "totalParkingSpaces": 120,
     "totalChargingSpaces": 10,
     "chargingStations": [
         {
-            "id": "92429d82a418a808c2402bba5012f6f9c0669b97",
+            "id": "e4a49acd-d010-4c41-a44b-b197c31afaac",
             "isOccupied": false,
             "chargingSpeedInKw": 350,
             "pricePerKwh": 0.25
@@ -56,28 +56,28 @@ raw (json)
 
 ### POST
 enter garage
-`http://localhost:8081/garage/enter/6df541559918a808c2402bba5012f6c60b27661c`
+`http://<host>:8081/garage/enter/<garage_id>`
 
 ### POST
 handle ticket payment
-`http://localhost:8081/garage/handlePayment/e2103f2f-bd47-4a53-98cb-67190c079364`
+`http://<host>:8081/garage/handlePayment/<ticket_id>`
 
 ### GET
 mayExit
-`http://localhost:8081/garage/mayExit/e2103f2f-bd47-4a53-98cb-67190c079364`
+`http://<host>:8081/garage/mayExit/<ticket_id>`
 
 ### POST
 exit garage
-`http://localhost:8081/garage/exit/6df541559918a808c2402bba5012f6c60b27661c`
+`http://<host>:8081/garage/exit/<garage_id>`
 
 ### POST
 start charging session
-`http://localhost:8081/garage/charging/startSession/6df541559918a808c2402bba5012f6c60b27661c/92429d82a418a808c2402bba5012f6f9c0669b97/92429d82a41e930486c6de5ebda9602d55c39986`
+`http://<host>:8081/garage/charging/startSession/<garage_id>/<station_id>/<user_id>`
 
 ### POST
 end charging session
-`http://localhost:8081/garage/charging/endSession/6df541559918a808c2402bba5012f6c60b27661c/03a8a43f-ec66-49a0-9d63-5933309729c0`
+`http://<host>:8081/garage/charging/endSession/<garage_id>/<session_id>`
 
 ### GET
 get charging session
-`http://localhost:8081/garage/charging/session/03a8a43f-ec66-49a0-9d63-5933309729c0`
+`http://<host>:8081/garage/charging/session/<session_id>`
