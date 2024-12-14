@@ -33,6 +33,16 @@ app.put("/garage/update", async (req, res) => {
   }
 });
 
+app.delete("/garage/delete/:garageId", async (req, res) => {
+  try {
+    const garageId: string = req.params.garageId;
+    await garageService.deleteGarage(garageId);
+    res.status(200).send("deleted");
+  } catch (e) {
+    res.status(500).send("deleting garage failed: " + e);
+  }
+});
+
 app.get("/garage/parking/occupancy/:garageId", async (req, res) => {
   try {
     const garageId: string = req.params.garageId;

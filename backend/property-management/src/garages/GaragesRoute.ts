@@ -7,10 +7,12 @@ import { GarageRequestObject } from "../../../../shared/GarageRequestObject";
 import { ChargingStation } from "./models/ChargingStation";
 import { ChargingStationResponseObject } from "../../../../shared/ChargingStationResponseObject";
 import { firestore } from "./../firestore";
+import { GarageEventsNotifier } from "./GarageEventsNotifier";
 
 const router = Router();
 
 const repository = new GarageRepository(firestore);
+const notifier = new GarageEventsNotifier("http://localhost:8081");
 
 router.get("/", (req, res) => {
   repository.getAllGarages()
@@ -29,8 +31,7 @@ router.post("/", (req, res) => {
   const garage = toGarage(createGarageRequest);
   repository.addGarage(garage)
     .then(() => {
-      // publish event to parking management service
-      
+      notifier.notifyGarageCreated(garage);
       res.status(201).send("created");
     })
     .catch((error) => {
@@ -66,7 +67,7 @@ router.put("/:id", async (req, res) => {
 
   repository.updateGarage(existingGarage)
     .then(() => {
-      // publish event to parking management service
+      notifier.notifyGarageUpdated(existingGarage);
       res.status(200).send("updated");
     })
     .catch((error) => {
