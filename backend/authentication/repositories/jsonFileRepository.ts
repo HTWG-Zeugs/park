@@ -26,9 +26,7 @@ export class JsonFileRepository implements Repository {
   }
 
   /**
-   * Gets a user by its id.
-   * @param userId The id of the user to get.
-   * @returns Returns instance of the user with the given id.
+   * @inheritdoc
    */
   async getUser(userId: string): Promise<User> {
     const data = await promises.readFile(USER_COLLECTION_PATH, "utf-8");
@@ -46,9 +44,7 @@ export class JsonFileRepository implements Repository {
   }
 
   /**
-   * Sets the role of a user.
-   * @param user User to set the role for.
-   * @param role The new role of the user.
+   * @inheritdoc
    */
   async setUserRole(user: User, role: Role): Promise<void> {
     const data = await promises.readFile(USER_COLLECTION_PATH, "utf-8");
@@ -67,8 +63,7 @@ export class JsonFileRepository implements Repository {
   }
 
   /**
-   * Deletes a user.
-   * @param user The user to delete.
+   * @inheritdoc
    */
   async deleteUser(user: User): Promise<void> {
     const data = await promises.readFile(USER_COLLECTION_PATH, "utf-8");
@@ -87,8 +82,7 @@ export class JsonFileRepository implements Repository {
   }
 
   /**
-   * Creates a new user.
-   * @param user The user to create.
+   * @inheritdoc
    */
   async createUser(user: User): Promise<void> {
     try {

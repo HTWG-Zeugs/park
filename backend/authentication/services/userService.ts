@@ -99,7 +99,6 @@ export class UserService {
       throw new Error("User already exists");
     }
     // Solution Admin is allowed to create users for every tenant
-    console.log(signedInUser.role === Role.solution_admin);
     if (signedInUser.role === Role.solution_admin) {
       await this.repo.createUser(user);
     } else {

@@ -1,15 +1,10 @@
 import jwt from "jsonwebtoken";
-import { initializeApp, applicationDefault } from "firebase-admin/app";
 import { auth } from "firebase-admin";
 import { User } from "../models/user";
 import { Repository } from "../repositories/repository";
-import { JsonFileRepository } from "../repositories/jsonFileRepository";
+import { FirestoreRepository } from "../repositories/firestoreRepository";
 
-initializeApp({
-  credential: applicationDefault(),
-}, "authenticationService");
-
-const repo: Repository = JsonFileRepository.getInstance();
+const repo: Repository = FirestoreRepository.getInstance();
 
 const validateFirebaseIdToken = async (req, res, next) => {
   // Check if the request has an Authorization header. If not, return a 403 error.

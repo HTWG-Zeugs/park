@@ -1,11 +1,9 @@
-import { JsonFileRepository } from "./repositories/jsonFileRepository";
 import { Repository } from "./repositories/repository";
+import { FirestoreRepository } from "./repositories/firestoreRepository";
 import { UserService } from "./services/userService";
 import { Config } from "./config";
 import { getRoleById } from "./models/role";
 import validateFirebaseIdToken from "./middleware/validateFirebaseIdToken";
-import { initializeApp, applicationDefault} from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
 import { User } from "./models/user";
 import { Role } from "./models/role";
 
@@ -13,26 +11,9 @@ const express = require("express");
 const app = express();
 const port = Config.PORT;
 
-initializeApp({
-  credential: applicationDefault(),
-});
-
-const db = getFirestore("authentication");
-const cityRef = db.collection('users').doc('cWHxtWFYSDgI46WeWW2TIMTHrQm1');
-
-(async () => {
-  const doc = await cityRef.get();
-  if (!doc.exists) {
-    console.log('No such document!');
-  } else {
-    console.log('Document data:', doc.data());
-  }
-})();
-
-
 app.use(express.json());
 
-const repo: Repository = JsonFileRepository.getInstance();
+const repo: Repository = FirestoreRepository.getInstance();
 const userService: UserService = UserService.getInstance(repo);
 
 /**
