@@ -1,10 +1,8 @@
 import { GarageDto } from "../shared/garageDto";
-import { JsonFileRepository } from "./repositories/jsonFileRepository";
+import { FirestoreRepository } from "./repositories/firestoreRepository";
 import { Repository } from "./repositories/repository";
 import { GarageService } from "./services/garageService";
 import "dotenv/config";
-
-console.log(process.env.ASDF);
 
 const express = require("express");
 const app = express();
@@ -12,7 +10,7 @@ const port = 8081;
 
 app.use(express.json());
 
-const repo: Repository = new JsonFileRepository();
+const repo: Repository = new FirestoreRepository();
 const garageService: GarageService = new GarageService(repo);
 
 app.put("/garage/create", async (req, res) => {

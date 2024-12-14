@@ -74,13 +74,13 @@ export class GarageService {
     const ticket = await this.repo.getTicket(ticketId);
     // check if payment was more than 15 minutes ago
     const currentDate = new Date();
-    const payDate = ticket.paymentTimestamp;
-    if (payDate !== undefined || payDate !== null) {
-      const isExceeded =
+    const payDate = new Date(ticket.paymentTimestamp);
+    if (payDate !== undefined && payDate !== null) {
+      const isStillValid =
         currentDate.getDate() - payDate.getDate() == 0 &&
         currentDate.getFullYear() - payDate.getFullYear() == 0 &&
         currentDate.getTime() - payDate.getTime() <= 900000;
-      return !isExceeded;
+      return isStillValid;
     } else {
       return false;
     }
@@ -95,7 +95,7 @@ export class GarageService {
         userId: userId,
         garageId: garageId,
         chargingStationId: stationId,
-        sessionStartedTimestamp: null,
+        sessionStartedTimestamp: new Date(),
         sessionFinishedTimestamp: null,
         kWhConsumed: null,
       };
@@ -190,14 +190,13 @@ export class GarageService {
     garage: Garage,
     session: ChargingSession
   ): number {
-    const station = garage.chargingStations.find((station) => {
-      station.id == session.chargingStationId;
-    });
+    const station = garage.chargingStations.find(s => s.id === session.chargingStationId)
+    console.log(station)
     const chargedHours =
       (session.sessionFinishedTimestamp.getTime() -
-      session.sessionStartedTimestamp.getTime()) /
+      new Date(session.sessionStartedTimestamp).getTime()) /
       (1000 * 60 * 60);
-    return chargedHours * station.chargingSpeedInKw;
+    return Math.round(chargedHours * station.chargingSpeedInKw * 100) / 100;
   }
 
   private getGarageFromDto(garageDto: GarageDto): Garage {

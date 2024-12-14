@@ -137,6 +137,6 @@ export class FirestoreRepository implements Repository {
         await this.firestore
             .collection(collection)
             .doc(obj.id)
-            .set(obj)
+            .set(JSON.parse(JSON.stringify((obj))))
     }
 }
