@@ -26,6 +26,17 @@
       "column_actions": "Actions"
     }
   },
+  "component_garageList": {
+    "buttons": {
+      "add_garage": "Add Garage"
+    },
+    "table": {
+      "column_id": "Id",
+      "column_name": "Name",
+      "column_last_modified": "Last modified at",
+      "column_actions": "Actions"
+    }
+  },
   "component_dropzone": {
     "drop_files_here": "Drag 'n' drop images here, or click to select images"
   },

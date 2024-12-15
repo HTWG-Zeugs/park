@@ -26,6 +26,17 @@
       "column_actions": "Aktionen"
     }
   },
+  "component_garageList": {
+    "buttons": {
+      "add_garage": "Parkhaus hinzufügen"
+    },
+    "table": {
+      "column_id": "Id",
+      "column_name": "Name",
+      "column_last_modified": "Zuletzt geändert am",
+      "column_actions": "Aktionen"
+    }
+  },
   "component_dropzone": {
     "drop_files_here": "Bilder hierher ziehen und ablegen oder klicken, um Bilder auszuwählen"
   },

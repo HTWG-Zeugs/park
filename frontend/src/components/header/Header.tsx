@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 
 const pages = [
   { text: "Home", href: "/home" },
+  { text: "Garages", href: "/garages" },
   { text: "Defects", href: "/defects" },
   { text: "Contact", href: "/contact" },
 ];
@@ -54,7 +55,7 @@ export default function Header() {
     try {
       localStorage.removeItem("jwt_token");
       navigate("/");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error signing out: ", error);
     }
   };

@@ -15,6 +15,7 @@ import "src/common/i18n/i18n.ts";
 
 import ProtectedRoute from "src/routes/ProtectedRoutes";
 import { AuthProvider } from "src/services/AuthContext";
+import Garages from "./routes/Garages";
 
 const router = createBrowserRouter([
   {
@@ -47,6 +48,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <DefectDetails />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "garages",
+        element: (
+          <ProtectedRoute>
+            <Garages />
           </ProtectedRoute>
         ),
       },
