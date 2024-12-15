@@ -13,7 +13,7 @@ app.use(express.json());
 const repo: Repository = new FirestoreRepository();
 const garageService: GarageService = new GarageService(repo);
 
-app.put("/garage/create", async (req, res) => {
+app.post("/garage/create", async (req, res) => {
   try {
     const garageDto: GarageDto = req.body;
     await garageService.createGarage(garageDto);

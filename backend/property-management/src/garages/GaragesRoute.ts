@@ -6,6 +6,7 @@ import { GarageResponseObject } from "../../../../shared/GarageResponseObject";
 import { GarageRequestObject } from "../../../../shared/GarageRequestObject";
 import { ChargingStation } from "./models/ChargingStation";
 import { ChargingStationResponseObject } from "../../../../shared/ChargingStationResponseObject";
+import { CreateGarageResponseObject } from "../../../../shared/CreateGarageResponseObject";
 import { firestore } from "./../firestore";
 import { GarageEventsNotifier } from "./GarageEventsNotifier";
 
@@ -21,7 +22,7 @@ router.get("/", (req, res) => {
       res.status(200).send(responseGarages);
     })
     .catch((error) => {
-      console.log(error);
+      console.error(error);
       res.status(500).json(error);
     });
 });
@@ -32,10 +33,14 @@ router.post("/", (req, res) => {
   repository.addGarage(garage)
     .then(() => {
       notifier.notifyGarageCreated(garage);
-      res.status(201).send("created");
+      res.status(201).send(
+        {
+          Id: garage.Id
+        } as CreateGarageResponseObject
+      );
     })
     .catch((error) => {
-      console.log(error);
+      console.error(error);
       res.status(500).json(error);
     });
 });
@@ -51,7 +56,7 @@ router.get("/:id", (req, res) => {
       }
     })
     .catch((error) => {
-      console.log(error);
+      console.error(error);
       res.status(500).json(error);
     });
 });
@@ -71,7 +76,20 @@ router.put("/:id", async (req, res) => {
       res.status(200).send("updated");
     })
     .catch((error) => {
-      console.log(error);
+      console.error(error);
+      res.status(500).json(error);
+    });
+});
+
+router.delete("/:id", (req, res) => {
+  const id = req.params.id;
+  repository.deleteGarage(id)
+    .then(() => {
+      notifier.notifyGarageDeleted(id);
+      res.status(200).send("deleted");
+    })
+    .catch((error) => {
+      console.error(error);
       res.status(500).json(error);
     });
 });

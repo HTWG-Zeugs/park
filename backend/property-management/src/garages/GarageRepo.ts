@@ -49,10 +49,17 @@ export class GarageRepository{
     this.createOrUpdate(state, this.garagesCollection);
   }
 
+  async deleteGarage(id: string): Promise<void> {
+    this.firestore
+      .collection(this.garagesCollection)
+      .doc(id)
+      .delete();
+  }
+
   private async createOrUpdate(obj: any, collection: string): Promise<void> {
     await this.firestore
-        .collection(collection)
-        .doc(obj.id)
-        .set(JSON.parse(JSON.stringify((obj))))
-}
+      .collection(collection)
+      .doc(obj.id)
+      .set(JSON.parse(JSON.stringify((obj))))
+  }
 }
