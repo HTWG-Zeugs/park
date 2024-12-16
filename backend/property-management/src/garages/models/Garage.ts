@@ -43,6 +43,7 @@ export class Garage {
     garage.Id = state.id;
     garage.CreatedAt = new Date(state.createdAt);
     garage.LastModifiedAt = new Date(state.lastModifiedAt);
+    garage.IsOpen = state.isOpen;
     garage.NumberParkingSpots = state.numberParkingSpots;
     garage.PricePerHour = state.pricePerHourInEuros;
     garage.OpeningTime = state.openingTime;

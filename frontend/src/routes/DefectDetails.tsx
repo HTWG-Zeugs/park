@@ -112,7 +112,7 @@ export default function DefectDetailsView() {
 
   function fetchDefect(id: string) {
     axiosAuthenticated
-      .get(`${BACKEND_URL}/defects/${id}`)
+      .get(`/defects/${id}`)
       .then((response) => {
         const defectData = response.data as DefectResponseObject;
         const formattedData = {

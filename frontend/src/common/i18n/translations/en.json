@@ -80,7 +80,8 @@
   "route_add_garage": {
     "add_garage": "Create new garage",
     "name": "Name",
-    "is_open": "Is open",
+    "open": "Open",
+    "closed": "Closed",
     "number_parking_spots": "Number of parking spots",
     "price_per_hour": "Price per hour",
     "opening_time": "Opening time",
@@ -93,6 +94,9 @@
       "closing_time_invalid": "Closing time is invalid",
       "closing_after_opening": "Closing time must be after opening time"
     }
+  },
+  "route_edit_garage": {
+    "edit_garage": "Edit garage"
   },
   "route_home": {
     "title": "Park",

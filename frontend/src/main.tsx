@@ -17,6 +17,7 @@ import "src/common/i18n/i18n.ts";
 
 import ProtectedRoute from "src/routes/ProtectedRoutes";
 import { AuthProvider } from "src/services/AuthContext";
+import EditGarage from "./routes/EditGarage";
 
 const router = createBrowserRouter([
   {
@@ -65,6 +66,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <AddGarage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "garages/edit",
+        element: (
+          <ProtectedRoute>
+            <EditGarage />
           </ProtectedRoute>
         ),
       },

@@ -124,6 +124,7 @@ function toGarage(garage: GarageRequestObject): Garage {
   g.setNumberParkingSpots(garage.numberParkingSpots);
   g.setPricePerHourInEuros(garage.pricePerHourInEuros);
   g.setOpeningTimes(garage.openingTime, garage.closingTime);
+  g.IsOpen = garage.isOpen;
 
   const chargingStations = garage.chargingStations.map((cs) => {
     return new ChargingStation(cs.name, cs.chargingSpeedInKw, cs.pricePerKwh);

@@ -80,7 +80,8 @@
   "route_add_garage": {
     "add_garage": "Neues Parkhaus anlegen",
     "name": "Name",
-    "is_open": "Ist geöffnet",
+    "open": "Geöffnet",
+    "closed": "Geschlossen",
     "number_parking_spots": "Anzahl Parkplätze",
     "price_per_hour": "Preis pro Stunde",
     "opening_time": "Öffnungszeit",
@@ -93,6 +94,9 @@
       "closing_time_invalid": "Schließzeit ist ungültig",
       "closing_after_opening": "Schließzeit muss nach der Öffnungszeit liegen"
     }
+  },
+  "route_edit_garage": {
+    "edit_garage": "Parkhaus bearbeiten"
   },
   "route_home": {
     "title": "Park",

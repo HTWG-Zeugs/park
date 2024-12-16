@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TextField, Typography, Paper, FormControlLabel, Switch } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import LoadingButton from "@mui/lab/LoadingButton";
 import SaveIcon from "@mui/icons-material/Save";
 import { GarageRequestObject } from "shared/GarageRequestObject";
 
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axiosAuthenticated from "src/services/Axios";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { useTranslation } from "react-i18next";
+import { GarageResponseObject } from "shared/GarageResponseObject";
 
 dayjs.extend(utc);
 
@@ -34,7 +35,9 @@ interface FormErrors {
   closingTime: string;
 }
 
-export default function AddGarage() {
+export default function EditGarage() {
+  const location = useLocation();
+  const { id } = location.state || {};
   const navigate = useNavigate();
 
   const { t } = useTranslation();
@@ -48,6 +51,31 @@ export default function AddGarage() {
     openingTime: "06:00",
     closingTime: "23:00",
   });
+
+  useEffect(() => {
+    if (id) {
+      fetchGarage(id);
+    }
+  }, [id]);
+
+  function fetchGarage(id: string) {
+    axiosAuthenticated
+      .get(`/garages/${id}`)
+      .then((response) => {
+        const data: GarageResponseObject = response.data;
+        setFormData({
+          name: data.Name,
+          isOpen: data.IsOpen,
+          numberParkingSpots: data.NumberParkingSpots,
+          pricePerHour: data.PricePerHourInEuros,
+          openingTime: data.OpeningTime,
+          closingTime: data.ClosingTime,
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
 
   const [formErrors, setFormErrors] = useState<FormErrors>({
     name: "",
@@ -165,7 +193,7 @@ export default function AddGarage() {
     };
 
     try {
-      await axiosAuthenticated.post(`/garages/`, request);
+      await axiosAuthenticated.put(`/garages/${id}`, request);
       navigate("/garages");
     } catch (error) {
       console.error(error);

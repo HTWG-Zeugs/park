@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import {
   DataGrid,
@@ -10,7 +10,7 @@ import {
 } from "@mui/x-data-grid";
 import { Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import DescriptionIcon from "@mui/icons-material/Description";
+import EditIcon from "@mui/icons-material/Edit";
 import axiosAuthenticated from "src/services/Axios";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -26,23 +26,22 @@ export default function DefectTable() {
   const navigate = useNavigate();
 
   function EditToolbar() {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  return (
-    <GridToolbarContainer>
-      <Button
-        color="primary"
-        startIcon={<AddIcon />}
-        onClick={() => navigate("/garages/add")}
-        variant="contained"
-      >
-        {t("component_garageList.buttons.add_garage")}
-      </Button>
-    </GridToolbarContainer>
-  );
-}
+    return (
+      <GridToolbarContainer>
+        <Button
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={() => navigate("/garages/add")}
+          variant="contained"
+        >
+          {t("component_garageList.buttons.add_garage")}
+        </Button>
+      </GridToolbarContainer>);
+    }
 
-  function fetchAllGarages() {
+  const fetchAllGarages = useCallback(() => {
     axiosAuthenticated
       .get("/garages/")
       .then((response) => {
@@ -59,11 +58,11 @@ export default function DefectTable() {
         console.error("Failed to fetch data:", error);
       })
       .finally(() => setLoading(false));
-  }
+  }, [t]);
 
   useEffect(() => {
     fetchAllGarages();
-  }, [setGarages, setLoading]);
+  }, [fetchAllGarages, setGarages, setLoading]);
 
   const handleDeleteClicked = (id: GridRowId) => async () => {
     try {
@@ -77,7 +76,7 @@ export default function DefectTable() {
     }
   };
 
-  const handleShowDetailsClicked = (id: GridRowId) => async () => {
+  const handleEditClicked = (id: GridRowId) => async () => {
     navigate("/garages/edit", {
       state: {
         id: id,
@@ -113,9 +112,9 @@ export default function DefectTable() {
             color="inherit"
           />,
           <GridActionsCellItem
-            icon={<DescriptionIcon />}
-            label="Details"
-            onClick={handleShowDetailsClicked(id)}
+            icon={<EditIcon />}
+            label="Edit"
+            onClick={handleEditClicked(id)}
             color="inherit"
           />,
         ];
