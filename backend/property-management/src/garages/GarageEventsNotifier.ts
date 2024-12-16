@@ -13,9 +13,7 @@ export class GarageEventsNotifier {
         console.log("Notified parking management about new garage");
       })
       .catch(error => {
-        if (error.response) {
-          console.error('Bad Request: ', error.response);
-        }
+        console.error('Bad Request, unable to notify parking management.');
       });
   }
 
@@ -27,9 +25,7 @@ export class GarageEventsNotifier {
         console.log("Notified parking management about updated garage");
       })
       .catch(error => {
-        if (error.response) {
-          console.error('Bad Request: ', error.response);
-        }
+        console.error('Bad Request, unable to notify parking management.');
       });
   }
 
@@ -39,9 +35,7 @@ export class GarageEventsNotifier {
         console.log("Notified parking management about deleted garage");
       })
       .catch(error => {
-        if (error.response) {
-          console.error('Bad Request: ', error.response);
-        }
+        console.error('Bad Request, unable to notify parking management.');
       });
   }
 
