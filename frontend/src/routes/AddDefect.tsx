@@ -19,7 +19,7 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 dayjs.extend(utc);
 
 interface Map {
-  [key: string]: (data: object) => string;
+  [key: string]: (data: string) => string;
 }
 
 interface FormData {
@@ -89,7 +89,7 @@ export default function AddDefect() {
     },
   };
 
-  const handleChange = (e: { target: { name: string; value: object } }) => {
+  const handleChange = (e: { target: { name: string; value: string } }) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
@@ -98,7 +98,7 @@ export default function AddDefect() {
     validateField(name, value);
   };
 
-  const validateField = (name: string, value: object) => {
+  const validateField = (name: string, value: string) => {
     const validationFunction = validationFunctions[name];
     if (validationFunction) {
       const error = validationFunction(value);

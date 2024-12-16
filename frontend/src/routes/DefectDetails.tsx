@@ -23,9 +23,7 @@ export default function DefectDetailsView() {
   const location = useLocation();
   const { id } = location.state || {};
   const { t } = useTranslation();
-  const [images, setImages] = useState<
-    { name: string; url: string; hasUrlError: boolean }[]
-  >([]);
+  const [images, setImages] = useState<{ name: string; url: string; hasUrlError: boolean }[]>([]);
   const [selectedImage, setSelectedImage] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -46,39 +44,39 @@ export default function DefectDetailsView() {
     }
   }, [id]);
 
-  async function fetchImageUrls() {
-    const imageUrls = [];
-    for (const imageName of defectData.imageNames) {
-      const response = await axiosAuthenticated.get(
-        `${BACKEND_URL}/defects/signedUrl/${imageName}`
-      );
-      const url = response.data;
-      // check if the image exists in the bucket
-      try {
-        await axios.head(url);
-        imageUrls.push({
-          name: imageName,
-          url: url,
-          hasUrlError: false,
-        });
-      } catch (error) {
-        console.error(
-          `Error occurred while checking if the following image exists: ${imageName}, ${url}`,
-          error
-        );
-        imageUrls.push({
-          name: imageName,
-          url: "",
-          hasUrlError: true,
-        });
-      }
-    }
-    setImages(imageUrls);
-  }
-
   useEffect(() => {
+    async function fetchImageUrls() {
+      const imageUrls = [];
+      for (const imageName of defectData.imageNames) {
+        const response = await axiosAuthenticated.get(
+          `${BACKEND_URL}/defects/signedUrl/${imageName}`
+        );
+        const url = response.data;
+        // check if the image exists in the bucket
+        try {
+          await axios.head(url);
+          imageUrls.push({
+            name: imageName,
+            url: url,
+            hasUrlError: false,
+          });
+        } catch (error) {
+          console.error(
+            `Error occurred while checking if the following image exists: ${imageName}, ${url}`,
+            error
+          );
+          imageUrls.push({
+            name: imageName,
+            url: "",
+            hasUrlError: true,
+          });
+        }
+      }
+      setImages(imageUrls);
+    }
+
     if (defectData.imageNames.length > 0) fetchImageUrls();
-  }, [defectData]);
+  }, [defectData, setImages]);
 
   const handleImageClick = (url: string) => {
     setSelectedImage(url);
