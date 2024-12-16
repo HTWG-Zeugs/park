@@ -101,7 +101,14 @@ export class Garage {
   }
 
   private isValidTime(time: string): boolean {
-    return /^\d{2}:\d{2}$/.test(time);
+    const formatValid = /^(\d{1,2}):(\d{2})$/.test(time);
+
+    if (!formatValid) {
+      return false;
+    }
+
+    const minutes = this.convertToMinutes(time);
+    return minutes >= 0 && minutes < 24 * 60;
   }
 
   // Convert HH:mm to minutes since midnight

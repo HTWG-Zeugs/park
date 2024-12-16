@@ -9,13 +9,14 @@ import SignUp from "src/routes/SignUp";
 import Home from "src/routes/Home";
 import Contact from "src/routes/Contact";
 import AddDefect from "src/routes/AddDefect";
+import Garages from "./routes/Garages";
+import AddGarage from "./routes/AddGarage";
 import DefectDetails from "src/routes/DefectDetails";
 import "firebase/auth";
 import "src/common/i18n/i18n.ts";
 
 import ProtectedRoute from "src/routes/ProtectedRoutes";
 import { AuthProvider } from "src/services/AuthContext";
-import Garages from "./routes/Garages";
 
 const router = createBrowserRouter([
   {
@@ -56,6 +57,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Garages />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "garages/add",
+        element: (
+          <ProtectedRoute>
+            <AddGarage />
           </ProtectedRoute>
         ),
       },
