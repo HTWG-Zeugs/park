@@ -2,12 +2,14 @@ import { GarageDto } from "../shared/garageDto";
 import { FirestoreRepository } from "./repositories/firestoreRepository";
 import { Repository } from "./repositories/repository";
 import { GarageService } from "./services/garageService";
+import cors from "cors";
 import "dotenv/config";
 
 const express = require("express");
 const app = express();
-const port = 8081;
+const port = process.env.PORT ?? 8081;
 
+app.use(cors());
 app.use(express.json());
 
 const repo: Repository = new FirestoreRepository();
