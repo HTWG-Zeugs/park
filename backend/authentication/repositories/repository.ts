@@ -7,6 +7,19 @@ import { Role } from "../models/role";
  */
 export interface Repository {
   /**
+   * Gets all users of all tenants.
+   * @returns Returns a array of all users.
+   */
+  getAllUsers(): Promise<User[]>;
+
+  /**
+   * Gets all users of a tenant.
+   * @param tenantId The id of the tenant to get the users for.
+   * @returns Returns a array of all users.
+   */
+  getAllTenantUsers(tenantId: string): Promise<User[]>;
+
+  /**
    * Gets a user by its id.
    * @param userId The id of the user to get.
    * @returns Returns instance of the user with the given id.

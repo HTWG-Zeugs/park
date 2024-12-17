@@ -52,6 +52,24 @@ export class UserService {
   }
 
   /**
+   * Gets all users.
+   * @returns Returns all users as array.
+   */
+    async getAllUsers(signedInUser: User): Promise<User[]> {
+      // Solution Admin is allowed to query everyone
+      if (signedInUser.role === Role.solution_admin) {
+        return await this.repo.getAllUsers();
+      } 
+      // Tenant Admin is only allowed to query all users of his tenant
+      else if (signedInUser.role === Role.tenant_admin) {
+        return await this.repo.getAllTenantUsers(signedInUser.tenantId);
+      } else {
+        console.error("User not allowed to get any users");
+        throw new Error("Unauthorized");
+      }
+    }
+
+  /**
    * Sets the role of a user.
    * @param user User to set the role for.
    * @param role The new role of the user.

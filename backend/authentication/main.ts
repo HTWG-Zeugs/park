@@ -32,6 +32,19 @@ app.get("/user/:userId", validateFirebaseIdToken, async (req, res) => {
 });
 
 /**
+ * Get a user by ID.
+ */
+app.get("/all-users", validateFirebaseIdToken, async (req, res) => {
+  const signedInUser: User = res.user;
+  try {
+    const users = await userService.getAllUsers(signedInUser);
+    res.status(200).send(users);
+  } catch (e) {
+    res.status(404).send("User not found");
+  }
+});
+
+/**
  * Create a new user.
  */
 app.post("/user", validateFirebaseIdToken, async (req, res) => {

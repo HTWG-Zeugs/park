@@ -20,6 +20,46 @@ export class FirestoreRepository implements Repository {
     });
     this.db = getFirestore(Config.FIRESTORE_ID);
   }
+  /**
+   * Gets all users from the Firestore database.
+   * @returns Returns a promise that resolves to an array of users.
+   */
+  async getAllUsers(): Promise<User[]> {
+    const usersSnapshot = await this.db.collection(this.USER_COLLECTION_PATH).get();
+    const users: User[] = [];
+    usersSnapshot.forEach(doc => {
+      const user = new User(
+        doc.data().id,
+        getRoleById(doc.data().role),
+        doc.data().tenantId,
+        doc.data().email
+      );
+      users.push(user);
+    });
+    return users;
+  }
+
+  /**
+   * Gets all users for a specific tenant from the Firestore database.
+   * @param tenantId The ID of the tenant.
+   * @returns Returns a promise that resolves to an array of users.
+   */
+  async getAllTenantUsers(tenantId: string): Promise<User[]> {
+    const usersSnapshot = await this.db.collection(this.USER_COLLECTION_PATH)
+      .where("tenantId", "==", tenantId)
+      .get();
+    const users: User[] = [];
+    usersSnapshot.forEach(doc => {
+      const user = new User(
+        doc.data().id,
+        getRoleById(doc.data().role),
+        doc.data().tenantId,
+        doc.data().email
+      );
+      users.push(user);
+    });
+    return users;
+  }
 
   /**
    * Gets the singleton instance of the repository.

@@ -13,6 +13,28 @@ export class JsonFileRepository implements Repository {
   private static instance: JsonFileRepository;
 
   private constructor() {}
+  /**
+   * Gets all users from the JSON file.
+   * @returns Returns a promise that resolves to an array of users.
+   */
+  async getAllUsers(): Promise<User[]> {
+    const data = await promises.readFile(USER_COLLECTION_PATH, "utf-8");
+    const jsonData = JSON.parse(data);
+    return jsonData.map((u: any) => new User(u.id, getRoleById(u.role), u.tenantId, u.email));
+  }
+
+  /**
+   * Gets all users for a specific tenant from the JSON file.
+   * @param tenantId The tenant ID to filter users by.
+   * @returns Returns a promise that resolves to an array of users.
+   */
+  async getAllTenantUsers(tenantId: string): Promise<User[]> {
+    const data = await promises.readFile(USER_COLLECTION_PATH, "utf-8");
+    const jsonData = JSON.parse(data);
+    return jsonData
+      .filter((u: any) => u.tenantId === tenantId)
+      .map((u: any) => new User(u.id, getRoleById(u.role), u.tenantId, u.email));
+  }
 
   /**
    * Gets the singleton instance of the repository.
