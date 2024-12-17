@@ -122,6 +122,12 @@
       }
     }
   },
+  "route_garage": {
+    "title": "Garage",
+    "occupancy": {
+      "title": "Occupancy Status"
+    }
+  },
   "route_protected_route": {
     "loading": "Loading..."
   },

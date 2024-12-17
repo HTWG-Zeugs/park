@@ -16,6 +16,7 @@ import "src/common/i18n/i18n.ts";
 
 import ProtectedRoute from "src/routes/ProtectedRoutes";
 import { AuthProvider } from "src/services/AuthContext";
+import Garage from "src/routes/Garage";
 
 const router = createBrowserRouter([
   {
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: "home", element: <Home /> },
+      { path: "garage", element: <Garage />},
       { path: "sign-in", element: <SignIn /> },
       { path: "sign-up", element: <SignUp /> },
       { path: "users", element: 

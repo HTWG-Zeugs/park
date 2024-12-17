@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 
 const pages = [
   { text: "Home", href: "/home" },
+  { text: "Garage", href: "/garage"},
   { text: "Defects", href: "/defects" },
   { text: "Contact", href: "/contact" },
 ];
