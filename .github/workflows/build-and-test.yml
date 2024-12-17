@@ -39,7 +39,7 @@ jobs:
     - name: Run tests
       run: |
         cd ${{ matrix.service }}
-        npm test
+        npm test --if-present
 
     - name: Build
       run: |
