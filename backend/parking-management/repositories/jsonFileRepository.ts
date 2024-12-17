@@ -16,6 +16,9 @@ const parkingInvoicesRepo = location + 'parkingInvoices.json';
 const ticketsRepo = location + 'tickets.json';
 
 export class JsonFileRepository implements Repository {
+    deleteGarage(garageId: string): Promise<void> {
+        return Promise.reject();
+    }
     
     async createGarage(garage: Garage): Promise<void> {
         return Promise.reject();
