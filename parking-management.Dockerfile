@@ -15,6 +15,6 @@ WORKDIR /usr/src/app
 COPY backend/parking-management/package*.json ./
 RUN npm install --only=production
 COPY --from=builder /usr/src/app/parking-management/dist ./
-EXPOSE 6969
+EXPOSE 8080
 
 ENTRYPOINT ["node","./parking-management/main.js"]

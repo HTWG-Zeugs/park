@@ -5,7 +5,7 @@ import garagesRoute from "./garages/GaragesRoute";
 import process from "process";
 import { Request, Response } from "express";
 const app = express();
-const port = process.env.PORT ?? 6969;
+const port = process.env.PORT ?? 8080;
 
 app.use(cors());
 
