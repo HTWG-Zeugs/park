@@ -1,4 +1,25 @@
 {
+  "mui": {
+    "noRows": "Keine Zeilen verfügbar",
+    "noResults": "Keine Ergebnisse gefunden",
+    "export": "Exportieren",
+    "density": "Dichte",
+    "density_label": "Dichte",
+    "density_compact": "Kompakt",
+    "density_standard": "Standard",
+    "density_comfortable": "Komfortabel",
+    "manage_columns": "Spalten verwalten",
+    "rows_selected": "{{count}} Zeile(n) ausgewählt",
+    "total_rows": "Gesamtanzahl Zeilen",
+    "visible_rows": "Sichtbar {{visibleCount}} von {{totalCount}}",
+    "rows_per_page": "Zeilen pro Seite:",
+    "sort_asc": "Aufsteigend sortieren",
+    "sort_desc": "Absteigend sortieren",
+    "filter": "Filter",
+    "hide_column": "Spalte ausblenden",
+    "show_columns": "Spalten anzeigen",
+    "unsort": "Sortierung aufheben"
+  },
   "component_contact": {
     "headline": "Kontakt",
     "p1_1": "Dieses Projekt wurde im Rahmen des",
@@ -23,6 +44,18 @@
       "column_reporting_date": "Gemeldet am",
       "column_last_modified": "Zuletzt geändert am",
       "column_status": "Status",
+      "column_actions": "Aktionen"
+    }
+  },
+  "component_userList": {
+    "add_user": "Benutzer erstellen",
+    "error_fetching_data": "Keine Daten empfangen",
+    "table": {
+      "column_user_id": "Benutzer ID",
+      "column_name": "Name",
+      "column_mail": "Mail",
+      "column_role": "Rolle",
+      "column_tenant_id": "Mandanten ID",
       "column_actions": "Aktionen"
     }
   },

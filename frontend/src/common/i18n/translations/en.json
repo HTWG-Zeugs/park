@@ -1,4 +1,25 @@
 {
+  "mui": {
+    "noRows": "No rows available",
+    "noResults": "No results found",
+    "export": "Export",
+    "density": "Density",
+    "density_label": "Density",
+    "density_compact": "Compact",
+    "density_standard": "Standard",
+    "density_comfortable": "Comfortable",
+    "manage_columns": "Manage Columns",
+    "rows_selected": "{{count}} row(s) selected",
+    "total_rows": "Total Rows",
+    "visible_rows": "Visible {{visibleCount}} of {{totalCount}}",
+    "rows_per_page": "Rows per page:",
+    "sort_asc": "Sort Ascending",
+    "sort_desc": "Sort Descending",
+    "filter": "Filter",
+    "hide_column": "Hide Column",
+    "show_columns": "Show Columns",
+    "unsort": "Unsort"
+  },
   "component_contact": {
     "headline": "Contact Us",
     "p1_1": "This project is part of the",
@@ -23,6 +44,18 @@
       "column_reporting_date": "Reported at",
       "column_last_modified": "Last modified at",
       "column_status": "Status",
+      "column_actions": "Actions"
+    }
+  },
+  "component_userList": {
+    "add_user": "Add user",
+    "error_fetching_data": "No data received",
+    "table": {
+      "column_user_id": "User ID",
+      "column_name": "Name",
+      "column_mail": "Mail",
+      "column_role": "Role",
+      "column_tenant_id": "Tenant ID",
       "column_actions": "Actions"
     }
   },
@@ -93,25 +126,25 @@
     "loading": "Loading..."
   },
   "route_sign_in": {
-      "user_is_null": "Sign in failed. User is null.",
-      "user_not_found": "No account found with this email address.",
-      "wrong_password": "Incorrect password.",
-      "sign_in_failed": "Sign in failed. Please try again.",
-      "email_required": "Please enter your email address.",
-      "password_reset_email_sent": "An email to reset your password has been sent.",
-      "password_reset_failed": "Password reset failed. Please try again."
+    "user_is_null": "Sign in failed. User is null.",
+    "user_not_found": "No account found with this email address.",
+    "wrong_password": "Incorrect password.",
+    "sign_in_failed": "Sign in failed. Please try again.",
+    "email_required": "Please enter your email address.",
+    "password_reset_email_sent": "An email to reset your password has been sent.",
+    "password_reset_failed": "Password reset failed. Please try again."
   },
   "route_sign_up": {
-      "passwords_do_not_match": "Passwords do not match.",
-      "user_is_null": "Registration failed. User is null.",
-      "email_already_exists": "This email address is already in use",
-      "invalid_email": "Invalid email address.",
-      "weak_password": "Password is too weak.",
-      "sign_up_failed": "Registration failed. Please try again.",
-      "title": "Sign Up",
-      "email": "E-Mail:",
-      "password": "Password:",
-      "confirm_password": "Confirm Password:",
-      "sign_up_button": "Sign Up"
+    "passwords_do_not_match": "Passwords do not match.",
+    "user_is_null": "Registration failed. User is null.",
+    "email_already_exists": "This email address is already in use",
+    "invalid_email": "Invalid email address.",
+    "weak_password": "Password is too weak.",
+    "sign_up_failed": "Registration failed. Please try again.",
+    "title": "Sign Up",
+    "email": "E-Mail:",
+    "password": "Password:",
+    "confirm_password": "Confirm Password:",
+    "sign_up_button": "Sign Up"
   }
 }

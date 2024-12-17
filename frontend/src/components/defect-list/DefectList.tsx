@@ -28,7 +28,7 @@ function EditToolbar() {
         onClick={() => navigate("/defects/add")}
         variant="contained"
       >
-        Add defect
+        Add defect //TODO: Translate
       </Button>
     </GridToolbarContainer>
   );
@@ -144,13 +144,13 @@ export default function DefectTable() {
         return [
           <GridActionsCellItem
             icon={<DeleteIcon />}
-            label="Delete"
+            label="Delete" //TODO: translate
             onClick={handleDeleteClicked(id)}
             color="inherit"
           />,
           <GridActionsCellItem
             icon={<DescriptionIcon />}
-            label="Details"
+            label="Details" //TODO: translate
             onClick={handleShowDetailsClicked(id)}
             color="inherit"
           />,
