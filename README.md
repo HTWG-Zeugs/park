@@ -41,6 +41,8 @@ Firestore local: https://firebase.google.com/docs/admin/setup?hl=de#initialize_t
 
 - List service accounts: `gcloud iam service-accounts list`
 - Access to firestore database: `gcloud projects add-iam-policy-binding cloud-park-app --member="serviceAccount:park-manager@cloud-park-app.iam.gserviceaccount.com" --role="roles/datastore.user"`
+- Access to a single firestore database: 
+`gcloud projects add-iam-policy-binding tensile-spirit-438110-i2 --member='serviceAccount:authentication-firestore@tensile-spirit-438110-i2.iam.gserviceaccount.com' --role='roles/datastore.user' --condition='expression=resource.name=="projects/tensile-spirit-438110-i2/databases/authentication",title=authentication,description=authenctication'`
 - Permissions to sign blobs for signed urls: `gcloud projects add-iam-policy-binding cloud-park-app --member="serviceAccount:park-manager@cloud-park-app.iam.gserviceaccount.com" --role="roles/iam.serviceAccountTokenCreator"`
 - Access to gloud storage: `gsutil iam ch serviceAccount:park-manager@cloud-park-app.iam.gserviceaccount.com:roles/datastore.user gs://defect-images`
 - Create a service account key and place the json file into `backend/service-account-credentials.json`

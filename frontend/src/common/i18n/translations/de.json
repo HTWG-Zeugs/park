@@ -137,7 +137,7 @@
     "password_reset_email_sent": "Eine E-Mail zum Zurücksetzen des Passworts wurde gesendet.",
     "password_reset_failed": "Passwort-Zurücksetzung fehlgeschlagen. Bitte versuchen Sie es erneut."
   },
-  "route_sing_up": {
+  "route_sign_up": {
     "passwords_do_not_match": "Passwörter stimmen nicht überein.",
     "user_is_null": "Registrierung fehlgeschlagen. Benutzer ist null.",
     "email_already_exists": "Diese E-Mail-Adresse wird bereits verwendet.",

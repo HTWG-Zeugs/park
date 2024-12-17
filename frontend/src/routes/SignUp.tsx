@@ -14,6 +14,8 @@ const SignUp: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const { t } = useTranslation();
 
+  const tenantId = import.meta.env.VITE_TENANT_ID;
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -24,6 +26,7 @@ const SignUp: React.FC = () => {
     }
 
     try {
+      auth.tenantId = tenantId;
       const userCredential = await auth.createUserWithEmailAndPassword(
         email,
         password
