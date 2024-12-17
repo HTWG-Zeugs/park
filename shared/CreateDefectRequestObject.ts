@@ -3,6 +3,5 @@ export type CreateDefectRequestObject = {
   Location: string;
   ShortDesc: string;
   DetailedDesc: string;
-  Status: string;
   ImageNames: string[];
 }

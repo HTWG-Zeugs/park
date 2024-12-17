@@ -1,23 +1,14 @@
 import { Defect } from "../models/defectAggregate/Defect";
 import type { IDefectRepo } from "../models/IDefectRepo";
 import type { DefectState } from "../models/defectAggregate/DefectState";
-import { initializeApp, applicationDefault } from "firebase-admin/app";
 import { getFirestore, Firestore } from "firebase-admin/firestore";
 import "dotenv/config";
 
 export class FirestoreDefectRepo implements IDefectRepo {
   firestore: Firestore;
 
-  constructor() {
-    initializeApp({
-      credential: applicationDefault(),
-    });
-
-    if (process.env.FIRESTORE_DB_ID === undefined)
-      throw new Error("FIRESTORE_DB_ID is not defined");
-
-    const dbId = process.env.FIRESTORE_DB_ID;
-    this.firestore = getFirestore(dbId);
+  constructor(firestore: Firestore) {
+    this.firestore = firestore;
   }
 
   async getAllDefects(): Promise<Defect[]> {

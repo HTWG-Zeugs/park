@@ -49,6 +49,13 @@ export class FirestoreRepository implements Repository {
         }
     }
 
+    async deleteGarage(garageId: string): Promise<void> {
+        await this.firestore
+            .collection(this.garagesCollection)
+            .doc(garageId)
+            .delete()
+    }
+
     async createTicket(ticket: Ticket): Promise<void> {
         this.createOrUpdate(ticket, this.ticketsCollection);
     }

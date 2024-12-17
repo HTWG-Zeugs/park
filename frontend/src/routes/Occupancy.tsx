@@ -2,7 +2,7 @@ import { Card, CardContent, FormControl, InputLabel, MenuItem, Select, SelectCha
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-export default function Garage() {
+export default function Occupancy() {
   const { t } = useTranslation();
   const [garages, setGarages] = React.useState<string[]>([]);
   const [selectedGarage, setSelectedGarage] = React.useState<string>('');

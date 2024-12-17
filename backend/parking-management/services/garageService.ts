@@ -1,6 +1,7 @@
 import { GarageDto } from "../../shared/garageDto";
 import { ChargingInvoice } from "../models/chargingInvoice";
 import { ChargingSession } from "../models/chargingSession";
+import { ChargingStation } from "../models/chargingStation";
 import { Garage } from "../models/garage";
 import { OccupancyStatus } from "../models/occupancyStatus";
 import { Ticket } from "../models/ticket";
@@ -21,6 +22,10 @@ export class GarageService {
   async updateGarage(garageDto: GarageDto): Promise<void> {
     const garage: Garage = this.getGarageFromDto(garageDto);
     this.repo.updateGarage(garage);
+  }
+
+  async deleteGarage(garageId: string) {
+    this.repo.deleteGarage(garageId);
   }
 
   async getParkingOccupancy(garageId: string): Promise<OccupancyStatus> {
@@ -207,7 +212,13 @@ export class GarageService {
       0,
       garageDto.totalChargingSpaces,
       0,
-      garageDto.chargingStations
+      garageDto.chargingStations.map(cs => ({
+        id: cs.id,
+        isOccupied: false,
+        isCharging: false,
+        chargingSpeedInKw: cs.chargingSpeedInKw,
+        pricePerKwh: cs.pricePerKwh,
+      } as ChargingStation))
     );
   }
 }

@@ -1,7 +1,7 @@
-import { CreateDefectRequestObject } from "../../../../shared/CreateDefectRequestObject";
-import { DefectResponseObject } from "../../../../shared/DefectResponseObject";
-import { CreateDefectResponseObject } from "../../../../shared/CreateDefectResponseObject";
-import { UpdateDefectRequestObject } from "../../../../shared/UpdateDefectRequestObject";
+import { CreateDefectRequestObject } from "../../../../../shared/CreateDefectRequestObject";
+import { DefectResponseObject } from "../../../../../shared/DefectResponseObject";
+import { CreateDefectResponseObject } from "../../../../../shared/CreateDefectResponseObject";
+import { UpdateDefectRequestObject } from "../../../../../shared/UpdateDefectRequestObject";
 import type { ObjectStorageRepo } from "../infrastructure/ObjectStorageRepo";
 import { Defect } from "../models/defectAggregate/Defect";
 import { DefectReportStatus } from "../models/defectAggregate/DefectReportStatus";
@@ -153,10 +153,7 @@ export class DefectController {
 }
 
 function toDefect(request: CreateDefectRequestObject): Defect {
-  const status: DefectReportStatus =
-    DefectReportStatus[request.Status as keyof typeof DefectReportStatus];
-
-  const defect: Defect = new Defect(request.Object, request.Location, status);
+  const defect: Defect = new Defect(request.Object, request.Location);
 
   defect.ShortDesc = request.ShortDesc;
   defect.DetailedDesc = request.DetailedDesc;

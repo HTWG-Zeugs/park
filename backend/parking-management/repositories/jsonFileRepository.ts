@@ -23,6 +23,9 @@ const data = require(filePath);
 
 
 export class JsonFileRepository implements Repository {
+    deleteGarage(garageId: string): Promise<void> {
+        return Promise.reject();
+    }
     
     async createGarage(garage: Garage): Promise<void> {
         return Promise.reject();
