@@ -1,5 +1,5 @@
 {
-  "name": "park-backend",
+  "name": "property-management",
   "version": "0.0.0",
   "description": "Parking management solution",
   "main": "src/main.ts",
