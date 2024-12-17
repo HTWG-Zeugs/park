@@ -1,4 +1,4 @@
-import { CircularProgress, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Stack } from "@mui/material";
+import { FormControl, InputLabel, MenuItem, Select, SelectChangeEvent} from "@mui/material";
 import Grid from "@mui/material/Grid2"
 import Card from "@mui/joy/Card";
 import React, { useEffect } from "react";
@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import EvStationIcon from '@mui/icons-material/EvStation';
 import { OccupancyGrid } from "src/components/occupancy-grid/OccupancyGrid";
+import axiosAuthenticated from "src/services/Axios";
 
 export default function Occupancy() {
   const { t } = useTranslation();
@@ -29,6 +30,26 @@ export default function Occupancy() {
       "Garage 2"
     ]
   }
+
+  // adjust to using analytics service (?)
+  // const fetchGarages = useCallback(() => {
+  //   axiosAuthenticated
+  //     .get("/garages/")
+  //     .then((response) => {
+  //       if (!response.data) {
+  //         throw new Error(t("component_defectList.error_fetching_data"));
+  //       }
+  //       const responseData: GarageResponseObject[] = response.data;
+  //       const listItems: GarageLisItem[] = responseData.map((d) =>
+  //         toGarageListItem(d)
+  //       );
+  //       setGarages(listItems);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Failed to fetch data:", error);
+  //     })
+  //     .finally(() => {});
+  //   }, [t])
   
   const handleChange = (event: SelectChangeEvent<string>) => {
     setSelectedGarage(event.target.value as string);
