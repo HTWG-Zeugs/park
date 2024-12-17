@@ -1,0 +1,47 @@
+{{- if and .Values.ingress.enabled .Values.ingress.hostname }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "my-app.fullname" . }}-ingress
+  labels:
+    app: {{ include "my-app.fullname" . }}
+  annotations:
+    # Add annotations if needed (e.g. for cert-manager, ingress class, etc.)
+    # Example: 
+    # kubernetes.io/ingress.class: "nginx"
+{{- if .Values.ingress.className }}
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.ingress.className }}
+{{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
+    - host: {{ .Values.ingress.hostname }}
+      http:
+        paths:
+          # Route for frontend
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "my-app.fullname" . }}-frontend
+                port:
+                  number: {{ .Values.frontend.service.port }}
+          # Optionally add a path for property-management API
+          # For example, if your property-management API is served under /api
+          # Uncomment and adjust as needed:
+          # - path: /api
+          #   pathType: Prefix
+          #   backend:
+          #     service:
+          #       name: {{ include "my-app.fullname" . }}-property-management
+          #       port:
+          #         number: {{ .Values.propertyManagement.service.port }}
+
+  {{- if and .Values.ingress.tls.enabled .Values.ingress.tls.secretName }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.hostname }}
+      secretName: {{ .Values.ingress.tls.secretName }}
+  {{- end }}
+{{- end }}

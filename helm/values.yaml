@@ -1,0 +1,42 @@
+# Global values
+replicaCount: 2
+
+propertyManagement:
+  image:
+    repository: "<YOUR_GCR_REPO>/property-management"
+    tag: "<YOUR_GITHUB_SHA_OR_TAG>"
+    pullPolicy: IfNotPresent
+  service:
+    name: property-management
+    port: 8080
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "256Mi"
+
+frontend:
+  image:
+    repository: "<YOUR_GCR_REPO>/frontend"
+    tag: "<YOUR_GITHUB_SHA_OR_TAG>"
+    pullPolicy: IfNotPresent
+  service:
+    name: frontend
+    port: 80
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "256Mi"
+
+ingress:
+  enabled: true
+  className: "external" # This depends on your Ingress Class (e.g., "gce" for GCE ingress, "nginx" for NGINX)
+  hostname: "example.yourdomain.com"
+  tls:
+    enabled: false
+    # secretName: "my-tls-secret" # if using TLS
