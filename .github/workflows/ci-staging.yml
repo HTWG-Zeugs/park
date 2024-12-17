@@ -46,6 +46,10 @@ jobs:
           --no-cache \
           --platform linux/amd64
 
+    - name: Tag Docker image
+      run: |
+        docker tag ${{ matrix.service.name }}:${{ env.TAG_ID }} ${{ env.GCR_REPO }}/${{ matrix.service.name }}:${{ env.TAG_ID }}
+
     - name: Push Docker image to GCR
       run: |
         docker push ${{ env.GCR_REPO }}/${{ matrix.service.name }}:${{ env.TAG_ID }}
