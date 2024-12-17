@@ -4,7 +4,6 @@ import { Repository } from "./repository";
 import { ChargingInvoice } from "../models/chargingInvoice";
 import { ChargingSession } from "../models/chargingSession";
 import { Garage } from "../models/garage";
-import { OccupancyStatus } from "../models/occupancyStatus";
 import { ParkingInvoice } from "../models/parkingInvoice";
 import { Ticket } from "../models/ticket";
 
@@ -30,21 +29,11 @@ export class FirestoreRepository implements Repository {
     }
 
     async createGarage(garage: Garage): Promise<void> {
-        await this.firestore
-            .collection(this.garagesCollection)
-            .doc(garage.id)
-            .set(garage)
-
-        return Promise.resolve();
+        this.createOrUpdate(garage, this.garagesCollection);
     }
 
     async updateGarage(garage: Garage): Promise<void> {
-        await this.firestore
-            .collection(this.garagesCollection)
-            .doc(garage.id)
-            .set(garage)
-
-        return Promise.resolve();
+        this.createOrUpdate(garage, this.garagesCollection);
     }
     
     async getGarage(garageId: string): Promise<Garage> {
@@ -54,61 +43,100 @@ export class FirestoreRepository implements Repository {
             .get()
 
         if (doc.exists) {
-            const garage: Garage = doc.data() as Garage;
-            return Promise.resolve(garage);
+            return doc.data() as Garage;
         } else {
-            return Promise.reject(new Error("Garage not found"));
+            throw new Error("Garage not found");
         }
     }
-    
-    async getParkingOccupancy(garageId: string): Promise<OccupancyStatus> {
-        throw new Error("Method not implemented.");
-    }
-    
-    async getChargingOccupancy(garageId: string): Promise<OccupancyStatus> {
-        throw new Error("Method not implemented.");
-    }
-    
-    async increaseParkingOccupancy(garageId: string): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    
-    async decreaseParkingOccupancy(garageId: string): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    
-    async occupyChargingStation(garageId: string, stationId: string): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    async vacateChargingStation(garageId: string, stationId: string): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    
+
     async createTicket(ticket: Ticket): Promise<void> {
-        throw new Error("Method not implemented.");
+        this.createOrUpdate(ticket, this.ticketsCollection);
     }
-    
+
+    async updateTicket(ticket: Ticket): Promise<void> {
+        this.createOrUpdate(ticket, this.ticketsCollection);
+    }
+
     async getTicket(ticketId: string): Promise<Ticket> {
-        throw new Error("Method not implemented.");
+        const doc = await this.firestore
+            .collection(this.ticketsCollection)
+            .doc(ticketId)
+            .get()
+
+        if (doc.exists) {
+            return doc.data() as Ticket;
+        } else {
+            throw new Error("Ticket not found");
+        }
     }
-    
-    async addPaymentTimestamp(ticketId: string, timestamp: Date): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    
+
     async createChargingSession(session: ChargingSession): Promise<void> {
-        throw new Error("Method not implemented.");
+        this.createOrUpdate(session, this.chargingSessionsCollection);
     }
-    
-    async endChargingSession(sessionId: string, timestamp: Date, kWhConsumed: number): Promise<void> {
-        throw new Error("Method not implemented.");
+
+    async updateChargingSession(session: ChargingSession): Promise<void> {
+        this.createOrUpdate(session, this.chargingSessionsCollection);
     }
-    
-    async getChargingInvoice(sessionId: string): Promise<ChargingInvoice> {
-        throw new Error("Method not implemented.");
+
+    async getChargingSession(sessionId: string): Promise<ChargingSession> {
+        const doc = await this.firestore
+            .collection(this.chargingSessionsCollection)
+            .doc(sessionId)
+            .get()
+
+        if (doc.exists) {
+            return doc.data() as ChargingSession;
+        } else {
+            throw new Error("Charging session not found");
+        }
     }
-    
-    async getParkingInvoice(ticketId: string): Promise<ParkingInvoice> {
-        throw new Error("Method not implemented.");
+
+    async createChargingInvoice(invoice: ChargingInvoice): Promise<void> {
+        this.createOrUpdate(invoice, this.chargingInvoicesCollection);
+    }
+
+    async updateChargingInvoice(invoice: ChargingInvoice): Promise<void> {
+        this.createOrUpdate(invoice, this.chargingInvoicesCollection);
+    }
+
+    async getChargingInvoice(invoiceId: string): Promise<ChargingInvoice> {
+        const doc = await this.firestore
+            .collection(this.chargingInvoicesCollection)
+            .doc(invoiceId)
+            .get()
+
+        if (doc.exists) {
+            return doc.data() as ChargingInvoice;
+        } else {
+            throw new Error("Charging invoice not found");
+        }
+    }
+
+    async createParkingInvoice(invoice: ParkingInvoice): Promise<void> {
+        this.createOrUpdate(invoice, this.parkingInvoicesCollection);
+    }
+
+    async updateParkingInvoice(invoice: ParkingInvoice): Promise<void> {
+        this.createOrUpdate(invoice, this.parkingInvoicesCollection);
+    }
+
+    async getParkingInvoice(invoiceId: string): Promise<ParkingInvoice> {
+        const doc = await this.firestore
+            .collection(this.parkingInvoicesCollection)
+            .doc(invoiceId)
+            .get()
+
+        if (doc.exists) {
+            return doc.data() as ParkingInvoice;
+        } else {
+            throw new Error("Parking invoice not found");
+        }
+    }
+
+    private async createOrUpdate(obj: any, collection: string): Promise<void> {
+        await this.firestore
+            .collection(collection)
+            .doc(obj.id)
+            .set(JSON.parse(JSON.stringify((obj))))
     }
 }
