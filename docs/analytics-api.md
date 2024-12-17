@@ -6,45 +6,44 @@ In this document we collect all information and endpoints that seem interesting 
 
 **Occupancy Status for parking spaces (current status and its evolution)**
 ```
-POST analytics/parking/status
+POST analytics/parking/status/update
 GET analytics/parking/status/:timestamp
 GET analytics/parking/status/:start/:end
 ```
 
 **Occupancy Status for charging (current status, running sessions and their evolution)**
 ```
-POST analytics/charging/status
+POST analytics/charging/status/update
 GET analytics/charging/status/:timestamp
 GET analytics/charging/status/:start/:end
 ```
 
 **Consumed power for charging**
 ```
-POST analytics/charging/powerConsumed
+POST analytics/charging/powerConsumed/record
 GET analytics/charging/powerConsumed/:start/:end
 ```
 
 **Earned money for charging**
 ```
-POST analytics/charging/turnover
+POST analytics/charging/turnover/record
 GET analytics/charging/turnover/:start/:end
 ```
 
 **Mean and max parking duration**
 ```
-POST analytics/parking/duration
+POST analytics/parking/duration/record
 GET analytics/parking/duration/mean
 GET analytics/parking/duration/mean/:start/:end
 GET analytics/parking/duration/max
 GET analytics/parking/duration/max/:start/:end
 ```
 
-
 ## Property Management
 
 **record new or updated defect with its state**
 ```
-POST analytics/defects
+POST analytics/defects/record
 ```
 
 **number of reported defects (current and their evolution)**
@@ -66,6 +65,12 @@ GET analytics/defects/:state
 
 **number of requests per day per tenant**
 ```
-POST analytics/requests/:tenant
+POST analytics/requests/record/:tenant
 GET analytics/requests/:tenant
+```
+
+**tenants**
+```
+POST analytics/tenants/record
+GET analytics/tenants
 ```
