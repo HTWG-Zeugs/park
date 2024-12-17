@@ -47,6 +47,11 @@
     "drop_files_here": "Bilder hierher ziehen und ablegen oder klicken, um Bilder auszuwählen"
   },
   "component_header": {
+    "home": "Home",
+    "occupancy": "Belegungsstatus",
+    "garages": "Garagen",
+    "defects": "Mängel",
+    "contact": "Kontakt",
     "sign_out": "Abmelden",
     "sign_in": "Anmelden"
   },
@@ -137,11 +142,14 @@
       }
     }
   },
-  "route_garage": {
-    "title": "Garage",
-    "occupancy": {
-      "title": "Belegungsstatus"
-    }
+  "route_occupancy": {
+    "title": "Belegungsstatus",
+    "parking_spaces": "Parkplätze",
+    "charging_spaces": "Ladestationen"
+  },
+  "component_occupancy_grid": {
+    "total": "Gesamt",
+    "occupied": "Belegt"
   },
   "route_protected_route": {
     "loading": "Laden..."

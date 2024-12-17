@@ -47,6 +47,11 @@
     "drop_files_here": "Drag 'n' drop images here, or click to select images"
   },
   "component_header": {
+    "home": "Home",
+    "occupancy": "Occupancy",
+    "garages": "Garages",
+    "defects": "Defects",
+    "contact": "Contact",
     "sign_out": "Sign out",
     "sign_in": "Sign in"
   },
@@ -137,11 +142,14 @@
       }
     }
   },
-  "route_garage": {
-    "title": "Garage",
-    "occupancy": {
-      "title": "Occupancy Status"
-    }
+  "route_occupancy": {
+    "title": "Occupancy Status",
+    "parking_spaces": "Parking spaces",
+    "charging_spaces": "Charging spaces"
+  },
+  "component_occupancy_grid": {
+    "total": "Total",
+    "occupied": "Occupied"
   },
   "route_protected_route": {
     "loading": "Loading..."
