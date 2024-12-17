@@ -15,7 +15,7 @@ app.use(express.json());
 const repo: Repository = new FirestoreRepository();
 const garageService: GarageService = new GarageService(repo);
 
-app.put("/garage/create", async (req, res) => {
+app.post("/garage/create", async (req, res) => {
   try {
     const garageDto: GarageDto = req.body;
     await garageService.createGarage(garageDto);
@@ -32,6 +32,16 @@ app.put("/garage/update", async (req, res) => {
     res.status(200).send("success");
   } catch (e) {
     res.status(500).send("updating garage failed: " + e);
+  }
+});
+
+app.delete("/garage/delete/:garageId", async (req, res) => {
+  try {
+    const garageId: string = req.params.garageId;
+    await garageService.deleteGarage(garageId);
+    res.status(200).send("deleted");
+  } catch (e) {
+    res.status(500).send("deleting garage failed: " + e);
   }
 });
 

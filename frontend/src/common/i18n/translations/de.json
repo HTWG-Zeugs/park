@@ -1,4 +1,9 @@
 {
+  "common": {
+    "yes": "Ja",
+    "no": "Nein",
+    "save_button": "Speichern"
+  },
   "component_contact": {
     "headline": "Kontakt",
     "p1_1": "Dieses Projekt wurde im Rahmen des",
@@ -48,8 +53,7 @@
     "grid_location": "Standort *",
     "grid_short_desc": "Kurzbeschreibung",
     "grid_detailed_desc": "Detaillierte Beschreibung",
-    "grid_status": "Status *",
-    "save_button": "Speichern"
+    "grid_status": "Status *"
   },
   "route_defect_details": {
     "img_not_available": "Bild nicht verfügbar",
@@ -61,6 +65,38 @@
     "status": "Status",
     "reported_at": "Gemeldet am",
     "last_modified_at": "Zuletzt geändert am"
+  },
+  "component_garageList": {
+    "buttons": {
+      "add_garage": "Parkhaus hinzufügen"
+    },
+    "table": {
+      "column_id": "Id",
+      "column_name": "Name",
+      "column_last_modified": "Zuletzt geändert am",
+      "column_actions": "Aktionen"
+    }
+  },
+  "route_add_garage": {
+    "add_garage": "Neues Parkhaus anlegen",
+    "name": "Name",
+    "open": "Geöffnet",
+    "closed": "Geschlossen",
+    "number_parking_spots": "Anzahl Parkplätze",
+    "price_per_hour": "Preis pro Stunde",
+    "opening_time": "Öffnungszeit",
+    "closing_time": "Schließzeit",
+    "errors": {
+      "name_required": "Name ist erforderlich",
+      "number_parking_spots_positive": "Anzahl der Parkplätze muss eine positive Zahl sein",
+      "price_per_hour_positive": "Preis pro Stunde muss eine positive Zahl sein",
+      "opening_time_invalid": "Öffnungszeit ist ungültig",
+      "closing_time_invalid": "Schließzeit ist ungültig",
+      "closing_after_opening": "Schließzeit muss nach der Öffnungszeit liegen"
+    }
+  },
+  "route_edit_garage": {
+    "edit_garage": "Parkhaus bearbeiten"
   },
   "route_home": {
     "title": "Park",
