@@ -1,18 +1,32 @@
-# Global values
 replicaCount: 1
+
+serviceAccount:
+  create: true
+  name: "free-tier-sa"
 
 propertyManagement:
   image:
     repository: "europe-west1-docker.pkg.dev/park-staging-444913/docker-repository/property-management"
-    tag: "14ad8e8ded2f"
+    tag: "45bcb4984e9a7f6ae08149663f35325b1b2c0b5a"
     pullPolicy: IfNotPresent
   service:
     name: property-management
     port: 8080
-  resources:
-    requests:
-      cpu: "100m"
-      memory: "256Mi"
-    limits:
-      cpu: "250m"
-      memory: "512Mi"
+  env:
+    fireStoreDbId: "park-staging-444913-property-management-free"
+    gcsBucketId: "park-staging-444913-property-management-free"
+
+frontend:
+  image:
+    repository: "europe-west1-docker.pkg.dev/park-staging-444913/docker-repository/frontend"
+    tag: "45bcb4984e9a7f6ae08149663f35325b1b2c0b5a"
+    pullPolicy: IfNotPresent
+  env:
+    identityPlatFormApiKey: "API_KEY"
+    identifyPlatFormAuthDomain: "park-staging-444913.firebaseapp.com"
+    identifyPlatFormProjectId: "park-staging-444913"
+  service:
+    name: frontend
+    port: 80
+  ingress:
+    name: frontend-ingress

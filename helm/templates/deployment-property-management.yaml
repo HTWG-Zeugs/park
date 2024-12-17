@@ -17,16 +17,17 @@ spec:
         app: {{ .Release.Name }}
         component: property-management
     spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
       containers:
         - name: property-management
           image: "{{ .Values.propertyManagement.image.repository }}:{{ .Values.propertyManagement.image.tag }}"
           imagePullPolicy: {{ .Values.propertyManagement.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.propertyManagement.service.port }}
-          # resources:
-          #   requests:
-          #     cpu: {{ .Values.propertyManagement.resources.requests.cpu }}
-          #     memory: {{ .Values.propertyManagement.resources.requests.memory }}
-          #   limits:
-          #     cpu: {{ .Values.propertyManagement.resources.limits.cpu }}
-          #     memory: {{ .Values.propertyManagement.resources.limits.memory }}
+          env:
+            - name: FIRESTORE_DB_ID
+              value: "{{ .Values.propertyManagement.env.fireStoreDbId }}"
+            - name: GCS_BUCKET_ID
+              value: "{{ .Values.propertyManagement.env.gcsBucketId }}"
+            - name: PORT
+              value: "{{ .Values.propertyManagement.service.port }}"

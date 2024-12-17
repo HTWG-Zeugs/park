@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-frontend
+  labels:
+    app: {{ .Release.Name }}
+    component: frontend
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      component: frontend
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        component: frontend
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      containers:
+        - name: frontend
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.frontend.service.port }}
+          env:
+            - name: PARK_BACKEND_URL
+              value: "{{ .Values.propertyManagement.service.name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.propertyManagement.service.port }}"
+            - name: PARK_IDENTITY_PLATFORM_API_KEY
+              value: "{{ .Values.frontend.env.identityPlatFormApiKey }}"
+            - name: PARK_IDENTITY_PLATFORM_AUTH_DOMAIN
+              value: "{{ .Values.frontend.env.identifyPlatFormAuthDomain }}"
+            - name: PARK_IDENTITY_PLATFORM_PROJECT_ID
+              value: "{{ .Values.frontend.env.identifyPlatFormProjectId }}"
