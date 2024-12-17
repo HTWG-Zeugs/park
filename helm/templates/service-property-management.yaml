@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "my-app.fullname" . }}-property-management
+  name: {{ .Release.Name }}-property-management
   labels:
-    app: {{ include "my-app.fullname" . }}
+    app: {{ .Release.Name }}
     component: property-management
 spec:
   type: ClusterIP
@@ -13,5 +13,5 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app: {{ include "my-app.fullname" . }}
+    app: {{ .Release.Name }}
     component: property-management

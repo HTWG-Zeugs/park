@@ -1,10 +1,10 @@
 # Global values
-replicaCount: 2
+replicaCount: 1
 
 propertyManagement:
   image:
-    repository: "<YOUR_GCR_REPO>/property-management"
-    tag: "<YOUR_GITHUB_SHA_OR_TAG>"
+    repository: "europe-west1-docker.pkg.dev/park-staging-444913/docker-repository/property-management"
+    tag: "14ad8e8ded2f"
     pullPolicy: IfNotPresent
   service:
     name: property-management
@@ -12,31 +12,7 @@ propertyManagement:
   resources:
     requests:
       cpu: "100m"
-      memory: "128Mi"
+      memory: "256Mi"
     limits:
       cpu: "250m"
-      memory: "256Mi"
-
-frontend:
-  image:
-    repository: "<YOUR_GCR_REPO>/frontend"
-    tag: "<YOUR_GITHUB_SHA_OR_TAG>"
-    pullPolicy: IfNotPresent
-  service:
-    name: frontend
-    port: 80
-  resources:
-    requests:
-      cpu: "100m"
-      memory: "128Mi"
-    limits:
-      cpu: "250m"
-      memory: "256Mi"
-
-ingress:
-  enabled: true
-  className: "external" # This depends on your Ingress Class (e.g., "gce" for GCE ingress, "nginx" for NGINX)
-  hostname: "example.yourdomain.com"
-  tls:
-    enabled: false
-    # secretName: "my-tls-secret" # if using TLS
+      memory: "512Mi"

@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "my-app.fullname" . }}-property-management
+  name: {{ .Release.Name }}-property-management
   labels:
-    app: {{ include "my-app.fullname" . }}
+    app: {{ .Release.Name }}
     component: property-management
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ include "my-app.fullname" . }}
+      app: {{ .Release.Name }}
       component: property-management
   template:
     metadata:
       labels:
-        app: {{ include "my-app.fullname" . }}
+        app: {{ .Release.Name }}
         component: property-management
     spec:
       containers:
@@ -23,10 +23,10 @@ spec:
           imagePullPolicy: {{ .Values.propertyManagement.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.propertyManagement.service.port }}
-          resources:
-            requests:
-              cpu: {{ .Values.propertyManagement.resources.requests.cpu }}
-              memory: {{ .Values.propertyManagement.resources.requests.memory }}
-            limits:
-              cpu: {{ .Values.propertyManagement.resources.limits.cpu }}
-              memory: {{ .Values.propertyManagement.resources.limits.memory }}
+          # resources:
+          #   requests:
+          #     cpu: {{ .Values.propertyManagement.resources.requests.cpu }}
+          #     memory: {{ .Values.propertyManagement.resources.requests.memory }}
+          #   limits:
+          #     cpu: {{ .Values.propertyManagement.resources.limits.cpu }}
+          #     memory: {{ .Values.propertyManagement.resources.limits.memory }}
