@@ -28,7 +28,6 @@ jobs:
           docker build \
             -f ${{ matrix.service.dockerfile }} \
             . \
-            -t ${{ matrix.service.name }}:${{ env.TAG_ID }} \
             --no-cache \
             --platform linux/amd64
 
