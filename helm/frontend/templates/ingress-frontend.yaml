@@ -1,9 +1,9 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Values.frontend.ingress.name }}
+  name: frontend-ingress
   annotations:
-    spec.ingressClassName: "gce" # Use GKE Ingress
+    kubernetes.io/ingress.class: "nginx"
 spec:
   rules:
   - http:

@@ -1,0 +1,47 @@
+replicaCount: 1
+
+repository: ""
+gitTag: ""
+
+identityPlatForm:
+  apiKey: "API_KEY"
+  authDomain: "AUTH_DOMAIN"
+  projectId: "PROJECT_ID"
+  tenantId: "DEFECT_ID"
+
+propertyManagement:
+  image:
+    name: "property-management"
+    pullPolicy: IfNotPresent
+  service:
+    name: property-management
+    port: 8080
+  env:
+    fireStoreDbId: ""
+    gcsBucketId: ""
+  serviceAccount:
+    name: "property-management-sa"
+
+parkingManagement:
+  image:
+    name: "parking-management"
+    pullPolicy: IfNotPresent
+  service:
+    name: parking-management
+    port: 8081
+  env:
+    fireStoreDbId: ""
+  serviceAccount:
+    name: "parking-management-sa"
+
+authenticationService:
+  image:
+    name: "authentication-service"
+    pullPolicy: IfNotPresent
+  service:
+    name: authentication-service
+    port: 8082
+  env:
+    fireStoreDbId: ""
+  serviceAccount:
+    name: "authentication-service-sa"

@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /parking-management(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: {{ .Values.parkingManagement.service.name }}
+            port:
+              number: {{ .Values.parkingManagement.service.port }}
+      - path: /property-management(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: {{ .Values.propertyManagement.service.name }}
+            port:
+              number: {{ .Values.propertyManagement.service.port }}
+      - path: /authentication-service(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: {{ .Values.authenticationService.service.name }}
+            port:
+              number: {{ .Values.authenticationService.service.port }}
