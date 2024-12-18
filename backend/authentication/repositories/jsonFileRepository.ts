@@ -3,7 +3,7 @@ import { Role, getRoleById } from "../models/role";
 import { Repository } from "./repository";
 import { promises } from "fs";
 import { CreateUserRequestObject } from "../../../shared/CreateUserRequestObject";
-import { v4 as uuidv4, v6 as uuidv6 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 
 const USER_COLLECTION_PATH = "./mocks/json_collections/users.json";
@@ -16,6 +16,23 @@ export class JsonFileRepository implements Repository {
   private static instance: JsonFileRepository;
 
   private constructor() {}
+
+  /**
+   * Gets the tenant ID for a specific user by their email.
+   * @param mail The email of the user.
+   * @returns Returns a promise that resolves to the tenant ID.
+   */
+  async getTenantId(mail: string): Promise<string> {
+    const data = await promises.readFile(USER_COLLECTION_PATH, "utf-8");
+    const jsonData = JSON.parse(data);
+    const user = jsonData.find((u: any) => u.mail === mail);
+    if (user) {
+      return user.tenantId;
+    } else {
+      throw new Error("User not found");
+    }
+  }
+  
   /**
    * Gets all users from the JSON file.
    * @returns Returns a promise that resolves to an array of users.

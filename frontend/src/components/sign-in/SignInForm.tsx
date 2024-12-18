@@ -66,9 +66,10 @@ const SignInForm: React.FC<SignInFormProps> = ({
       <button onClick={handlePasswordReset} className="reset-password-button">
         {t("component_sign_in.forgot_password")}
       </button>
-      <button onClick={goToRegister} className="register-button">
+      {/* Sign up is not allowed anymore */}
+      {/* <button onClick={goToRegister} className="register-button">
         {t("component_sign_in.sign_up")}
-      </button>
+      </button> */}
     </div>
   );
 };

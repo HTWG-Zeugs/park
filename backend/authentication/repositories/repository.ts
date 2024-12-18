@@ -45,4 +45,10 @@ export interface Repository {
    * @param user The user to create.
    */
   createUser(user: CreateUserRequestObject): Promise<void>;
+
+  /**
+   * Gets tenant_id of a mail.
+   * @param mail mail to get the tenant_id for.
+   */
+  getTenantId(mail: string): Promise<string>;
 }

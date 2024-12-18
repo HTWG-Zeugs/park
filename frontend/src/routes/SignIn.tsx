@@ -3,6 +3,7 @@ import { auth } from "src/services/FirebaseConfig";
 import SignInForm from "src/components/sign-in/SignInForm";
 import "src/components/sign-in/SignInForm.css";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -11,7 +12,8 @@ const SignIn: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
   const { t } = useTranslation();
 
-  const tenantId = import.meta.env.VITE_TENANT_ID;
+  const AUTHENTICATION_BACKEND = import.meta.env
+    .VITE_AUTHENTICATION_SERVICE_URL;
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +21,14 @@ const SignIn: React.FC = () => {
     setMessage(null);
 
     try {
-      auth.tenantId = tenantId;
+      const tenantId = import.meta.env.VITE_TENANT_ID;
+      if (!auth.tenantId) {
+        const response = await axios.get(`${AUTHENTICATION_BACKEND}/tenant-id/${email}`);
+        auth.tenantId = response.data;
+        console.log(response);
+      } else {
+        auth.tenantId = tenantId;
+      }
       const userCredential = await auth.signInWithEmailAndPassword(
         email,
         password
@@ -54,7 +63,14 @@ const SignIn: React.FC = () => {
     }
 
     try {
-      auth.tenantId = tenantId;
+      const tenantId = import.meta.env.VITE_TENANT_ID;
+      if (!auth.tenantId) {
+        const response = await axios.get(`${AUTHENTICATION_BACKEND}/tenant-id/${email}`);
+        console.log(response);
+        auth.tenantId = response.data.tenant_id;
+      } else {
+        auth.tenantId = tenantId;
+      }
       await auth.sendPasswordResetEmail(email);
       setMessage(t("route_sign_in.password_reset_email_sent"));
     } catch (error: any) {
