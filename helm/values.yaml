@@ -18,6 +18,16 @@ propertyManagement:
     fireStoreDbId: "park-staging-444913-property-management-free"
     gcsBucketId: "park-staging-444913-property-management-free"
 
+parkingManagement:
+  image:
+    name: "parking-management"
+    pullPolicy: IfNotPresent
+  service:
+    name: parking-management
+    port: 8081
+  env:
+    fireStoreDbId: "park-staging-444913-parking-management-free"
+
 frontend:
   image:
     name: "frontend"
