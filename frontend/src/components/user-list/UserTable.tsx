@@ -66,8 +66,8 @@ export default function UserTable() {
 
   const handleDeleteClicked = (id: GridRowId) => async () => {
     try {
-      //TODO: Implement delete user
-      console.log("Delete user with id:", id);
+      await axiosAuthenticated.delete(`${AUTHENTICATION_BACKEND}/user/${id}`);
+      setUsers((prev) => prev.filter((user) => user.id !== id));
     } catch (error) {
       console.error("Failed to delete:", error);
     }
@@ -148,6 +148,7 @@ export default function UserTable() {
     toolbarDensityStandard: t("mui.density_standard"),
     toolbarDensityComfortable: t("mui.density_comfortable"),
     toolbarColumns: t("mui.manage_columns"),
+    toolbarColumnsLabel: t("mui.manage_columns"),
     footerPaginationRowsPerPage: t("mui.rows_per_page"),
     footerRowSelected: (count: number) => t("mui.rows_selected", { count }),
     footerTotalRows: t("mui.total_rows"),

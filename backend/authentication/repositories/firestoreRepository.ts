@@ -117,6 +117,8 @@ export class FirestoreRepository implements Repository {
     const doc = await userRef.get();
     if (doc.exists) {
       await userRef.delete();
+      const tenantAwareAuth = auth().tenantManager().authForTenant(user.tenantId);
+      await tenantAwareAuth.deleteUser(user.id);
     } else {
       throw new Error("User not found");
     }
