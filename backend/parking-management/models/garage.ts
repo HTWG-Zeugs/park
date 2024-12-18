@@ -1,41 +1,41 @@
 import { ChargingStation } from "./chargingStation";
-import { OccupancyStatus } from "./occupancyStatus";
-import { GarageDto } from "../../shared/garageDto";
 
 export class Garage {
   id: string;
+  name: string;
   isOpen: boolean;
   parkingPlacesTotal: number;
   parkingPlacesOccupied: number;
   chargingPlacesTotal: number;
   chargingPlacesOccupied: number;
+  pricePerHourInEuros: number;
+  openingTime: string;
+  closingTime: string
   chargingStations: ChargingStation[];
 
   constructor(
     id: string,
+    name: string,
     isOpen: boolean,
-    totalParkingPlaces: number,
-    occupiedParkingPlaces: number,
-    totalChargingPlaces: number,
-    occupiedChargingPlaces: number,
+    parkingPlacesTotal: number,
+    parkingPlacesOccupied: number,
+    chargingPlacesTotal: number,
+    chargingPlacesOccupied: number,
+    pricePerHourInEuros: number,
+    openingTime: string,
+    closingTime: string,
     chargingStations: ChargingStation[]
   ) {
     this.id = id;
+    this.name = name;
     this.isOpen = isOpen;
-    this.parkingPlacesTotal = totalParkingPlaces;
-    this.parkingPlacesOccupied = occupiedParkingPlaces;
-    this.chargingPlacesTotal = totalChargingPlaces;
-    this.chargingPlacesOccupied = occupiedChargingPlaces;
+    this.parkingPlacesTotal = parkingPlacesTotal;
+    this.parkingPlacesOccupied = parkingPlacesOccupied;
+    this.chargingPlacesTotal = chargingPlacesTotal;
+    this.chargingPlacesOccupied = chargingPlacesOccupied;
+    this.pricePerHourInEuros = pricePerHourInEuros;
+    this.openingTime = openingTime;
+    this.closingTime = closingTime;
     this.chargingStations = chargingStations;
   }
-}
-
-export class asdf {
-  id: string;
-  isOpen: boolean;
-  parkingPlacesTotal: number;
-  parkingPlacesOccupied: number;
-  chargingPlacesTotal: number;
-  chargingPlacesOccupied: number;
-  chargingStations: ChargingStation[];
 }

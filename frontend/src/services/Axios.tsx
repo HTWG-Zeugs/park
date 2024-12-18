@@ -2,12 +2,16 @@ import axios from "axios";
 
 const PROPERTY_MANAGEMENT_BACKEND = import.meta.env.VITE_PROPERTY_MANAGEMENT_SERVICE_URL;
 const AUTHENTICATION_BACKEND = import.meta.env.VITE_AUTHENTICATION_SERVICE_URL;
+const PARKING_MANAGEMENT_BACKEND = import.meta.env.VITE_PARKING_MANAGEMENT_SERVICE_URL
+
+if (PARKING_MANAGEMENT_BACKEND === undefined)
+    throw new Error("Backend URL of Parking Management service is not defined");
 
 if (PROPERTY_MANAGEMENT_BACKEND === undefined)
     throw new Error("Backend URL of Property Management service is not defined");
 
 if (AUTHENTICATION_BACKEND === undefined)
-    throw new Error("Backendend URL of Authentication service is not defined");
+    throw new Error("Backend URL of Authentication service is not defined");
 
 const axiosAuthenticated = axios.create();
 

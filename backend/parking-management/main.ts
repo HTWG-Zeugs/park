@@ -2,6 +2,7 @@ import { GarageDto } from "../shared/garageDto";
 import { FirestoreRepository } from "./repositories/firestoreRepository";
 import { Repository } from "./repositories/repository";
 import { GarageService } from "./services/garageService";
+import { GarageInfoObject } from '../../shared/GarageInfoObject';
 import cors from "cors";
 import "dotenv/config";
 
@@ -14,6 +15,16 @@ app.use(express.json());
 
 const repo: Repository = new FirestoreRepository();
 const garageService: GarageService = new GarageService(repo);
+
+app.get("/garage/:garageId", async (req, res) => {
+  try {
+    const garageId: string = req.params.garageId;
+    const garage: GarageInfoObject = await garageService.getGarage(garageId);
+    res.status(200).send(garage);
+  } catch (e) {
+    res.status(500).send(`Getting garage with ID ${req.params.garageId} failed: ${e}`);
+  }
+});
 
 app.post("/garage/create", async (req, res) => {
   try {
