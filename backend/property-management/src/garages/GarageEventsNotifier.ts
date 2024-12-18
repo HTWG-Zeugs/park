@@ -42,9 +42,13 @@ export class GarageEventsNotifier {
   private convertGarageToDto(garage: Garage): GarageDto {
     return {
       id: garage.Id,
+      name: garage.Name,
       isOpen: garage.IsOpen,
       totalParkingSpaces: garage.NumberParkingSpots,
       totalChargingSpaces: garage.ChargingStations.length,
+      pricePerHourInEuros: garage.PricePerHour,
+      openingTime: garage.OpeningTime,
+      closingTime: garage.ClosingTime,
       chargingStations: garage.ChargingStations.map(cs => ({
         id: cs.Id,
         chargingSpeedInKw: cs.ChargingSpeedInKw,

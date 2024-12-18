@@ -16,7 +16,7 @@ app.use(express.json());
 const repo: Repository = new FirestoreRepository();
 const garageService: GarageService = new GarageService(repo);
 
-app.get("/garage/:id", async (req, res) => {
+app.get("/garage/:garageId", async (req, res) => {
   try {
     const garageId: string = req.params.garageId;
     const garage: GarageInfoObject = await garageService.getGarage(garageId);

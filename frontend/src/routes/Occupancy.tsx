@@ -17,6 +17,9 @@ export default function Occupancy() {
   //const [selectedGarageName, setSelectedGarageName] = React.useState<string>('');
   const [selectedGarage, setSelectedGarage] = React.useState<GarageInfoObject>();
 
+  const PARKING_MANAGEMENT_URL = import.meta.env.VITE_PARKING_MANAGEMENT_SERVICE_URL;
+  const PROPERTY_MANAGEMENT_URL = import.meta.env.VITE_PROPERTY_MANAGEMENT_SERVICE_URL;
+
   useEffect(() => {
     fetchGarages();
   }, [])
@@ -30,7 +33,7 @@ export default function Occupancy() {
 
   const fetchGarages = useCallback(() => {
     axiosAuthenticated
-      .get("/garages/")
+      .get(`${PROPERTY_MANAGEMENT_URL}/garages/`)
       .then((response) => {
         if (!response.data) {
           throw new Error("fetching garages failed!");
@@ -39,10 +42,8 @@ export default function Occupancy() {
         const listItems: GarageListItem[] = responseData.map((d) =>
           toGarageListItem(d)
         );
-        if (listItems.length > 1) {
+        if (listItems.length > 0) {
           setGarages(listItems);
-          fetchGarageInfos(listItems[0].Id);
-        } else if (listItems.length == 1) {
           fetchGarageInfos(listItems[0].Id);
         }
       })
@@ -56,12 +57,13 @@ export default function Occupancy() {
 
   const fetchGarageInfos = useCallback((garageId: string) => {
     axiosAuthenticated
-      .get(`/garage/${garageId}`)
+      .get(`${PARKING_MANAGEMENT_URL}/garage/${garageId}`)
       .then(response => {
         if (!response.data) {
           throw new Error(`fetching garage infos for garage with id ${garageId} failed!`);
         }
         const responseData: GarageInfoObject = response.data;
+        console.log(responseData);
         setSelectedGarage(responseData)
       })
       .catch((error) => {
@@ -107,12 +109,12 @@ export default function Occupancy() {
             <DirectionsCarIcon/> 
             <h2>{t("route_occupancy.parking_spaces")}</h2>
           </Grid>
-          <OccupancyGrid total={250} occupied={120}/>
+          <OccupancyGrid total={selectedGarage!.ParkingPlacesTotal} occupied={selectedGarage!.ParkingPlacesOccupied}/>
           <Grid container alignItems={"center"} spacing={{md: 2 }}>
             <EvStationIcon/> 
             <h2>{t("route_occupancy.charging_spaces")}</h2>
           </Grid>
-          <OccupancyGrid total={12} occupied={4}/>
+          <OccupancyGrid total={selectedGarage!.ChargingPlacesTotal} occupied={selectedGarage!.ChargingPlacesOccupied}/>
         </div>
       </div>
     </Card>

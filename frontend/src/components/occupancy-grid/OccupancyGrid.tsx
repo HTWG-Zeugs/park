@@ -17,7 +17,7 @@ export const OccupancyGrid: FunctionComponent<OccupancyGridProps> = ({total, occ
         <Grid container alignContent={"center"} size={4}>
           <CircularProgress 
             variant="determinate" 
-            value={total-occupied} 
+            value={(occupied/total)*100} 
             thickness={10} size={60} 
             color='primary'
             sx={{

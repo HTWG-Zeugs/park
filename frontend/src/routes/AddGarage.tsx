@@ -35,6 +35,7 @@ interface FormErrors {
 }
 
 export default function AddGarage() {
+  const PROPERTY_MANAGEMENT_URL = import.meta.env.VITE_PROPERTY_MANAGEMENT_SERVICE_URL;
   const navigate = useNavigate();
 
   const { t } = useTranslation();
@@ -165,7 +166,7 @@ export default function AddGarage() {
     };
 
     try {
-      await axiosAuthenticated.post(`/garages/`, request);
+      await axiosAuthenticated.post(`${PROPERTY_MANAGEMENT_URL}/garages/`, request);
       navigate("/garages");
     } catch (error) {
       console.error(error);

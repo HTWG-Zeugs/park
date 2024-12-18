@@ -13,7 +13,7 @@ import { GarageEventsNotifier } from "./GarageEventsNotifier";
 const router = Router();
 
 const repository = new GarageRepository(firestore);
-const notifier = new GarageEventsNotifier("http://localhost:8081");
+const notifier = new GarageEventsNotifier(process.env.PARKING_MANAGEMENT_BACKEND_URL);
 
 router.get("/", (req, res) => {
   repository.getAllGarages()
