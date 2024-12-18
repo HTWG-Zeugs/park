@@ -70,7 +70,7 @@ export default function DefectTable() {
       const defectId = id.toString();
       setLoading(true);
       axiosAuthenticated
-        .delete(`/garages/${defectId}`)
+        .delete(`${PROPERTY_MANAGEMENT_URL}/garages/${defectId}`)
         .then(() => fetchAllGarages());
     } catch (error) {
       console.error("Failed to delete:", error);
