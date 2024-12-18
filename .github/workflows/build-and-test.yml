@@ -7,14 +7,40 @@ on:
       - dev
 
 jobs:
-  build-and-test:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - { name: "property-management", dockerfile: "./property-management.Dockerfile" }
+          - { name: "parking-management", dockerfile: "./parking-management.Dockerfile" }
+          - { name: "authentication-service", dockerfile: "./authentication-service.Dockerfile" }
+          - { name: "frontend", dockerfile: "./frontend.Dockerfile" }
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -f ${{ matrix.service.dockerfile }} \
+            . \
+            --no-cache \
+            --platform linux/amd64
+
+  test:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         service: [
           backend/property-management,
-          backend/parking-management, 
+          backend/parking-management,
+          backend/authentication,
           frontend
         ]
 
@@ -36,8 +62,3 @@ jobs:
       run: |
         cd ${{ matrix.service }}
         npm test --if-present
-
-    - name: Build
-      run: |
-        cd ${{ matrix.service }}
-        npm run build
