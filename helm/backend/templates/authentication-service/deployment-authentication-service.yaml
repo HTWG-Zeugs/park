@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-authentication-service
+  labels:
+    app: {{ .Release.Name }}
+    component: authentication-service
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      component: authentication-service
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        component: authentication-service
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      containers:
+        - name: authentication-service
+          image: "{{ .Values.repository }}/{{.Values.authenticationService.image.name}}:{{ .Values.gitTag }}"
+          imagePullPolicy: {{ .Values.authenticationService.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.authenticationService.service.port }}
+          env:
+            - name: FIRESTORE_DB_ID
+              value: "{{ .Values.authenticationService.env.fireStoreDbId }}"
+            - name: PORT
+              value: "{{ .Values.authenticationService.service.port }}"

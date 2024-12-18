@@ -131,7 +131,7 @@ export default function Header() {
               >
                 {pages.map((page) => (
                   <MenuItem
-                    key={page.text}
+                    key={page.href}
                     onClick={() => handleCloseNavMenu(page.href)}
                   >
                     <Typography sx={{ textAlign: "center" }}>
@@ -162,7 +162,7 @@ export default function Header() {
             <Box sx={{ flexGrow: 1, display: { xs: "none", sm: "flex" } }}>
               {pages.map((page) => (
                 <Button
-                  key={page.text}
+                  key={page.href}
                   onClick={() => handleCloseNavMenu(page.href)}
                   sx={{ my: 2, color: "white", display: "block" }}
                 >

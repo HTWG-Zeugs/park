@@ -17,7 +17,7 @@ spec:
         app: {{ .Release.Name }}
         component: frontend
     spec:
-      serviceAccountName: {{ .Values.serviceAccount.name }}
+      serviceAccountName: {{ .Values.frontend.serviceAccount.name }}
       containers:
         - name: frontend
           image: "{{ .Values.repository }}/{{.Values.frontend.image.name}}:{{ .Values.gitTag }}"
@@ -25,11 +25,17 @@ spec:
           ports:
             - containerPort: {{ .Values.frontend.service.port }}
           env:
-            - name: PARK_BACKEND_URL
-              value: "{{ .Values.propertyManagement.service.name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.propertyManagement.service.port }}"
+            - name: PARK_PROPERTY_MANAGEMENT_URL
+              value: "{{ .Values.frontend.env.BackendUrl }}/property-management"
+            - name: PARK_PARKING_MANAGEMENT_URL
+              value: "{{ .Values.frontend.env.BackendUrl }}/parking-management"
+            - name: PARK_AUTHENTICATION_URL
+              value: "{{ .Values.frontend.env.BackendUrl }}/authentication-service"
             - name: PARK_IDENTITY_PLATFORM_API_KEY
-              value: "{{ .Values.frontend.env.identityPlatFormApiKey }}"
+              value: {{ .Values.identityPlatForm.apiKey }}
             - name: PARK_IDENTITY_PLATFORM_AUTH_DOMAIN
-              value: "{{ .Values.frontend.env.identifyPlatFormAuthDomain }}"
+              value: {{ .Values.identityPlatForm.authDomain }}
             - name: PARK_IDENTITY_PLATFORM_PROJECT_ID
-              value: "{{ .Values.frontend.env.identifyPlatFormProjectId }}"
+              value: {{ .Values.identityPlatForm.projectId }}
+            - name: PARK_TENANT_ID
+              value: {{ .Values.identityPlatForm.tenantId }}

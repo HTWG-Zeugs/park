@@ -1,4 +1,4 @@
-name: Deploy to Staging with Approval
+name: Deploy to Staging Free
 
 on:
   workflow_dispatch:
@@ -19,7 +19,7 @@ env:
   GCR_REPO: "${{ vars.REGION }}-docker.pkg.dev/${{ vars.STAGING_PROJECT_ID }}/${{ vars.STAGING_ARTIFACT_REPO }}"
 
 jobs:
-  deployment-free-tier:
+  deployment-backend:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -44,11 +44,12 @@ jobs:
       
       - name: Deploy using Helm
         run: |
-          helm upgrade --install park ./helm \
+          helm upgrade --install park ./helm/backend \
             --namespace ${{ vars.GKE_FREE_NAMESPACE }} \
-            --set serviceAccount.name=${{ vars.GKE_FREE_NAMESPACE }}-sa \
-            --set frontend.env.identityPlatFormApiKey=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }} \
-            --set frontend.env.identifyPlatFormAuthDomain=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
-            --set frontend.env.identifyPlatFormProjectId=${{ vars.STAGING_PROJECT_ID }} \
+            --create-namespace \
+            --set identityPlatForm.apiKey=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }} \
+            --set identityPlatForm.authDomain=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
+            --set identityPlatForm.projectId=${{ vars.STAGING_PROJECT_ID }} \
+            --set identityPlatForm.tenantId=${{ secrets.STAGING_IDENTITY_PLATFORM_TENANT_ID }} \
             --set repository=${{ env.GCR_REPO }} \
             --set gitTag=${{ inputs.git_tag }} \

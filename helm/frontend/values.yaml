@@ -1,0 +1,22 @@
+replicaCount: 1
+
+repository: ""
+gitTag: ""
+
+identityPlatForm:
+  apiKey: ""
+  authDomain: ""
+  projectId: ""
+  tenantId: ""
+
+frontend:
+  image:
+    name: "frontend"
+    pullPolicy: IfNotPresent
+  service:
+    name: frontend
+    port: 80
+  env:
+    BackendUrl: ""
+  serviceAccount:
+    name: "frontend-sa"
