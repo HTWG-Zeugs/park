@@ -31,3 +31,5 @@ spec:
               value: "{{ .Values.propertyManagement.env.gcsBucketId }}"
             - name: PORT
               value: "{{ .Values.propertyManagement.service.port }}"
+            - name: PARKING_MANAGEMENT_BACKEND_URL
+              value: "{{ .Values.parkingManagement.service.name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.parkingManagement.service.port }}"
