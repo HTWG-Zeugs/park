@@ -1,5 +1,6 @@
 import { User } from "../models/user";
 import { Role } from "../models/role";
+import { CreateUserRequestObject } from "../../../shared/CreateUserRequestObject";
 
 /**
  * Interface for the repository that handles user data.
@@ -43,5 +44,5 @@ export interface Repository {
    * Creates a new user.
    * @param user The user to create.
    */
-  createUser(user: User): Promise<void>;
+  createUser(user: CreateUserRequestObject): Promise<void>;
 }

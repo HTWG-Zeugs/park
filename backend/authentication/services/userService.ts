@@ -1,6 +1,7 @@
 import { User } from "../models/user";
 import { Role } from "../models/role";
 import { Repository } from "../repositories/repository";
+import { CreateUserRequestObject } from "../../../shared/CreateUserRequestObject";
 
 /**
  * Handles interactions with the user repository.
@@ -111,11 +112,7 @@ export class UserService {
    * Creates a new user.
    * @param user The user to create.
    */
-  async createUser(signedInUser: User, user: User): Promise<void> {
-    // check if user already exists
-    if (await this.repo.getUser(user.id)) {
-      throw new Error("User already exists");
-    }
+  async createUser(signedInUser: User, user: CreateUserRequestObject): Promise<void> {
     // Solution Admin is allowed to create users for every tenant
     if (signedInUser.role === Role.solution_admin) {
       await this.repo.createUser(user);

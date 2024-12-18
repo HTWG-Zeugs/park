@@ -11,6 +11,7 @@ import Contact from "src/routes/Contact";
 import AddDefect from "src/routes/AddDefect";
 import DefectDetails from "src/routes/DefectDetails";
 import Users from "./routes/Users";
+import AddUsers from "./routes/AddUser";
 import "firebase/auth";
 import "src/common/i18n/i18n.ts";
 
@@ -27,11 +28,9 @@ const router = createBrowserRouter([
       { path: "home", element: <Home /> },
       { path: "sign-in", element: <SignIn /> },
       { path: "sign-up", element: <SignUp /> },
-      { path: "users", element: 
-        <>
-          <Users />
-        </>
-       },
+      { path: "users", element: <Users /> },
+      { path: "users/add", element: <AddUsers />},
+
       {
         path: "defects",
         element: (

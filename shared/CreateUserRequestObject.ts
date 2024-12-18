@@ -1,7 +1,7 @@
-export type UserObject = {
-    id: string;
+export type CreateUserRequestObject = {
     name: string;
     mail: string;
     role: number;
     tenantId: string;
+    password: string;
   }

@@ -16,7 +16,7 @@ import { ImageFile } from "src/models/ImageFile";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const BACKEND_URL = import.meta.env.VITE_PROPERTY_MANAGEMENT_SERVICE_URL;
 dayjs.extend(utc);
 
 interface Map {

@@ -14,6 +14,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DescriptionIcon from "@mui/icons-material/Description";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import axiosAuthenticated from "src/services/Axios";
 
 function EditToolbar() {
   const navigate = useNavigate();
@@ -40,19 +41,24 @@ export default function UserTable() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
+  const AUTHENTICATION_BACKEND = import.meta.env.VITE_AUTHENTICATION_SERVICE_URL;
+
+
   const fetchAllUsers = () => {
-    const fetchedUsers: UserObject[] = [
-        {
-            UserId: "1",
-            Name: "John Doe",
-            Mail: "john.doe@mail.com",
-            Role: "Admin",
-            TenantId: "1"
-        },
-    ];
-    setUsers(fetchedUsers);
-    setLoading(false);
-  };
+    axiosAuthenticated
+      .get(`${AUTHENTICATION_BACKEND}/all-users`)
+      .then((response) => {
+        if (!response.data) {
+          throw new Error(t("component_userList.error_fetching_data"));
+        }
+        const responseData: UserObject[] = response.data;
+        setUsers(responseData);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch data:", error);
+      })
+      .finally(() => setLoading(false));
+  }
 
   useEffect(() => {
     fetchAllUsers();
@@ -60,6 +66,7 @@ export default function UserTable() {
 
   const handleDeleteClicked = (id: GridRowId) => async () => {
     try {
+      //TODO: Implement delete user
       console.log("Delete user with id:", id);
     } catch (error) {
       console.error("Failed to delete:", error);
@@ -67,35 +74,36 @@ export default function UserTable() {
   };
 
   const handleChangeRoleClicked = (id: GridRowId) => async () => {
+    //TODO: Implement change role
     console.log("Change role for user with id:", id);
   };
 
   const columns: GridColDef[] = [
     {
-      field: "UserId",
+      field: "id",
       headerName: t("component_userList.table.column_user_id"),
       width: 200,
     },
     {
-      field: "Name",
+      field: "name",
       headerName: t("component_userList.table.column_name"),
       flex: 1,
       minWidth: 200,
     },
     {
-      field: "Mail",
+      field: "mail",
       headerName: t("component_userList.table.column_mail"),
       flex: 1,
       minWidth: 200,
     },
     {
-      field: "Role",
+      field: "role",
       headerName: t("component_userList.table.column_role"),
       flex: 1,
       minWidth: 200,
     },
     {
-      field: "TenantId",
+      field: "tenantId",
       headerName: t("component_userList.table.column_tenant_id"),
       flex: 1,
       minWidth: 200,
@@ -190,7 +198,7 @@ export default function UserTable() {
             justifyContent: "center",
           },
         }}
-        getRowId={(row) => row.UserId}
+        getRowId={(row) => row.id}
         loading={loading}
       />
     </Box>

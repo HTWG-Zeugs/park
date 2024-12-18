@@ -6,6 +6,8 @@ import { getRoleById } from "./models/role";
 import validateFirebaseIdToken from "./middleware/validateFirebaseIdToken";
 import { User } from "./models/user";
 import { Role } from "./models/role";
+import cors from "cors";
+import { CreateUserRequestObject } from "../../shared/CreateUserRequestObject";
 
 const express = require("express");
 const app = express();
@@ -13,11 +15,18 @@ const port = Config.PORT;
 
 app.use(express.json());
 
+app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
 const repo: Repository = FirestoreRepository.getInstance();
 const userService: UserService = UserService.getInstance(repo);
 
 /**
- * Get a user by ID.
+ * Gets an user by ID.
  */
 app.get("/user/:userId", validateFirebaseIdToken, async (req, res) => {
   const signedInUser: User = res.user;
@@ -32,7 +41,7 @@ app.get("/user/:userId", validateFirebaseIdToken, async (req, res) => {
 });
 
 /**
- * Get a user by ID.
+ * Gets an user by ID.
  */
 app.get("/all-users", validateFirebaseIdToken, async (req, res) => {
   const signedInUser: User = res.user;
@@ -45,12 +54,13 @@ app.get("/all-users", validateFirebaseIdToken, async (req, res) => {
 });
 
 /**
- * Create a new user.
+ * Creates a new user.
  */
 app.post("/user", validateFirebaseIdToken, async (req, res) => {
   const signedInUser: User = res.user;
   try {
-    const userToCreate: User = req.body;
+    const userToCreate: CreateUserRequestObject = req.body;
+    console.log("Creating user:", userToCreate);
     await userService.createUser(signedInUser, userToCreate);
     res.status(200).send("User created");
   } catch (e) {
@@ -59,7 +69,7 @@ app.post("/user", validateFirebaseIdToken, async (req, res) => {
 });
 
 /**
- * Set user role.
+ * Sets user role.
  */
 app.put(
   "/user/:userId/role/:role",
@@ -91,7 +101,7 @@ app.put(
 );
 
 /**
- * Delete user.
+ * Deletes user.
  */
 app.delete("/user/:userId", validateFirebaseIdToken, async (req, res) => {
   const signedInUser: User = res.user;
@@ -116,7 +126,7 @@ app.delete("/user/:userId", validateFirebaseIdToken, async (req, res) => {
 });
 
 /**
- * Health check the service.
+ * Health checks the service.
  */
 app.get("/health", validateFirebaseIdToken, (req, res) => {
   res.status(200).send("Authentication service is running.");
