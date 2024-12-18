@@ -17,7 +17,7 @@ spec:
         app: {{ .Release.Name }}
         component: authentication-service
     spec:
-      serviceAccountName: {{ .Values.serviceAccount.name }}
+      serviceAccountName: {{ .Values.authenticationService.serviceAccount.name }}
       containers:
         - name: authentication-service
           image: "{{ .Values.repository }}/{{.Values.authenticationService.image.name}}:{{ .Values.gitTag }}"

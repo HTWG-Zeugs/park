@@ -74,7 +74,7 @@ jobs:
             exit 1
           fi
 
-      - name: Wait for ingress IP assignment
+      - name: Deploy frontend
         run: |
           helm upgrade --install park-frontend ./helm/frontend \
             --namespace ${{ vars.GKE_FREE_NAMESPACE }} \
