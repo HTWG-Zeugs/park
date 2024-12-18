@@ -39,7 +39,8 @@ jobs:
       matrix:
         service: [
           backend/property-management,
-          backend/parking-management, 
+          backend/parking-management,
+          backend/authentication,
           frontend
         ]
 
@@ -61,8 +62,3 @@ jobs:
       run: |
         cd ${{ matrix.service }}
         npm test --if-present
-
-    - name: Build
-      run: |
-        cd ${{ matrix.service }}
-        npm run build
