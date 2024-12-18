@@ -7,7 +7,32 @@ on:
       - dev
 
 jobs:
-  build-and-test:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - { name: "property-management", dockerfile: "./property-management.Dockerfile" }
+          - { name: "parking-management", dockerfile: "./parking-management.Dockerfile" }
+          - { name: "frontend", dockerfile: "./frontend.Dockerfile" }
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -f ${{ matrix.service.dockerfile }} \
+            . \
+            -t ${{ matrix.service.name }}:${{ env.TAG_ID }} \
+            --no-cache \
+            --platform linux/amd64
+
+  test:
     runs-on: ubuntu-latest
 
     strategy:
