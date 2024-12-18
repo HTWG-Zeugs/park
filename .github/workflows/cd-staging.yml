@@ -1,0 +1,53 @@
+name: Deploy to Staging with Approval
+
+on:
+  workflow_dispatch:
+    inputs:
+      git_tag:
+        description: "Git tag to deploy"
+        required: true
+      branch:
+        description: 'The branch to run this workflow on'
+        required: true
+        default: 'dev'
+
+env:
+  GCR_REPO: "${{ vars.REGION }}-docker.pkg.dev/${{ vars.STAGING_PROJECT_ID }}/${{ vars.STAGING_ARTIFACT_REPO }}"
+
+jobs:
+  prepare-deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Login to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.STAGING_GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Get GKE credentials
+        uses: 'google-github-actions/get-gke-credentials@v2'
+        with:
+          cluster_name: ${{ vars.STAGING_CLUSTER_NAME }}
+          location: ${{vars.REGION}}
+
+  deploy-free-tier:
+    needs: prepare-deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy using Helm
+        run: |
+          helm upgrade --install park ./helm \
+            --namespace ${{ vars.GKE_FREE_NAMESPACE }} \
+            --set serviceAccount.name=${{ vars.GKE_FREE_NAMESPACE }}-sa \
+            --set frontend.env.identityPlatFormApiKey=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }} \
+            --set frontend.env.identifyPlatFormAuthDomain=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
+            --set frontend.env.identifyPlatFormProjectId=${{ vars.STAGING_PROJECT_ID }} \
+            --set repository=${{ env.GCR_REPO }} \
+            --set gitTag=${{ inputs.git_tag }} \

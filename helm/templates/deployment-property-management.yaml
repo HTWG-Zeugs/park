@@ -20,7 +20,7 @@ spec:
       serviceAccountName: {{ .Values.serviceAccount.name }}
       containers:
         - name: property-management
-          image: "{{ .Values.propertyManagement.image.repository }}:{{ .Values.propertyManagement.image.tag }}"
+          image: "{{ .Values.repository }}/{{.Values.propertyManagement.image.name}}:{{ .Values.gitTag }}"
           imagePullPolicy: {{ .Values.propertyManagement.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.propertyManagement.service.port }}

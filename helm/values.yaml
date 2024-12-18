@@ -1,13 +1,15 @@
 replicaCount: 1
 
+repository: "europe-west1-docker.pkg.dev/park-staging-444913/docker-repository"
+gitTag: "45bcb4984e9a7f6ae08149663f35325b1b2c0b5a"
+
 serviceAccount:
   create: true
   name: "free-tier-sa"
 
 propertyManagement:
   image:
-    repository: "europe-west1-docker.pkg.dev/park-staging-444913/docker-repository/property-management"
-    tag: "45bcb4984e9a7f6ae08149663f35325b1b2c0b5a"
+    name: "property-management"
     pullPolicy: IfNotPresent
   service:
     name: property-management
@@ -18,13 +20,12 @@ propertyManagement:
 
 frontend:
   image:
-    repository: "europe-west1-docker.pkg.dev/park-staging-444913/docker-repository/frontend"
-    tag: "45bcb4984e9a7f6ae08149663f35325b1b2c0b5a"
+    name: "frontend"
     pullPolicy: IfNotPresent
   env:
     identityPlatFormApiKey: "API_KEY"
-    identifyPlatFormAuthDomain: "park-staging-444913.firebaseapp.com"
-    identifyPlatFormProjectId: "park-staging-444913"
+    identifyPlatFormAuthDomain: "AUTH_DOMAIN"
+    identifyPlatFormProjectId: "PROJECT_ID"
   service:
     name: frontend
     port: 80
