@@ -66,7 +66,7 @@ export default function DefectTable() {
 
   useEffect(() => {
     fetchAllDefects();
-  }, []);
+  }, [setDefects, setLoading]);
 
   const handleDeleteClicked = (id: GridRowId) => async () => {
     try {

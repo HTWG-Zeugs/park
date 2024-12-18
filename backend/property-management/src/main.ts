@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import defectsRoute from "./defects/DefectRoute";
+import garagesRoute from "./garages/GaragesRoute";
 import process from "process";
 import { Request, Response } from "express";
 const app = express();
@@ -11,6 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/defects", defectsRoute);
+app.use("/garages", garagesRoute);
 
 app.get("*", function (_req: Request, res: Response) {
   res.sendStatus(404);

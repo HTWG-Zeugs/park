@@ -3,9 +3,10 @@ import { DefectController } from "./controllers/DefectController";
 import { ObjectStorageRepo } from "./infrastructure/ObjectStorageRepo";
 import { FirestoreDefectRepo } from "./infrastructure/FirestoreDefectRepo";
 import validateFirebaseIdToken from "../middleware/validateFirebaseIdToken";
+import { firestore } from "./../firestore";
 const router = Router();
 
-const repository = new FirestoreDefectRepo();
+const repository = new FirestoreDefectRepo(firestore);
 const objectStorage = new ObjectStorageRepo();
 const defectController = new DefectController(repository, objectStorage);
 

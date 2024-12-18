@@ -8,6 +8,7 @@ export interface Repository {
     createGarage(garage: Garage): Promise<void>;
     updateGarage(garage: Garage): Promise<void>;
     getGarage(garageId: string): Promise<Garage>;
+    deleteGarage(garageId: string): Promise<void>;
 
     createTicket(ticket: Ticket): Promise<void>;
     updateTicket(ticket: Ticket): Promise<void>;

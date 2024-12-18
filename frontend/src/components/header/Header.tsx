@@ -12,19 +12,20 @@ import { auth } from "src/services/FirebaseConfig";
 import { useTranslation } from "react-i18next";
 
 
-const pages = [
-  { text: "Home", href: "/home" },
-  { text: "Defects", href: "/defects" },
-  { text: "Contact", href: "/contact" },
-];
-
-export default function Header() {
+export default function Header() {  
+  const { t } = useTranslation();
+  const pages = [
+    { text: t("component_header.home"), href: "/home" },
+    { text: t("component_header.occupancy"), href: "/occupancy"},
+    { text: t("component_header.garages"), href: "/garages" },
+    { text: t("component_header.defects"), href: "/defects" },
+    { text: t("component_header.contact"), href: "/contact" },
+  ];
   const navigate = useNavigate();
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
 
-  const { t } = useTranslation();
 
   const { isAuthenticated, logout } = useAuth();
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -54,7 +55,7 @@ export default function Header() {
     try {
       localStorage.removeItem("jwt_token");
       navigate("/");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error signing out: ", error);
     }
   };

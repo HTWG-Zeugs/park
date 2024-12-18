@@ -1,0 +1,43 @@
+name: Build and Test
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service: [
+          backend/property-management,
+          backend/parking-management, 
+          frontend
+        ]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      run: |
+        cd ${{ matrix.service }}
+        npm ci
+
+    - name: Run tests
+      run: |
+        cd ${{ matrix.service }}
+        npm test --if-present
+
+    - name: Build
+      run: |
+        cd ${{ matrix.service }}
+        npm run build
