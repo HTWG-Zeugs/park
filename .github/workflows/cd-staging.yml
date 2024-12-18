@@ -19,7 +19,7 @@ env:
   GCR_REPO: "${{ vars.REGION }}-docker.pkg.dev/${{ vars.STAGING_PROJECT_ID }}/${{ vars.STAGING_ARTIFACT_REPO }}"
 
 jobs:
-  prepare-deployment:
+  deployment-free-tier:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -41,11 +41,7 @@ jobs:
         with:
           cluster_name: ${{ vars.STAGING_CLUSTER_NAME }}
           location: ${{vars.REGION}}
-
-  deploy-free-tier:
-    needs: prepare-deployment
-    runs-on: ubuntu-latest
-    steps:
+      
       - name: Deploy using Helm
         run: |
           helm upgrade --install park ./helm \
