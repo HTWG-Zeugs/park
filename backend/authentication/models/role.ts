@@ -1,18 +1,20 @@
+import { UserRoleObject } from "../../../shared/UserRoleObject";
+
 /**
  * Enum for the different roles a user can have.
  * @Elsper01
  */
 export enum Role {
   // admin of all tenants
-  solution_admin = 500,
+  solution_admin = UserRoleObject.solution_admin,
   // admin of a tenant instance
-  tenant_admin = 400,
+  tenant_admin = UserRoleObject.tenant_admin,
   // staff of a tenant
-  operational_manager = 300,
+  operational_manager = UserRoleObject.operational_manager,
   // customer of a tenant
-  customer = 200,
+  customer = UserRoleObject.customer,
   // third party software, e.g. a payment provider that needs to access the data of a tenant customer
-  third_party = 100,
+  third_party = UserRoleObject.third_party,
 }
 
 /**

@@ -72,6 +72,14 @@
     "grid_detailed_desc": "Detaillierte Beschreibung",
     "grid_status": "Status *"
   },
+  "route_add_user": {
+    "add_user": "Nutzer hinzufügen",
+    "grid_name": "Benutzername *",
+    "grid_mail": "E-Mail *",
+    "grid_role": "Rolle *",
+    "grid_password": "Passwort *",
+    "save_button": "Speichern"
+  },
   "route_defect_details": {
     "img_not_available": "Bild nicht verfügbar",
     "defect_details": "Mängeldetails",

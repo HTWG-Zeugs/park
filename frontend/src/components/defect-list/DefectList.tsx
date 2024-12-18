@@ -42,9 +42,12 @@ export default function DefectTable() {
 
   const navigate = useNavigate();
 
+  const BASE_URL = import.meta.env.VITE_PROPERTY_MANAGEMENT_SERVICE_URL;
+
+
   function fetchAllDefects() {
     axiosAuthenticated
-      .get("/defects/")
+      .get(`${BASE_URL}/defects/`)
       .then((response) => {
         if (!response.data) {
           throw new Error(t("component_defectList.error_fetching_data"));
@@ -70,7 +73,7 @@ export default function DefectTable() {
       const defectId = id.toString();
       setLoading(true);
       axiosAuthenticated
-        .delete(`/defects/${defectId}`)
+        .delete(`${BASE_URL}/defects/${defectId}`)
         .then(() => fetchAllDefects());
     } catch (error) {
       console.error("Failed to delete:", error);

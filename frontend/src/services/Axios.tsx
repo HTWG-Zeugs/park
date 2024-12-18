@@ -1,13 +1,15 @@
 import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+const PROPERTY_MANAGEMENT_BACKEND = import.meta.env.VITE_PROPERTY_MANAGEMENT_SERVICE_URL;
+const AUTHENTICATION_BACKEND = import.meta.env.VITE_AUTHENTICATION_SERVICE_URL;
 
-if (BASE_URL === undefined)
-    throw new Error("BACKEND_URL is not defined");
+if (PROPERTY_MANAGEMENT_BACKEND === undefined)
+    throw new Error("Backend URL of Property Management service is not defined");
 
-const axiosAuthenticated = axios.create({
-    baseURL: BASE_URL,
-});
+if (AUTHENTICATION_BACKEND === undefined)
+    throw new Error("Backendend URL of Authentication service is not defined");
+
+const axiosAuthenticated = axios.create();
 
 axiosAuthenticated.interceptors.request.use(
     (config) => {
