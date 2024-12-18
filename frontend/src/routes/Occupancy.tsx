@@ -14,7 +14,6 @@ import { GarageListItem, toGarageListItem } from "src/models/GarageListItem";
 export default function Occupancy() {
   const { t } = useTranslation();
   const [garages, setGarages] = React.useState<GarageListItem[]>([]);
-  //const [selectedGarageName, setSelectedGarageName] = React.useState<string>('');
   const [selectedGarage, setSelectedGarage] = React.useState<GarageInfoObject>();
 
   const PARKING_MANAGEMENT_URL = import.meta.env.VITE_PARKING_MANAGEMENT_SERVICE_URL;
@@ -23,13 +22,6 @@ export default function Occupancy() {
   useEffect(() => {
     fetchGarages();
   }, [])
-
-  // const fetchGarages = () => {
-  //   return [
-  //     "Garage 1",
-  //     "Garage 2"
-  //   ]
-  // }
 
   const fetchGarages = useCallback(() => {
     axiosAuthenticated
