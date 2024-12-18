@@ -125,10 +125,10 @@ export default function UserTable() {
               color="inherit"
             />
           </Tooltip>,
-          <Tooltip title={t("component_userList.actions.details")}>
+          <Tooltip title={t("component_userList.actions.change_role")}>
             <GridActionsCellItem
               icon={<DescriptionIcon color="primary" />}
-              label={t("component_userList.actions.details")}
+              label={t("component_userList.actions.change_role")}
               onClick={handleChangeRoleClicked(id)}
               color="inherit"
             />

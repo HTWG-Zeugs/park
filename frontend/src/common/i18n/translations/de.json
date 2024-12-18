@@ -63,6 +63,10 @@
       "column_role": "Rolle",
       "column_tenant_id": "Mandanten ID",
       "column_actions": "Aktionen"
+    },
+    "actions": {
+      "change_role": "Rolle ändern",
+      "delete": "Löschen"
     }
   },
   "component_dropzone": {

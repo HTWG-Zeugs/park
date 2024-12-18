@@ -62,6 +62,10 @@
       "column_role": "Role",
       "column_tenant_id": "Tenant ID",
       "column_actions": "Actions"
+    },
+    "actions": {
+      "change_role": "Change role",
+      "delete": "Delete"
     }
   },
   "component_dropzone": {
