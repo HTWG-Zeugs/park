@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 
 function EditToolbar() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <GridToolbarContainer>
@@ -28,7 +29,7 @@ function EditToolbar() {
         onClick={() => navigate("/defects/add")}
         variant="contained"
       >
-        Add defect //TODO: Translate
+        {t("component_defectList.add_defect")}
       </Button>
     </GridToolbarContainer>
   );
@@ -147,13 +148,13 @@ export default function DefectTable() {
         return [
           <GridActionsCellItem
             icon={<DeleteIcon />}
-            label="Delete" //TODO: translate
+            label={t("component_defectList.actions.delete")}
             onClick={handleDeleteClicked(id)}
             color="inherit"
           />,
           <GridActionsCellItem
             icon={<DescriptionIcon />}
-            label="Details" //TODO: translate
+            label={t("component_defectList.actions.details")}
             onClick={handleShowDetailsClicked(id)}
             color="inherit"
           />,
@@ -162,12 +163,37 @@ export default function DefectTable() {
     },
   ];
 
+  const localeText = {
+    noRowsLabel: t("mui.noRows"),
+    noResultsOverlayLabel: t("mui.noResults"),
+    toolbarExport: t("mui.export"),
+    toolbarDensity: t("mui.density"),
+    toolbarDensityLabel: t("mui.density_label"),
+    toolbarDensityCompact: t("mui.density_compact"),
+    toolbarDensityStandard: t("mui.density_standard"),
+    toolbarDensityComfortable: t("mui.density_comfortable"),
+    toolbarColumns: t("mui.manage_columns"),
+    toolbarColumnsLabel: t("mui.manage_columns"),
+    footerPaginationRowsPerPage: t("mui.rows_per_page"),
+    footerRowSelected: (count: number) => t("mui.rows_selected", { count }),
+    footerTotalRows: t("mui.total_rows"),
+    footerTotalVisibleRows: (visibleCount: number, totalCount: number) =>
+      t("mui.visible_rows", { visibleCount, totalCount }),
+    columnMenuSortAsc: t("mui.sort_asc"),
+    columnMenuSortDesc: t("mui.sort_desc"),
+    columnMenuFilter: t("mui.filter"),
+    columnMenuHideColumn: t("mui.hide_column"),
+    columnMenuShowColumns: t("mui.show_columns"),
+    columnMenuUnsort: t("mui.unsort"),
+  };
+
   const paginationModel = { page: 0, pageSize: 5 };
 
   return (
     <DataGrid
       rows={defects}
       columns={columns}
+      localeText={localeText}
       initialState={{ pagination: { paginationModel } }}
       slots={{
         toolbar: EditToolbar as GridSlots["toolbar"],

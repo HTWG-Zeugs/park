@@ -165,7 +165,6 @@ export default function UserTable() {
   const paginationModel = {
     page: 0,
     pageSize: 5,
-    labelRowsPerPage: "Rows per wadawda",
     rowsPerPageOptions: [5, 10, 25, 50, 100],
   };
 

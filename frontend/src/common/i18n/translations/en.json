@@ -39,6 +39,7 @@
     "li3_mail": "jonas.elsper@htwg-konstanz.de"
   },
   "component_defectList": {
+    "add_defect": "Add defect",
     "error_fetching_data": "No data received",
     "table": {
       "column_id": "Id",
@@ -50,6 +51,10 @@
       "column_last_modified": "Last modified at",
       "column_status": "Status",
       "column_actions": "Actions"
+    },
+    "actions": {
+      "delete": "Delete",
+      "details": "details"
     }
   },
   "component_userList": {

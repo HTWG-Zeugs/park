@@ -40,6 +40,7 @@
     "li3_mail": "jonas.elsper@htwg-konstanz.de"
   },
   "component_defectList": {
+    "add_defect": "Mangel hinzufügen",
     "error_fetching_data": "Keine Daten empfangen",
     "table": {
       "column_id": "ID",
