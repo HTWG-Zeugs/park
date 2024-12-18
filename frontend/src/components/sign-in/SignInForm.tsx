@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 interface SignInFormProps {
@@ -23,11 +23,11 @@ const SignInForm: React.FC<SignInFormProps> = ({
   handleSignIn,
   handlePasswordReset,
 }) => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
-  const goToRegister = () => {
-    navigate("/sign-up");
-  };
+  // const goToRegister = () => {
+  //   navigate("/sign-up");
+  // };
 
   const { t } = useTranslation();
 
