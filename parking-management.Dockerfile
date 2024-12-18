@@ -6,6 +6,7 @@ RUN npm ci
 WORKDIR /usr/src/app
 COPY backend/parking-management/. ./parking-management
 COPY backend/shared/. ./shared
+COPY shared/. ./shared
 WORKDIR /usr/src/app/parking-management
 RUN npm run build
 
