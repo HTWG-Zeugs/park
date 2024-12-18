@@ -24,9 +24,10 @@ jobs:
           ref: ${{ inputs.branch }}
 
       - name: Login to Google Cloud
-        uses: google-github-actions/auth@v2
+        uses: 'google-github-actions/auth@v2'
         with:
-          credentials_json: ${{ secrets.STAGING_GCP_SERVICE_ACCOUNT_KEY }}
+          service_account: 'github-sa@park-staging-444913.iam.gserviceaccount.com'
+          workload_identity_provider: 'projects/585856061049/locations/global/workloadIdentityPools/park-staging-444913-github-pool'
 
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
