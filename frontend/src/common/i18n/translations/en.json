@@ -72,7 +72,6 @@
     "drop_files_here": "Drag 'n' drop images here, or click to select images"
   },
   "component_header": {
-    "home": "Home",
     "occupancy": "Occupancy",
     "garages": "Garages",
     "defects": "Defects",
