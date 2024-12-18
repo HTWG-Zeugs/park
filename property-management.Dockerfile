@@ -16,6 +16,6 @@ WORKDIR /usr/src/app
 COPY backend/property-management/package*.json ./
 RUN npm install --only=production
 COPY --from=builder /usr/src/app/backend/property-management/dist ./
-EXPOSE 6969
+EXPOSE 8080
 
 ENTRYPOINT ["node","./backend/property-management/src/main.js"]

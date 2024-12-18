@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-property-management
+  labels:
+    app: {{ .Release.Name }}
+    component: property-management
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      component: property-management
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        component: property-management
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      containers:
+        - name: property-management
+          image: "{{ .Values.repository }}/{{.Values.propertyManagement.image.name}}:{{ .Values.gitTag }}"
+          imagePullPolicy: {{ .Values.propertyManagement.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.propertyManagement.service.port }}
+          env:
+            - name: FIRESTORE_DB_ID
+              value: "{{ .Values.propertyManagement.env.fireStoreDbId }}"
+            - name: GCS_BUCKET_ID
+              value: "{{ .Values.propertyManagement.env.gcsBucketId }}"
+            - name: PORT
+              value: "{{ .Values.propertyManagement.service.port }}"
