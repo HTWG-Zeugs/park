@@ -84,6 +84,4 @@ jobs:
             --set identityPlatForm.apiKey=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }} \
             --set identityPlatForm.authDomain=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
             --set identityPlatForm.projectId=${{ vars.STAGING_PROJECT_ID }} \
-            --set identityPlatForm.tenantId=${{ secrets.STAGING_IDENTITY_PLATFORM_TENANT_ID }} \
             --set backendUrl=$BACKEND_INGRESS \
-            
