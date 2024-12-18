@@ -5,6 +5,10 @@ on:
     branches:
       - dev
 
+permissions:
+  id-token: write 
+  contents: read 
+
 env:
   TAG_ID: "${{ github.sha }}"
   GCR_REPO: "${{ vars.REGION }}-docker.pkg.dev/${{ vars.STAGING_PROJECT_ID }}/${{ vars.STAGING_ARTIFACT_REPO }}"
