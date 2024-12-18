@@ -9,6 +9,9 @@ identityPlatForm:
   projectId: "PROJECT_ID"
   tenantId: "DEFECT_ID"
 
+ingress:
+  name: "park-backend-ingress"
+
 propertyManagement:
   image:
     name: "property-management"
