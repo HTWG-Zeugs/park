@@ -1,20 +1,22 @@
-import { useRef, useState } from "react";
-import { TextField, Typography, Paper } from "@mui/material";
+import { useState } from "react";
+import { TextField, Typography, Paper, MenuItem } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import LoadingButton from "@mui/lab/LoadingButton";
 import SaveIcon from "@mui/icons-material/Save";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { CreateUserRequestObject } from "shared/CreateUserRequestObject";
+import axiosAuthenticated from "src/services/Axios";
+import { UserRoleObject } from "shared/UserRoleObject";
 
 const AUTHENTICATION_URL = import.meta.env.VITE_AUTHENTICATION_SERVICE_URL;
 
 interface FormData {
-    name: string;
-    mail: string;
-    password: string;
-    role: string;
-  }
+  name: string;
+  mail: string;
+  password: string;
+  role: string;
+}
 
 interface FormErrors {
   name: string;
@@ -27,10 +29,6 @@ export default function AddUsers() {
   const navigate = useNavigate();
 
   const { t } = useTranslation();
-
-  const userCreated = useRef(false);
-
-  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -56,9 +54,10 @@ export default function AddUsers() {
       return "";
     },
     role: (value: string) => {
-        //TODO: Fix this
-      if (parseInt(value) < 0) return "Role is required";
-        return "";
+      const validRoles = [100, 200, 300, 400, 500];
+      const parsedValue = parseInt(value);
+      if (!validRoles.includes(parsedValue)) return "Invalid role";
+      return "";
     },
     password: (value: string) => {
       if (value.length < 1) return "Password is required";
@@ -108,7 +107,22 @@ export default function AddUsers() {
   };
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
-    console.log("submitting");
+    e.preventDefault();
+    let userToCreate: CreateUserRequestObject = {
+      name: formData.name,
+      mail: formData.mail,
+      role: parseInt(formData.role),
+      password: formData.password,
+      tenantId: import.meta.env.VITE_TENANT_ID,
+    };
+    if (!validateAllFields()) return;
+
+    try {
+      await axiosAuthenticated.post(`${AUTHENTICATION_URL}/user`, userToCreate);
+      navigate("/users");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -134,7 +148,7 @@ export default function AddUsers() {
                   id="outlined-error"
                   fullWidth
                   label={t("route_add_user.grid_name")}
-                  name="object"
+                  name="name"
                   value={formData.name}
                   onChange={handleChange}
                   error={!!formErrors.name}
@@ -147,7 +161,7 @@ export default function AddUsers() {
                   id="outlined-error"
                   fullWidth
                   label={t("route_add_user.grid_mail")}
-                  name="location"
+                  name="mail"
                   value={formData.mail}
                   onChange={handleChange}
                   error={!!formErrors.mail}
@@ -157,21 +171,44 @@ export default function AddUsers() {
 
               <Grid size={12}>
                 <TextField
+                  select
                   fullWidth
                   label={t("route_add_user.grid_role")}
-                  name="shortDescription"
+                  name="role"
                   value={formData.role}
                   onChange={handleChange}
                   error={!!formErrors.role}
                   helperText={formErrors.role}
-                />
+                  // slotProps={{
+                  //   select: {
+                  //     native: true,
+                  //   },
+                  // }}
+                >
+                  <MenuItem value={UserRoleObject.solution_admin.valueOf().toString()}>
+                    {t(`route_add_user.role_select.solution_admin`)}
+                  </MenuItem>
+                  <MenuItem value={UserRoleObject.tenant_admin.valueOf().toString()}>
+                    {t(`route_add_user.role_select.tenant_admin`)}
+                  </MenuItem>
+                  <MenuItem value={UserRoleObject.operational_manager.valueOf().toString()}>
+                    {t(`route_add_user.role_select.operational_manager`)}
+                  </MenuItem>
+                  <MenuItem value={UserRoleObject.customer.valueOf().toString()}>
+                    {t(`route_add_user.role_select.customer`)}
+                  </MenuItem>
+                  <MenuItem value={UserRoleObject.third_party.valueOf().toString()}>
+                    {t(`route_add_user.role_select.third_party`)}
+                  </MenuItem>
+                </TextField>
               </Grid>
 
               <Grid size={12}>
                 <TextField
                   fullWidth
                   label={t("route_add_user.grid_password")}
-                  name="shortDescription"
+                  name="password"
+                  type="password"
                   value={formData.password}
                   onChange={handleChange}
                   error={!!formErrors.password}
@@ -183,7 +220,6 @@ export default function AddUsers() {
                 <LoadingButton
                   type="submit"
                   color="primary"
-                  loading={saving}
                   loadingPosition="start"
                   startIcon={<SaveIcon />}
                   variant="outlined"

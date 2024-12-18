@@ -30,11 +30,11 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: "home", element: <Home /> },
-      { path: "occupancy", element: <Occupancy />},
+      { path: "occupancy", element: <Occupancy />}, //TODO: Add protected route
       { path: "sign-in", element: <SignIn /> },
       { path: "sign-up", element: <SignUp /> },
-      { path: "users", element: <Users /> },
-      { path: "users/add", element: <AddUsers />},
+      { path: "users", element: <Users /> }, //TODO: Add protected route
+      { path: "users/add", element: <AddUsers />}, //TODO: Add protected route
 
       {
         path: "defects",

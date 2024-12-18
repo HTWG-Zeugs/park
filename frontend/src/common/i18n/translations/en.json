@@ -4,6 +4,27 @@
     "no": "No",
     "save_button": "Save"
   },
+  "mui": {
+    "noRows": "No rows available",
+    "noResults": "No results found",
+    "export": "Export",
+    "density": "Density",
+    "density_label": "Row Density",
+    "density_compact": "Compact",
+    "density_standard": "Standard",
+    "density_comfortable": "Comfortable",
+    "manage_columns": "Manage Columns",
+    "rows_per_page": "Rows per page:",
+    "rows_selected": "{{count}} row selected",
+    "total_rows": "Total Rows",
+    "visible_rows": "{{visibleCount}} of {{totalCount}} rows visible",
+    "sort_asc": "Sort Ascending",
+    "sort_desc": "Sort Descending",
+    "filter": "Filter",
+    "hide_column": "Hide Column",
+    "show_columns": "Show Columns",
+    "unsort": "Remove Sorting"
+  },
   "component_contact": {
     "headline": "Contact Us",
     "p1_1": "This project is part of the",
@@ -53,7 +74,8 @@
     "defects": "Defects",
     "contact": "Contact",
     "sign_out": "Sign out",
-    "sign_in": "Sign in"
+    "sign_in": "Sign in",
+    "users": "Users"
   },
   "component_sign_in": {
     "title": "Sign-In",
@@ -71,6 +93,21 @@
     "grid_short_desc": "Short Description",
     "grid_detailed_desc": "Detailed Description",
     "grid_status": "Status *"
+  },
+  "route_add_user": {
+    "add_user": "Add User",
+    "grid_name": "Username *",
+    "grid_mail": "E-Mail *",
+    "grid_role": "Role *",
+    "role_select": {
+      "solution_admin": "Solution Admin",
+      "tenant_admin": "Tenant Admin",
+      "operational_manager": "Operational Staff",
+      "customer": "Customer",
+      "third_party": "Third Party"
+    },
+    "grid_password": "Password *",
+    "save_button": "Save"
   },
   "route_defect_details": {
     "img_not_available": "Image not available",

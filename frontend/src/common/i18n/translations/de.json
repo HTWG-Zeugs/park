@@ -4,6 +4,28 @@
     "no": "Nein",
     "save_button": "Speichern"
   },
+  "mui": {
+    "noRows": "Keine Zeilen verfügbar",
+    "noResults": "Keine Ergebnisse gefunden",
+    "export": "Exportieren",
+    "density": "Dichte",
+    "density_label": "Zeilenabstand",
+    "density_compact": "Kompakt",
+    "density_standard": "Standard",
+    "density_comfortable": "Komfortabel",
+    "manage_columns": "Spalten verwalten",
+    "rows_per_page": "Zeilen pro Seite:",
+    "rows_selected": "{{count}} Zeile ausgewählt",
+    "total_rows": "Gesamtanzahl Zeilen",
+    "visible_rows": "{{visibleCount}} von {{totalCount}} Zeilen sichtbar",
+    "sort_asc": "Aufsteigend sortieren",
+    "sort_desc": "Absteigend sortieren",
+    "filter": "Filtern",
+    "hide_column": "Spalte ausblenden",
+    "show_columns": "Spalten anzeigen",
+    "unsort": "Sortierung entfernen"
+  },
+
   "component_contact": {
     "headline": "Kontakt",
     "p1_1": "Dieses Projekt wurde im Rahmen des",
@@ -53,7 +75,8 @@
     "defects": "Mängel",
     "contact": "Kontakt",
     "sign_out": "Abmelden",
-    "sign_in": "Anmelden"
+    "sign_in": "Anmelden",
+    "users": "Benutzer"
   },
   "component_sign_in": {
     "title": "Anmelden",
@@ -77,6 +100,13 @@
     "grid_name": "Benutzername *",
     "grid_mail": "E-Mail *",
     "grid_role": "Rolle *",
+    "role_select": {
+      "solution_admin": "Solution Admin",
+      "tenant_admin": "Mandanten Admin",
+      "operational_manager": "Betriebsmitarbeitender",
+      "customer": "Kunde",
+      "third_party": "Drittanbieter"
+    },
     "grid_password": "Passwort *",
     "save_button": "Speichern"
   },
