@@ -1,3 +1,4 @@
+import { GarageInfoObject } from "../../../shared/GarageInfoObject";
 import { GarageDto } from "../../shared/garageDto";
 import { ChargingInvoice } from "../models/chargingInvoice";
 import { ChargingSession } from "../models/chargingSession";
@@ -12,6 +13,10 @@ export class GarageService {
 
   constructor(repository: Repository) {
     this.repo = repository;
+  }
+
+  async getGarage(garageId: string): Promise<GarageInfoObject> {
+    return this.getGarageInfoObjectFromGarage(await this.repo.getGarage(garageId));
   }
 
   async createGarage(garageDto: GarageDto): Promise<void> {
@@ -207,11 +212,15 @@ export class GarageService {
   private getGarageFromDto(garageDto: GarageDto): Garage {
     return new Garage(
       garageDto.id,
+      garageDto.name,
       garageDto.isOpen,
       garageDto.totalParkingSpaces,
       0,
       garageDto.totalChargingSpaces,
       0,
+      garageDto.pricePerHourInEuros,
+      garageDto.openingTime,
+      garageDto.closingTime,
       garageDto.chargingStations.map(cs => ({
         id: cs.id,
         isOccupied: false,
@@ -220,5 +229,20 @@ export class GarageService {
         pricePerKwh: cs.pricePerKwh,
       } as ChargingStation))
     );
+  }
+
+  private getGarageInfoObjectFromGarage(garage: Garage): GarageInfoObject {
+    return {
+      Id: garage.id,
+      Name: garage.name,
+      IsOpen: garage.isOpen,
+      ParkingPlacesTotal: garage.parkingPlacesTotal,
+      ParkingPlacesOccupied: garage.parkingPlacesOccupied,
+      ChargingPlacesTotal: garage.chargingPlacesTotal,
+      ChargingPlacesOccupied: garage.chargingPlacesOccupied,
+      PricePerHourInEuros: garage.pricePerHourInEuros,
+      OpeningTime: garage.openingTime,
+      ClosingTime:garage.closingTime
+    } as GarageInfoObject
   }
 }

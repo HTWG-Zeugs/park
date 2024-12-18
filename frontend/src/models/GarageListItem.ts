@@ -1,7 +1,7 @@
 import { GarageResponseObject } from "shared/GarageResponseObject";
 import dayjs from "dayjs";
 
-export class GarageLisItem{
+export class GarageListItem{
   Id: string = "";
   Name: string = "";
   CreatedAt: string = "";
@@ -10,8 +10,8 @@ export class GarageLisItem{
 
 export const toGarageListItem = (
   response: GarageResponseObject
-): GarageLisItem => {
-  const garageListItem = new GarageLisItem();
+): GarageListItem => {
+  const garageListItem = new GarageListItem();
   garageListItem.Id = response.Id;
   garageListItem.Name = response.Name;
   garageListItem.CreatedAt = dayjs(response.CreatedAt)

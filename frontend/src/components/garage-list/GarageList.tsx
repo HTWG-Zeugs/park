@@ -14,11 +14,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import axiosAuthenticated from "src/services/Axios";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { GarageLisItem, toGarageListItem } from "src/models/GarageListItem";
+import { GarageListItem, toGarageListItem } from "src/models/GarageListItem";
 import { GarageResponseObject } from "shared/GarageResponseObject";
 
 export default function DefectTable() {
-  const [garages, setGarages] = useState<GarageLisItem[]>([]);
+  const [garages, setGarages] = useState<GarageListItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   const { t } = useTranslation();
@@ -49,7 +49,7 @@ export default function DefectTable() {
           throw new Error(t("component_defectList.error_fetching_data"));
         }
         const responseData: GarageResponseObject[] = response.data;
-        const listItems: GarageLisItem[] = responseData.map((d) =>
+        const listItems: GarageListItem[] = responseData.map((d) =>
           toGarageListItem(d)
         );
         setGarages(listItems);
