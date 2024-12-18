@@ -303,12 +303,12 @@ export default function AddGarage() {
               </Grid>
 
               <Typography variant="h5">
-                Charging Stations
+                {t("route_add_garage.charging_stations.title")}
               </Typography>
                 {formData.chargingStations.map((station, index) => (
                     <Grid container spacing={2}>
                       <Typography variant="h6">
-                        Charging Station {index + 1} 
+                        {t("route_add_garage.charging_stations.station")} {index + 1} 
                         <IconButton
                           type="button"
                           onClick={() => removeChargingStation(station.name)}>
@@ -318,7 +318,7 @@ export default function AddGarage() {
                       <Grid size={12}>
                         <TextField
                           fullWidth
-                          label="Name"
+                          label={t("route_add_garage.charging_stations.name")}
                           name="name"
                           value={station.name}
                           onChange={(e) =>
@@ -331,7 +331,7 @@ export default function AddGarage() {
                       <Grid size={12}>
                         <TextField
                           fullWidth
-                          label="Charging Speed"
+                          label={t("route_add_garage.charging_stations.charging_speed")}
                           name="charging-speed"
                           value={station.chargingSpeedInKw}
                           onChange={(e) =>
@@ -344,7 +344,7 @@ export default function AddGarage() {
                       <Grid size={12}>
                         <TextField
                           fullWidth
-                          label="Price per KWh"
+                          label={t("route_add_garage.charging_stations.price")}
                           name="price"
                           value={station.pricePerKwh}
                           onChange={(e) =>

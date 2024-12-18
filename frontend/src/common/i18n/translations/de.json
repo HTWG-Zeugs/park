@@ -145,6 +145,13 @@
     "price_per_hour": "Preis pro Stunde",
     "opening_time": "Öffnungszeit",
     "closing_time": "Schließzeit",
+    "charging_stations": {
+      "title": "Ladestationen",
+      "station": "Ladestation",
+      "name": "Name",
+      "charging_speed": "Ladegeschwindigkeit",
+      "price": "Preis pro KWh"
+    },
     "errors": {
       "name_required": "Name ist erforderlich",
       "number_parking_spots_positive": "Anzahl der Parkplätze muss eine positive Zahl sein",
