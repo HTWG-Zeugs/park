@@ -39,7 +39,6 @@ export default function UserTable() {
   const [users, setUsers] = useState<UserObject[]>([]);
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation();
-  const navigate = useNavigate();
 
   const AUTHENTICATION_BACKEND = import.meta.env.VITE_AUTHENTICATION_SERVICE_URL;
 
