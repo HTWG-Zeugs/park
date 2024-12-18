@@ -2,6 +2,9 @@ import { User } from "../models/user";
 import { Role, getRoleById } from "../models/role";
 import { Repository } from "./repository";
 import { promises } from "fs";
+import { CreateUserRequestObject } from "../../../shared/CreateUserRequestObject";
+import { v4 as uuidv4, v6 as uuidv6 } from 'uuid';
+
 
 const USER_COLLECTION_PATH = "./mocks/json_collections/users.json";
 
@@ -13,6 +16,28 @@ export class JsonFileRepository implements Repository {
   private static instance: JsonFileRepository;
 
   private constructor() {}
+  /**
+   * Gets all users from the JSON file.
+   * @returns Returns a promise that resolves to an array of users.
+   */
+  async getAllUsers(): Promise<User[]> {
+    const data = await promises.readFile(USER_COLLECTION_PATH, "utf-8");
+    const jsonData = JSON.parse(data);
+    return jsonData.map((u: any) => new User(u.id, getRoleById(u.role), u.tenantId, u.mail, u.name));
+  }
+
+  /**
+   * Gets all users for a specific tenant from the JSON file.
+   * @param tenantId The tenant ID to filter users by.
+   * @returns Returns a promise that resolves to an array of users.
+   */
+  async getAllTenantUsers(tenantId: string): Promise<User[]> {
+    const data = await promises.readFile(USER_COLLECTION_PATH, "utf-8");
+    const jsonData = JSON.parse(data);
+    return jsonData
+      .filter((u: any) => u.tenantId === tenantId)
+      .map((u: any) => new User(u.id, getRoleById(u.role), u.tenantId, u.mail, u.name));
+  }
 
   /**
    * Gets the singleton instance of the repository.
@@ -37,7 +62,8 @@ export class JsonFileRepository implements Repository {
         jsonData[index].id,
         getRoleById(jsonData[index].role),
         jsonData[index].tenantId,
-        jsonData[index].email
+        jsonData[index].mail,
+        jsonData[index].name
       );
       return userToGet;
     }
@@ -84,15 +110,16 @@ export class JsonFileRepository implements Repository {
   /**
    * @inheritdoc
    */
-  async createUser(user: User): Promise<void> {
+  async createUser(user: CreateUserRequestObject): Promise<void> {
     try {
       const data = await promises.readFile(USER_COLLECTION_PATH, "utf-8");
       const jsonData = JSON.parse(data);
       jsonData.push({
-        id: user.id,
+        id: uuidv4(),
         role: user.role.valueOf(),
         tenantId: user.tenantId,
-        email: user.email,
+        mail: user.mail,
+        name: user.name,
       });
       await promises.writeFile(
         USER_COLLECTION_PATH,

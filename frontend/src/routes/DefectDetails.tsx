@@ -17,7 +17,7 @@ import { DefectReportStatus } from "src/models/DefectReportStatus";
 import { DefectResponseObject } from "shared/DefectResponseObject";
 import { useTranslation } from "react-i18next";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const BACKEND_URL = import.meta.env.VITE_PROPERTY_MANAGEMENT_SERVICE_URL;
 
 export default function DefectDetailsView() {
   const location = useLocation();

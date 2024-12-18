@@ -1,11 +1,25 @@
 import { User } from "../models/user";
 import { Role } from "../models/role";
+import { CreateUserRequestObject } from "../../../shared/CreateUserRequestObject";
 
 /**
  * Interface for the repository that handles user data.
  * @Elsper01
  */
 export interface Repository {
+  /**
+   * Gets all users of all tenants.
+   * @returns Returns a array of all users.
+   */
+  getAllUsers(): Promise<User[]>;
+
+  /**
+   * Gets all users of a tenant.
+   * @param tenantId The id of the tenant to get the users for.
+   * @returns Returns a array of all users.
+   */
+  getAllTenantUsers(tenantId: string): Promise<User[]>;
+
   /**
    * Gets a user by its id.
    * @param userId The id of the user to get.
@@ -30,5 +44,5 @@ export interface Repository {
    * Creates a new user.
    * @param user The user to create.
    */
-  createUser(user: User): Promise<void>;
+  createUser(user: CreateUserRequestObject): Promise<void>;
 }

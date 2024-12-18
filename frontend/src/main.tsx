@@ -12,12 +12,15 @@ import AddDefect from "src/routes/AddDefect";
 import Garages from "./routes/Garages";
 import AddGarage from "./routes/AddGarage";
 import DefectDetails from "src/routes/DefectDetails";
+import Users from "./routes/Users";
+import AddUsers from "./routes/AddUser";
 import "firebase/auth";
 import "src/common/i18n/i18n.ts";
 
 import ProtectedRoute from "src/routes/ProtectedRoutes";
 import { AuthProvider } from "src/services/AuthContext";
 import EditGarage from "./routes/EditGarage";
+import Occupancy from "src/routes/Occupancy";
 
 const router = createBrowserRouter([
   {
@@ -27,8 +30,12 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: "home", element: <Home /> },
+      { path: "occupancy", element: <Occupancy />}, //TODO: Add protected route
       { path: "sign-in", element: <SignIn /> },
       { path: "sign-up", element: <SignUp /> },
+      { path: "users", element: <Users /> }, //TODO: Add protected route
+      { path: "users/add", element: <AddUsers />}, //TODO: Add protected route
+
       {
         path: "defects",
         element: (
