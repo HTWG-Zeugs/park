@@ -22,6 +22,24 @@ export class FirestoreRepository implements Repository {
     });
     this.db = getFirestore(Config.FIRESTORE_ID);
   }
+
+  /**
+   * Gets the tenant ID for a given email.
+   * @param mail The email of the user.
+   * @returns Returns a promise that resolves to the tenant ID.
+   */
+  async getTenantId(mail: string): Promise<string> {
+    const usersSnapshot = await this.db.collection(this.USER_COLLECTION_PATH)
+      .where("mail", "==", mail)
+      .limit(1)
+      .get();
+    console.log(usersSnapshot);
+    if (!usersSnapshot.empty) {
+      const userDoc = usersSnapshot.docs[0];
+      return userDoc.data().tenantId;
+    }
+  }
+
   /**
    * Gets all users from the Firestore database.
    * @returns Returns a promise that resolves to an array of users.

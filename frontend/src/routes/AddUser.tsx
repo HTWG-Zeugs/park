@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { CreateUserRequestObject } from "shared/CreateUserRequestObject";
 import axiosAuthenticated from "src/services/Axios";
 import { UserRoleObject } from "shared/UserRoleObject";
+import { jwtDecode } from "jwt-decode";
 
 const AUTHENTICATION_URL = import.meta.env.VITE_AUTHENTICATION_SERVICE_URL;
 
@@ -107,13 +108,24 @@ export default function AddUsers() {
   };
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
+    //TODO: extract later
+    // extract tenant_id from jwt_token
+    const token = localStorage.getItem('jwt_token');
+    if (!token) {
+      console.error("Token is null");
+      return;
+    }
+    const decodedToken: any = jwtDecode(token);
+    const tenantId = decodedToken.firebase.tenant;
+
+    // start of normal function
     e.preventDefault();
     let userToCreate: CreateUserRequestObject = {
       name: formData.name,
       mail: formData.mail,
       role: parseInt(formData.role),
       password: formData.password,
-      tenantId: import.meta.env.VITE_TENANT_ID,
+      tenantId: tenantId,
     };
     if (!validateAllFields()) return;
 

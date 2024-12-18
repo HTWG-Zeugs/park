@@ -146,6 +146,23 @@ app.get("/help", validateFirebaseIdToken, (req, res) => {
         `);
 });
 
+/**
+ * Gets the tenant ID for a given user.
+ */
+app.get("/tenant-id/:mail", async (req, res) => {
+  if (!req.params.mail) {
+    return res.status(400).send("Mail is required");
+  }
+  const mail = req.params.mail;
+  try {
+    await userService.getTenantId(mail).then((tenantId) => {
+      res.status(200).send(tenantId);
+    });
+  } catch (e) {
+    res.status(404).send("User not found");
+  }
+});
+
 app.listen(port, () => {
   console.log(`Authentication service listening on port ${port}.`);
 });

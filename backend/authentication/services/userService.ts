@@ -43,7 +43,10 @@ export class UserService {
     } else {
       const userToGet = await this.repo.getUser(userId);
       // signed-in user role must be higher than the user to get and must be the same tenant
-      if (signedInUser.role >= userToGet.role && signedInUser.tenantId === userToGet.tenantId) {
+      if (
+        signedInUser.role >= userToGet.role &&
+        signedInUser.tenantId === userToGet.tenantId
+      ) {
         return userToGet;
       } else {
         console.error("User not allowed to get user");
@@ -56,19 +59,19 @@ export class UserService {
    * Gets all users.
    * @returns Returns all users as array.
    */
-    async getAllUsers(signedInUser: User): Promise<User[]> {
-      // Solution Admin is allowed to query everyone
-      if (signedInUser.role === Role.solution_admin) {
-        return await this.repo.getAllUsers();
-      } 
-      // Tenant Admin is only allowed to query all users of his tenant
-      else if (signedInUser.role === Role.tenant_admin) {
-        return await this.repo.getAllTenantUsers(signedInUser.tenantId);
-      } else {
-        console.error("User not allowed to get any users");
-        throw new Error("Unauthorized");
-      }
+  async getAllUsers(signedInUser: User): Promise<User[]> {
+    // Solution Admin is allowed to query everyone
+    if (signedInUser.role === Role.solution_admin) {
+      return await this.repo.getAllUsers();
     }
+    // Tenant Admin is only allowed to query all users of his tenant
+    else if (signedInUser.role === Role.tenant_admin) {
+      return await this.repo.getAllTenantUsers(signedInUser.tenantId);
+    } else {
+      console.error("User not allowed to get any users");
+      throw new Error("Unauthorized");
+    }
+  }
 
   /**
    * Sets the role of a user.
@@ -76,11 +79,14 @@ export class UserService {
    * @param role The new role of the user.
    */
   async setUserRole(signedInUser: User, user: User, role: Role): Promise<void> {
-    if(signedInUser.role === Role.solution_admin) {
+    if (signedInUser.role === Role.solution_admin) {
       await this.repo.setUserRole(user, role);
     } else {
       // signed-in user role must be higher than the user to set the role for and must be the same tenant
-      if (signedInUser.role >= user.role && signedInUser.tenantId === user.tenantId) {
+      if (
+        signedInUser.role >= user.role &&
+        signedInUser.tenantId === user.tenantId
+      ) {
         await this.repo.setUserRole(user, role);
       } else {
         console.error("User not allowed to set role");
@@ -90,17 +96,29 @@ export class UserService {
   }
 
   /**
+   * Gets tenant_id for a user by mail .
+   * @param mail mail of the user to get the tenant_id for.
+   * @returns Returns the tenant_id of the user.
+   */
+  async getTenantId(mail: string): Promise<string> {
+    return await this.repo.getTenantId(mail);
+  }
+
+  /**
    * Deletes a user.
    * @param user The user to delete.
    */
-  deleteUser(signedInUser: User, user: User): void {
+  async deleteUser(signedInUser: User, user: User): Promise<void> {
     // Solution Admin is allowed to delete everyone
     if (signedInUser.role === Role.solution_admin) {
-      this.repo.deleteUser(user);
+      await this.repo.deleteUser(user);
     } else {
       // signed-in user role must be higher than the user to delete and must be the same tenant
-      if (signedInUser.role >= user.role && signedInUser.tenantId === user.tenantId) {
-        this.repo.deleteUser(user);
+      if (
+        signedInUser.role >= user.role &&
+        signedInUser.tenantId === user.tenantId
+      ) {
+        await this.repo.deleteUser(user);
       } else {
         console.error("User not allowed to delete user");
         throw new Error("User not allowed to delete user");
@@ -112,18 +130,29 @@ export class UserService {
    * Creates a new user.
    * @param user The user to create.
    */
-  async createUser(signedInUser: User, user: CreateUserRequestObject): Promise<void> {
-    // Solution Admin is allowed to create users for every tenant
-    if (signedInUser.role === Role.solution_admin) {
-      await this.repo.createUser(user);
-    } else {
-      // signed user role must be higher than the user to create and must be the same tenant
-      if (signedInUser.role >= user.role && signedInUser.tenantId === user.tenantId) {
+  async createUser(
+    signedInUser: User,
+    user: CreateUserRequestObject
+  ): Promise<void> {
+    const tenantId = await this.repo.getTenantId(user.mail);
+    if (!tenantId) {
+      // Solution Admin is allowed to create users for every tenant
+      if (signedInUser.role === Role.solution_admin) {
         await this.repo.createUser(user);
       } else {
-        console.error("User not allowed to create user");
-        throw new Error("User not allowed to create user");
+        // signed user role must be higher than the user to create and must be the same tenant
+        if (
+          signedInUser.role >= user.role &&
+          signedInUser.tenantId === user.tenantId
+        ) {
+          await this.repo.createUser(user);
+        } else {
+          console.error("User not allowed to create user");
+          throw new Error("User not allowed to create user");
+        }
       }
+    } else {
+      throw new Error("User already exists");
     }
   }
 }
