@@ -1,15 +1,17 @@
 import { useState } from "react";
-import { TextField, Typography, Paper, FormControlLabel, Switch } from "@mui/material";
+import { TextField, Typography, Paper, FormControlLabel, Switch, Button, IconButton } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import LoadingButton from "@mui/lab/LoadingButton";
 import SaveIcon from "@mui/icons-material/Save";
 import { GarageRequestObject } from "shared/GarageRequestObject";
-
 import { useNavigate } from "react-router-dom";
 import axiosAuthenticated from "src/services/Axios";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { useTranslation } from "react-i18next";
+import { ChargingStationRequestObject } from "shared/ChargingStationRequestObject";
+import AddIcon from '@mui/icons-material/Add';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 dayjs.extend(utc);
 
@@ -23,7 +25,8 @@ interface FormData {
   numberParkingSpots: number;
   pricePerHour: number;
   openingTime: string;
-  closingTime: string; 
+  closingTime: string;
+  chargingStations: ChargingStationRequestObject[]; 
 }
 
 interface FormErrors {
@@ -48,6 +51,7 @@ export default function AddGarage() {
     pricePerHour: 1,
     openingTime: "06:00",
     closingTime: "23:00",
+    chargingStations: []
   });
 
   const [formErrors, setFormErrors] = useState<FormErrors>({
@@ -148,6 +152,37 @@ export default function AddGarage() {
     return isValid;
   };
 
+  // Handler for adding a new charging station
+  const addChargingStation = () => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      chargingStations: [
+        ...prevFormData.chargingStations,
+        { name: "", chargingSpeedInKw: 0, pricePerKwh: 0 }
+      ],
+    }));
+  };
+
+  // Handler for updating charging station properties
+  const handleChargingStationChange = (name: string, chargingSpeedInKw: number, pricePerKwh: number) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      chargingStations: prevFormData.chargingStations.map((station) =>
+        station.name === name ? { ...station, chargingSpeedInKw: chargingSpeedInKw, pricePerKwh: pricePerKwh }: station
+      ),
+    }));
+  };
+
+  // Handler for removing a charging station
+  const removeChargingStation = (name: string) => {
+    setFormData((setFormData) => ({
+      ...setFormData,
+      chargingStations: setFormData.chargingStations.filter(
+        (station) => station.name !== name
+      ),
+    }));
+  };
+
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
@@ -162,7 +197,7 @@ export default function AddGarage() {
       pricePerHourInEuros: formData.pricePerHour,
       openingTime: formData.openingTime,
       closingTime: formData.closingTime,
-      chargingStations: [],
+      chargingStations: formData.chargingStations,
     };
 
     try {
@@ -188,7 +223,7 @@ export default function AddGarage() {
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
               <Grid size={12}>
-                <Typography variant="h6">
+                <Typography variant="h4">
                   {t("route_add_garage.add_garage")}
                 </Typography>
               </Grid>
@@ -266,6 +301,64 @@ export default function AddGarage() {
                   helperText={formErrors.closingTime}
                 />
               </Grid>
+
+              <Typography variant="h5">
+                Charging Stations
+              </Typography>
+                {formData.chargingStations.map((station, index) => (
+                    <Grid container spacing={2}>
+                      <Typography variant="h6">
+                        Charging Station {index + 1} 
+                        <IconButton
+                          type="button"
+                          onClick={() => removeChargingStation(station.name)}>
+                            <DeleteOutlineIcon/>
+                        </IconButton>
+                      </Typography>
+                      <Grid size={12}>
+                        <TextField
+                          fullWidth
+                          label="Name"
+                          name="name"
+                          value={station.name}
+                          onChange={(e) =>
+                            handleChargingStationChange(e.target.value, station.chargingSpeedInKw, station.pricePerKwh)
+                          }
+                          error={!!formErrors.closingTime}
+                          helperText={formErrors.closingTime}
+                        />
+                      </Grid>
+                      <Grid size={12}>
+                        <TextField
+                          fullWidth
+                          label="Charging Speed"
+                          name="charging-speed"
+                          value={station.chargingSpeedInKw}
+                          onChange={(e) =>
+                            handleChargingStationChange(station.name, +e.target.value, station.pricePerKwh)
+                          }
+                          error={!!formErrors.closingTime}
+                          helperText={formErrors.closingTime}
+                        />
+                      </Grid>
+                      <Grid size={12}>
+                        <TextField
+                          fullWidth
+                          label="Price per KWh"
+                          name="price"
+                          value={station.pricePerKwh}
+                          onChange={(e) =>
+                            handleChargingStationChange(station.name, station.chargingSpeedInKw, +e.target.value)
+                          }
+                          error={!!formErrors.closingTime}
+                          helperText={formErrors.closingTime}
+                        />
+                      </Grid>
+                    </Grid>
+                ))}
+                <IconButton type="button" onClick={addChargingStation}>
+                  <AddIcon/>
+                </IconButton>
 
               <Grid size={12}>
                 <LoadingButton
