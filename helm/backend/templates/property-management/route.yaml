@@ -16,7 +16,7 @@ spec:
           urlRewrite:
             path:
               type: ReplacePrefixMatch
-              replaceFullPath: /
+              replacePrefixMatch: /
       backendRefs:
         - name: {{ .Values.propertyManagement.service.name }}
           port: {{ .Values.propertyManagement.service.port }}
