@@ -41,17 +41,12 @@ jobs:
         with:
           cluster_name: ${{ vars.STAGING_CLUSTER_NAME }}
           location: ${{vars.REGION}}
-      
-      # - name: Deploy api gateway
-      #   run: |
-      #     helm upgrade --install park-api-gateway ./helm/api-gateway \
-      #       --wait
             
       - name: Wait for API gateway IP assignment
         run: |
           # Loop until the API gateway has an assigned external IP.
           for i in {1..30}; do
-            IP=$(kubectl get gateway -o jsonpath="{.items[0].status.addresses[0].value}")
+            IP=$(kubectl -n infra-ns get gateway -o jsonpath="{.items[0].status.addresses[0].value}")
             if [ -n "$IP" ] && [ "$IP" != "<pending>" ]; then
               echo "API gateway IP found: $IP"
               echo "BACKEND_INGRESS=http://$IP" >> $GITHUB_ENV

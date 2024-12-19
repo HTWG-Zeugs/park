@@ -6,6 +6,7 @@ spec:
   parentRefs:
     - kind: Gateway
       name: {{ .Values.gateway.name }}
+      namespace: infra-ns
   rules:
     - matches:
         - path:
