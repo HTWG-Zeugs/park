@@ -26,4 +26,5 @@ frontend:
   healthCheck:
     endpoint: "/livez"
     initialDelaySeconds: 3
-    periodSeconds: 3
+    periodSeconds: 5
+    timeoutSeconds: 3

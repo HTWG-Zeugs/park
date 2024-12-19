@@ -1,0 +1,21 @@
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: {{ .Values.propertyManagement.service.name }}-healthcheck
+spec:
+  default:
+    checkIntervalSec: {{ .Values.propertyManagement.healthCheck.periodSeconds }}
+    timeoutSec: {{ .Values.propertyManagement.healthCheck.timeoutSeconds}}
+    healthyThreshold: 2
+    unhealthyThreshold: 2
+    logConfig:
+      enabled: ENABLED
+    config:
+      type: HTTP
+      httpHealthCheck:
+        port: {{ .Values.propertyManagement.service.port }}
+        requestPath: {{ .Values.propertyManagement.healthCheck.endpoint }}
+  targetRef:
+    group: ""
+    kind: Service
+    name: {{ .Values.propertyManagement.service.name }}
