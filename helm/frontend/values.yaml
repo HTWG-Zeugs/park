@@ -23,3 +23,8 @@ frontend:
     BackendUrl: ""
   serviceAccount:
     name: "frontend-sa"
+  healthCheck:
+    endpoint: "/livez"
+    initialDelaySeconds: 3
+    periodSeconds: 5
+    timeoutSeconds: 3

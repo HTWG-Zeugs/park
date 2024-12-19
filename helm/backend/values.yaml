@@ -24,6 +24,11 @@ propertyManagement:
     gcsBucketId: "property-management-free"
   serviceAccount:
     name: "property-management-sa"
+  healthCheck:
+    endpoint: "/livez"
+    initialDelaySeconds: 3
+    periodSeconds: 5
+    timeoutSeconds: 3
 
 parkingManagement:
   image:
@@ -36,6 +41,11 @@ parkingManagement:
     fireStoreDbId: "parking-management-free"
   serviceAccount:
     name: "parking-management-sa"
+  healthCheck:
+    endpoint: "/livez"
+    initialDelaySeconds: 3
+    periodSeconds: 5
+    timeoutSeconds: 3
 
 authenticationService:
   image:
@@ -48,3 +58,8 @@ authenticationService:
     fireStoreDbId: "authentication-service-free"
   serviceAccount:
     name: "authentication-service-sa"
+  healthCheck:
+    endpoint: "/livez"
+    initialDelaySeconds: 3
+    periodSeconds: 5
+    timeoutSeconds: 3
