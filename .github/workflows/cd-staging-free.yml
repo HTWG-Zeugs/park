@@ -17,7 +17,6 @@ permissions:
   
 env:
   GCR_REPO: "${{ vars.REGION }}-docker.pkg.dev/${{ vars.STAGING_PROJECT_ID }}/${{ vars.STAGING_ARTIFACT_REPO }}"
-  BACKEND_INGRESS_NAME: "park-backend-ingress"
 
 jobs:
   deployment-backend:
@@ -43,6 +42,29 @@ jobs:
           cluster_name: ${{ vars.STAGING_CLUSTER_NAME }}
           location: ${{vars.REGION}}
       
+      # - name: Deploy api gateway
+      #   run: |
+      #     helm upgrade --install park-api-gateway ./helm/api-gateway \
+      #       --wait
+            
+      - name: Wait for API gateway IP assignment
+        run: |
+          # Loop until the API gateway has an assigned external IP.
+          for i in {1..30}; do
+            IP=$(kubectl get gateway -o jsonpath="{.items[0].status.addresses[0].value}")
+            if [ -n "$IP" ] && [ "$IP" != "<pending>" ]; then
+              echo "API gateway IP found: $IP"
+              echo "BACKEND_INGRESS=http://$IP" >> $GITHUB_ENV
+              break
+            fi
+            echo "Waiting for the API gateway external IP..."
+            sleep 10
+          done
+          if [ -z "$IP" ] || [ "$IP" == "<pending>" ]; then
+            echo "Timed out waiting for the API gateway external IP."
+            exit 1
+          fi
+      
       - name: Deploy backend
         run: |
           helm upgrade --install park-backend ./helm/backend \
@@ -52,27 +74,7 @@ jobs:
             --set gitTag=${{ inputs.git_tag }} \
             --set identityPlatForm.apiKey=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }} \
             --set identityPlatForm.authDomain=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
-            --set identityPlatForm.projectId=${{ vars.STAGING_PROJECT_ID }} \
-            --set ingress.name=${{ env.BACKEND_INGRESS_NAME }} \
-            
-      - name: Wait for ingress IP assignment
-        run: |
-          # Loop until the Ingress has an assigned external IP.
-          # Adjust "${{ env.BACKEND_INGRESS_NAME }}" and namespace variables as needed.
-          for i in {1..30}; do
-            IP=$(kubectl get ingress ${{ env.BACKEND_INGRESS_NAME }} -n ${{ vars.GKE_FREE_NAMESPACE }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-            if [ -n "$IP" ] && [ "$IP" != "<pending>" ]; then
-              echo "Ingress IP found: $IP"
-              echo "BACKEND_INGRESS=http://$IP" >> $GITHUB_ENV
-              break
-            fi
-            echo "Waiting for the Ingress external IP..."
-            sleep 10
-          done
-          if [ -z "$IP" ] || [ "$IP" == "<pending>" ]; then
-            echo "Timed out waiting for the Ingress external IP."
-            exit 1
-          fi
+            --set identityPlatForm.projectId=${{ vars.STAGING_PROJECT_ID }}
 
       - name: Deploy frontend
         run: |
