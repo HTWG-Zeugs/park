@@ -32,4 +32,4 @@ spec:
             - name: PORT
               value: "{{ .Values.propertyManagement.service.port }}"
             - name: PARKING_MANAGEMENT_BACKEND_URL
-              value: "{{ .Values.parkingManagement.service.name }}:{{ .Values.parkingManagement.service.port }}"
+              value: "http://{{ .Values.parkingManagement.service.name }}:{{ .Values.parkingManagement.service.port }}"
