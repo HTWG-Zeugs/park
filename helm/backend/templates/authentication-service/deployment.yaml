@@ -26,7 +26,7 @@ spec:
             - containerPort: {{ .Values.authenticationService.service.port }}
           env:
             - name: FIRESTORE_DB_ID
-              value: "{{ .Values.authenticationService.env.fireStoreDbId }}"
+              value: "{{ .Values.gc_project_id }}-auth-{{ .Release.Namespace }}"
             - name: PORT
               value: "{{ .Values.authenticationService.service.port }}"
           livenessProbe:

@@ -3,10 +3,11 @@ replicaCount: 1
 repository: ""
 gitTag: ""
 
+gc_project_id: "PROJECT_ID"
+
 identityPlatForm:
   apiKey: "API_KEY"
   authDomain: "AUTH_DOMAIN"
-  projectId: "PROJECT_ID"
   tenantId: "DEFECT_ID"
 
 gateway:
@@ -19,9 +20,6 @@ propertyManagement:
   service:
     name: property-management
     port: 8080
-  env:
-    fireStoreDbId: "property-management-free"
-    gcsBucketId: "property-management-free"
   serviceAccount:
     name: "property-management-sa"
   healthCheck:
@@ -37,8 +35,6 @@ parkingManagement:
   service:
     name: parking-management
     port: 8081
-  env:
-    fireStoreDbId: "parking-management-free"
   serviceAccount:
     name: "parking-management-sa"
   healthCheck:
@@ -54,8 +50,6 @@ authenticationService:
   service:
     name: authentication-service
     port: 8082
-  env:
-    fireStoreDbId: "authentication-service-free"
   serviceAccount:
     name: "authentication-service-sa"
   healthCheck:
