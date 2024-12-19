@@ -3,10 +3,11 @@ replicaCount: 1
 repository: ""
 gitTag: ""
 
+gc_project_id: "PROJECT_ID"
+
 identityPlatForm:
   apiKey: ""
   authDomain: ""
-  projectId: ""
   tenantId: null
 
 gateway:

@@ -36,7 +36,7 @@ spec:
             - name: PARK_IDENTITY_PLATFORM_AUTH_DOMAIN
               value: {{ .Values.identityPlatForm.authDomain }}
             - name: PARK_IDENTITY_PLATFORM_PROJECT_ID
-              value: {{ .Values.identityPlatForm.projectId }}
+              value: {{ .Values.gc_project_id }}
             {{ if .Values.identityPlatForm.tenantId }}
             - name: PARK_TENANT_ID
               value: {{ .Values.identityPlatForm.tenantId }}
