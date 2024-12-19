@@ -41,3 +41,9 @@ spec:
             - name: PARK_TENANT_ID
               value: {{ .Values.identityPlatForm.tenantId }}
             {{ end }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.frontend.healthCheck.endpoint }}
+              port: {{ .Values.frontend.service.port }}
+            initialDelaySeconds: {{ .Values.frontend.healthCheck.initialDelaySeconds }}
+            periodSeconds:  {{ .Values.frontend.healthCheck.periodSeconds }}

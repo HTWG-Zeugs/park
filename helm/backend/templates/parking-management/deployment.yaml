@@ -29,3 +29,9 @@ spec:
               value: "{{ .Values.parkingManagement.env.fireStoreDbId }}"
             - name: PORT
               value: "{{ .Values.parkingManagement.service.port }}"
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.parkingManagement.healthCheck.endpoint }}
+              port: {{ .Values.parkingManagement.service.port }}
+            initialDelaySeconds: {{ .Values.parkingManagement.healthCheck.initialDelaySeconds }}
+            periodSeconds: {{ .Values.parkingManagement.healthCheck.periodSeconds }}

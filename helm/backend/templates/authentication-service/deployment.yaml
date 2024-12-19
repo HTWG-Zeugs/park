@@ -29,3 +29,9 @@ spec:
               value: "{{ .Values.authenticationService.env.fireStoreDbId }}"
             - name: PORT
               value: "{{ .Values.authenticationService.service.port }}"
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.authenticationService.healthCheck.endpoint }}
+              port: {{ .Values.authenticationService.service.port }}
+            initialDelaySeconds: {{ .Values.authenticationService.healthCheck.initialDelaySeconds }}
+            periodSeconds: {{ .Values.authenticationService.healthCheck.periodSeconds }}
