@@ -14,7 +14,7 @@ env:
   GCR_REPO: "${{ vars.REGION }}-docker.pkg.dev/${{ vars.STAGING_PROJECT_ID }}/${{ vars.STAGING_ARTIFACT_REPO }}"
 
 jobs:
-  build-and-push:
+  build-and-push-images:
     runs-on: ubuntu-latest
     strategy:
       matrix:

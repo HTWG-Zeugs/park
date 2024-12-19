@@ -9,8 +9,8 @@ identityPlatForm:
   projectId: "PROJECT_ID"
   tenantId: "DEFECT_ID"
 
-ingress:
-  name: "park-backend-ingress"
+gateway:
+  name: "external-http"
 
 propertyManagement:
   image:

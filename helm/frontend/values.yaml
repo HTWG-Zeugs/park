@@ -9,6 +9,9 @@ identityPlatForm:
   projectId: ""
   tenantId: null
 
+gateway:
+  name: "external-http"
+
 frontend:
   image:
     name: "frontend"
