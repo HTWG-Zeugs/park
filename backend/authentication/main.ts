@@ -41,7 +41,7 @@ app.get("/user/:userId", validateFirebaseIdToken, async (req, res) => {
 });
 
 /**
- * Gets an user by ID.
+ * Get all users.
  */
 app.get("/all-users", validateFirebaseIdToken, async (req, res) => {
   const signedInUser: User = res.user;
