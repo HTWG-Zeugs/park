@@ -35,7 +35,6 @@ const router = createBrowserRouter([
       { path: "sign-up", element: <SignUp /> },
       { path: "users", element: <Users /> }, //TODO: Add protected route
       { path: "users/add", element: <AddUsers />}, //TODO: Add protected route
-
       {
         path: "defects",
         element: (

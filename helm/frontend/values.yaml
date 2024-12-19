@@ -7,7 +7,7 @@ identityPlatForm:
   apiKey: ""
   authDomain: ""
   projectId: ""
-  tenantId: ""
+  tenantId: null
 
 frontend:
   image:

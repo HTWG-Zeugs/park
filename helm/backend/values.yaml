@@ -9,6 +9,9 @@ identityPlatForm:
   projectId: "PROJECT_ID"
   tenantId: "DEFECT_ID"
 
+ingress:
+  name: "park-backend-ingress"
+
 propertyManagement:
   image:
     name: "property-management"
@@ -17,8 +20,8 @@ propertyManagement:
     name: property-management
     port: 8080
   env:
-    fireStoreDbId: ""
-    gcsBucketId: ""
+    fireStoreDbId: "property-management-free"
+    gcsBucketId: "property-management-free"
   serviceAccount:
     name: "property-management-sa"
 
@@ -30,7 +33,7 @@ parkingManagement:
     name: parking-management
     port: 8081
   env:
-    fireStoreDbId: ""
+    fireStoreDbId: "parking-management-free"
   serviceAccount:
     name: "parking-management-sa"
 
@@ -42,6 +45,6 @@ authenticationService:
     name: authentication-service
     port: 8082
   env:
-    fireStoreDbId: ""
+    fireStoreDbId: "authentication-service-free"
   serviceAccount:
     name: "authentication-service-sa"

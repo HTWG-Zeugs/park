@@ -45,10 +45,11 @@ const SignIn: React.FC = () => {
       }
 
       window.location.href = "/home";
-    } catch (error: any) {
-      if (error.code === "auth/user-not-found") {
+    } catch (error: unknown) {
+      const code = (error as { code: string }).code;
+      if (code === "auth/user-not-found") {
         setError(t("route_sign_in.user_not_found"));
-      } else if (error.code === "auth/wrong-password") {
+      } else if (code === "auth/wrong-password") {
         setError(t("route_sign_in.wrong_password"));
       } else {
         setError(t("route_sign_in.sign_in_failed"));
@@ -73,7 +74,7 @@ const SignIn: React.FC = () => {
       }
       await auth.sendPasswordResetEmail(email);
       setMessage(t("route_sign_in.password_reset_email_sent"));
-    } catch (error: any) {
+    } catch {
       setError(t("route_sign_in.password_reset_failed"));
     }
   };
