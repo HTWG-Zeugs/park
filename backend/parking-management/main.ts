@@ -169,6 +169,11 @@ app.get("/garage/charging/invoice/:sessionId", async (req, res) => {
   }
 });
 
+
+app.get("/livez", (req, res) => {
+  res.status(200).send("Parking management service is running.");
+});
+
 app.listen(port, () => {
   console.log(`parking management service listening on port ${port}`);
 });

@@ -3,7 +3,6 @@ import cors from "cors";
 import defectsRoute from "./defects/DefectRoute";
 import garagesRoute from "./garages/GaragesRoute";
 import process from "process";
-import { Request, Response } from "express";
 const app = express();
 const port = process.env.PORT ?? 8080;
 
@@ -14,8 +13,8 @@ app.use(express.json());
 app.use("/defects", defectsRoute);
 app.use("/garages", garagesRoute);
 
-app.get("*", function (_req: Request, res: Response) {
-  res.sendStatus(404);
+app.get("/livez", (req, res) => {
+  res.status(200).send("Property management service is running.");
 });
 
 const server = app.listen(port, () => {
