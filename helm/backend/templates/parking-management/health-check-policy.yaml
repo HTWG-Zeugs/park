@@ -8,8 +8,6 @@ spec:
     timeoutSec: {{ .Values.parkingManagement.healthCheck.timeoutSeconds}}
     healthyThreshold: 2
     unhealthyThreshold: 2
-    logConfig:
-      enabled: ENABLED
     config:
       type: HTTP
       httpHealthCheck:
