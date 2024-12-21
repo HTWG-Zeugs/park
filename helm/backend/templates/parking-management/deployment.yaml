@@ -17,7 +17,7 @@ spec:
         app: park-{{ .Release.Namespace }}
         component: parking-management
     spec:
-      serviceAccountName: {{ .Values.parkingManagement.serviceAccount.name }}
+      serviceAccountName: parking-management-sa
       containers:
         - name: parking-management
           image: "{{ .Values.repository }}/{{.Values.parkingManagement.image.name}}:{{ .Values.gitTag }}"

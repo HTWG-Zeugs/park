@@ -17,7 +17,7 @@ spec:
         app: park-{{ .Release.Namespace }}
         component: authentication-service
     spec:
-      serviceAccountName: {{ .Values.authenticationService.serviceAccount.name }}
+      serviceAccountName: authentication-service-sa
       containers:
         - name: authentication-service
           image: "{{ .Values.repository }}/{{.Values.authenticationService.image.name}}:{{ .Values.gitTag }}"
