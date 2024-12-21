@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.authenticationService.service.name }}
+  name: authentication-service
   labels:
     app: {{ .Release.Name }}
     component: authentication-service

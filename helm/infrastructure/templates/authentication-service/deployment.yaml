@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-authentication-service
+  name: authentication-service
   labels:
     app: {{ .Release.Name }}
     component: authentication-service

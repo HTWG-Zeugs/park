@@ -11,7 +11,8 @@ identityPlatForm:
   tenantId: "DEFECT_ID"
 
 gateway:
-  name: "external-http"
+  name: "park-external-http"
+  namespace: "infra-ns"
 
 propertyManagement:
   image:
@@ -37,21 +38,6 @@ parkingManagement:
     port: 8081
   serviceAccount:
     name: "parking-management-sa"
-  healthCheck:
-    endpoint: "/livez"
-    initialDelaySeconds: 3
-    periodSeconds: 5
-    timeoutSeconds: 3
-
-authenticationService:
-  image:
-    name: "authentication-service"
-    pullPolicy: IfNotPresent
-  service:
-    name: authentication-service
-    port: 8082
-  serviceAccount:
-    name: "authentication-service-sa"
   healthCheck:
     endpoint: "/livez"
     initialDelaySeconds: 3
