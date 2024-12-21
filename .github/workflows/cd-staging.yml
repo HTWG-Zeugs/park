@@ -1,4 +1,4 @@
-name: Deploy to Staging Free
+name: Deploy to Staging
 
 on:
   workflow_dispatch:
@@ -19,7 +19,7 @@ env:
   GCR_REPO: "${{ vars.REGION }}-docker.pkg.dev/${{ vars.STAGING_PROJECT_ID }}/${{ vars.STAGING_ARTIFACT_REPO }}"
 
 jobs:
-  deployment-backend:
+  deploy-backend:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -41,6 +41,17 @@ jobs:
         with:
           cluster_name: ${{ vars.STAGING_CLUSTER_NAME }}
           location: ${{vars.REGION}}
+
+      - name: Deploy infrastructure services
+        run: |
+          helm upgrade --install infra ./helm/infrastructure \
+            --namespace infra-ns \
+            --create-namespace \
+            --set repository=${{ env.GCR_REPO }} \
+            --set gitTag=${{ inputs.git_tag }} \
+            --set identityPlatForm.apiKey=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }} \
+            --set identityPlatForm.authDomain=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
+            --set gc_project_id=${{ vars.STAGING_PROJECT_ID }}
             
       - name: Wait for API gateway IP assignment
         run: |
@@ -49,7 +60,7 @@ jobs:
             IP=$(kubectl -n infra-ns get gateway -o jsonpath="{.items[0].status.addresses[0].value}")
             if [ -n "$IP" ] && [ "$IP" != "<pending>" ]; then
               echo "API gateway IP found: $IP"
-              echo "BACKEND_INGRESS=http://$IP" >> $GITHUB_ENV
+              echo "BACKEND_URL=http://$IP" >> $GITHUB_ENV
               break
             fi
             echo "Waiting for the API gateway external IP..."
@@ -59,26 +70,47 @@ jobs:
             echo "Timed out waiting for the API gateway external IP."
             exit 1
           fi
-      
-      - name: Deploy backend
+
+      # - name: Get list of tenants
+      #   run: |
+      #     TENANTS=$(curl -s -X GET "https://example.com/api/tenants" | jq -r '.tenants[]')
+      #     FREE_TENANT="free"
+      #     PREMIUM_TENANT="premium"
+      #     TENANTS="$TENANTS $FREE_TENANT $PREMIUM_TENANT"
+      #     echo "TENANTS=$TENANTS" >> $GITHUB_ENV
+
+      - name: Get list of tenants
         run: |
-          helm upgrade --install park-backend ./helm/backend \
-            --namespace ${{ vars.GKE_FREE_NAMESPACE }} \
+          FREE_TENANT="free"
+          PREMIUM_TENANT="premium"
+          TENANTS="$FREE_TENANT $PREMIUM_TENANT"
+          echo "TENANTS=$TENANTS" >> $GITHUB_ENV
+
+      - name: Deploy backend for each tenant
+        run: |
+          for TENANT in $TENANTS; do
+          helm upgrade --install park-backend-$TENANT ./helm/backend \
+            --namespace $TENANT \
             --create-namespace \
             --set repository=${{ env.GCR_REPO }} \
             --set gitTag=${{ inputs.git_tag }} \
             --set identityPlatForm.apiKey=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }} \
             --set identityPlatForm.authDomain=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
             --set gc_project_id=${{ vars.STAGING_PROJECT_ID }}
+            --set tenant=$TENANT
+            done
+      
 
-      - name: Deploy frontend
+      - name: Deploy frontend for each tenant
         run: |
-          helm upgrade --install park-frontend ./helm/frontend \
-            --namespace ${{ vars.GKE_FREE_NAMESPACE }} \
-            --create-namespace \
-            --set repository=${{ env.GCR_REPO }} \
-            --set gitTag=${{ inputs.git_tag }} \
-            --set identityPlatForm.apiKey=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }} \
-            --set identityPlatForm.authDomain=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
-            --set gc_project_id=${{ vars.STAGING_PROJECT_ID }} \
-            --set backendUrl=$BACKEND_INGRESS \
+          for TENANT in $TENANTS; do
+            helm upgrade --install park-frontend-$TENANT ./helm/frontend \
+              --namespace tenant-$TENANT \
+              --create-namespace \
+              --set repository=${{ env.GCR_REPO }} \
+              --set gitTag=${{ inputs.git_tag }} \
+              --set identityPlatForm.apiKey=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }} \
+              --set identityPlatForm.authDomain=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
+              --set gc_project_id=${{ vars.STAGING_PROJECT_ID }} \
+              --set backendUrl=$BACKEND_URL \
+          done

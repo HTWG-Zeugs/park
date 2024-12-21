@@ -26,11 +26,11 @@ spec:
             - containerPort: {{ .Values.frontend.service.port }}
           env:
             - name: PARK_PROPERTY_MANAGEMENT_URL
-              value: "{{ .Values.frontend.env.BackendUrl }}{{ .Values.env.propertyUrl }}"
+              value: "{{ .Values.frontend.env.BackendUrl }}{{ .Values.frontend.env.propertyUrl }}"
             - name: PARK_PARKING_MANAGEMENT_URL
-              value: "{{ .Values.frontend.env.BackendUrl }}{{ .Values.env.parkingUrl }}"
+              value: "{{ .Values.frontend.env.BackendUrl }}{{ .Values.frontend.env.parkingUrl }}"
             - name: PARK_AUTHENTICATION_URL
-              value: "{{ .Values.frontend.env.BackendUrl }}{{ .Values.env.authUrl }}"
+              value: "{{ .Values.frontend.env.BackendUrl }}{{ .Values.frontend.env.authUrl }}"
             - name: PARK_IDENTITY_PLATFORM_API_KEY
               value: {{ .Values.identityPlatForm.apiKey }}
             - name: PARK_IDENTITY_PLATFORM_AUTH_DOMAIN

@@ -29,7 +29,6 @@ jobs:
           docker build \
             -f ${{ matrix.service.dockerfile }} \
             . \
-            --no-cache \
             --platform linux/amd64
 
   test:
