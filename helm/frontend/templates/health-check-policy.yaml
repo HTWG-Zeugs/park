@@ -1,7 +1,7 @@
 apiVersion: networking.gke.io/v1
 kind: HealthCheckPolicy
 metadata:
-  name: {{ .Values.frontend.service.name }}-healthcheck
+  name: {{ .Release.Namespace }}-frontend-healthcheck
 spec:
   default:
     checkIntervalSec: {{ .Values.frontend.healthCheck.periodSeconds }}
@@ -16,4 +16,4 @@ spec:
   targetRef:
     group: ""
     kind: Service
-    name: {{ .Values.frontend.service.name }}
+    name: frontend

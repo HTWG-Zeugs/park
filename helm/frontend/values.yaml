@@ -6,24 +6,27 @@ gitTag: ""
 gc_project_id: "PROJECT_ID"
 
 identityPlatForm:
-  apiKey: ""
-  authDomain: ""
-  tenantId: null
+  apiKey: "API_KEY"
+  authDomain: "AUTH_DOMAIN"
+  tenantId: "TENANT_ID"
 
 gateway:
-  name: "external-http"
+  name: "park-external-http"
+  namespace: "infra-ns"
 
 frontend:
   image:
     name: "frontend"
     pullPolicy: IfNotPresent
   service:
-    name: frontend
     port: 80
+  route:
+    prefix: "/"
   env:
     BackendUrl: ""
-  serviceAccount:
-    name: "frontend-sa"
+    authUrl: "/auth"
+    propertyUrl: "/property"
+    parkingUrl: "/parking"
   healthCheck:
     endpoint: "/livez"
     initialDelaySeconds: 3
