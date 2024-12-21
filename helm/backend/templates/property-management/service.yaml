@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: property-management
   labels:
-    app: {{ .Release.NameSpace }}
+    app: park-{{ .Release.Namespace }}
     component: property-management
 spec:
   type: ClusterIP
@@ -13,5 +13,5 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app: {{ .Release.NameSpace }}
+    app: park-{{ .Release.Namespace }}
     component: property-management

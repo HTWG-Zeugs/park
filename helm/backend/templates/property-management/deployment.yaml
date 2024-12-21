@@ -3,18 +3,18 @@ kind: Deployment
 metadata:
   name: property-management
   labels:
-    app: {{ .Release.Namespace }}
+    app: park-{{ .Release.Namespace }}
     component: property-management
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Release.Namespace }}
+      app: park-{{ .Release.Namespace }}
       component: property-management
   template:
     metadata:
       labels:
-        app: {{ .Release.Namespace }}
+        app: park-{{ .Release.Namespace }}
         component: property-management
     spec:
       serviceAccountName: {{ .Values.propertyManagement.serviceAccount.name }}
