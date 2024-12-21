@@ -1,7 +1,7 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: parking-management-external
+  name: {{ .Release.Namespace }}-parking-management-external
 spec:
   parentRefs:
     - kind: Gateway
@@ -11,7 +11,7 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /parking-management
+            value: {{ .Values.parkingManagement.route.prefix }}
       filters:
         - type: URLRewrite
           urlRewrite:
@@ -19,5 +19,5 @@ spec:
               type: ReplacePrefixMatch
               replacePrefixMatch: /
       backendRefs:
-        - name: {{ .Values.parkingManagement.service.name }}
+        - name: parking-management
           port: {{ .Values.parkingManagement.service.port }}

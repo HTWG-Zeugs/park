@@ -8,7 +8,7 @@ gc_project_id: "PROJECT_ID"
 identityPlatForm:
   apiKey: "API_KEY"
   authDomain: "AUTH_DOMAIN"
-  tenantId: "DEFECT_ID"
+  tenantId: "TENANT_ID"
 
 gateway:
   name: "park-external-http"
@@ -19,10 +19,9 @@ propertyManagement:
     name: "property-management"
     pullPolicy: IfNotPresent
   service:
-    name: property-management
     port: 8080
-  serviceAccount:
-    name: "property-management-sa"
+  route:
+    prefix: "/property"
   healthCheck:
     endpoint: "/livez"
     initialDelaySeconds: 3
@@ -34,10 +33,9 @@ parkingManagement:
     name: "parking-management"
     pullPolicy: IfNotPresent
   service:
-    name: parking-management
     port: 8081
-  serviceAccount:
-    name: "parking-management-sa"
+  route:
+    prefix: "/parking"
   healthCheck:
     endpoint: "/livez"
     initialDelaySeconds: 3
