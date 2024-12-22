@@ -26,6 +26,12 @@ spec:
             - containerPort: {{ .Values.parkingManagement.service.port }}
           env:
             - name: FIRESTORE_DB_ID
-              value: "{{ .Values.parkingManagement.env.fireStoreDbId }}"
+              value: "{{ .Values.gc_project_id }}-park-ma-{{ .Release.Namespace }}"
             - name: PORT
               value: "{{ .Values.parkingManagement.service.port }}"
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.parkingManagement.healthCheck.endpoint }}
+              port: {{ .Values.parkingManagement.service.port }}
+            initialDelaySeconds: {{ .Values.parkingManagement.healthCheck.initialDelaySeconds }}
+            periodSeconds: {{ .Values.parkingManagement.healthCheck.periodSeconds }}

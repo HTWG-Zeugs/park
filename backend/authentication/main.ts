@@ -156,6 +156,11 @@ app.get("/tenant-id/:mail", async (req, res) => {
   }
 });
 
+
+app.get("/livez", (req, res) => {
+  res.status(200).send("Authentication service is running.");
+});
+
 app.listen(port, () => {
   console.log(`Authentication service listening on port ${port}.`);
 });

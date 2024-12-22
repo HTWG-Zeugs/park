@@ -1,0 +1,19 @@
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: {{ .Values.parkingManagement.service.name }}-healthcheck
+spec:
+  default:
+    checkIntervalSec: {{ .Values.parkingManagement.healthCheck.periodSeconds }}
+    timeoutSec: {{ .Values.parkingManagement.healthCheck.timeoutSeconds}}
+    healthyThreshold: 2
+    unhealthyThreshold: 2
+    config:
+      type: HTTP
+      httpHealthCheck:
+        port: {{ .Values.parkingManagement.service.port }}
+        requestPath: {{ .Values.parkingManagement.healthCheck.endpoint }}
+  targetRef:
+    group: ""
+    kind: Service
+    name: {{ .Values.parkingManagement.service.name }}

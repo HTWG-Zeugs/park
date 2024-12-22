@@ -3,10 +3,11 @@ replicaCount: 1
 repository: ""
 gitTag: ""
 
+gc_project_id: "PROJECT_ID"
+
 identityPlatForm:
   apiKey: ""
   authDomain: ""
-  projectId: ""
   tenantId: null
 
 gateway:
@@ -23,3 +24,8 @@ frontend:
     BackendUrl: ""
   serviceAccount:
     name: "frontend-sa"
+  healthCheck:
+    endpoint: "/livez"
+    initialDelaySeconds: 3
+    periodSeconds: 5
+    timeoutSeconds: 3
