@@ -69,7 +69,7 @@
       "column_actions": "Actions"
     },
     "actions": {
-      "change_role": "Change role",
+      "edit_user": "Edit user",
       "delete": "Delete"
     }
   },
@@ -128,13 +128,14 @@
     "reported_at": "Reported at",
     "last_modified_at": "Last modified at"
   },
-  "route_user_details": {
+  "route_edit_user": {
     "user_details": "User Details",
      "name": "Name",
      "mail": "Mail",
      "tenant_id": "Tenant ID",
      "user_id": "User ID",
-     "role": "Role"
+     "role": "Role",
+     "save_button": "Save"
    },
   "component_garageList": {
     "buttons": {

@@ -161,13 +161,13 @@ export default function EditUser() {
             <Grid container spacing={2}>
               <Grid size={12}>
                 <Typography variant="h6">
-                  {t("route_user_details.user_details")}
+                  {t("route_edit_user.user_details")}
                 </Typography>
               </Grid>
 
               <Grid size={12}>
                 <TextField
-                  label={t("route_user_details.user_id")}
+                  label={t("route_edit_user.user_id")}
                   fullWidth
                   slotProps={{ input: { readOnly: true } }}
                   value={userToChange?.id}
@@ -177,7 +177,7 @@ export default function EditUser() {
 
               <Grid size={12}>
                 <TextField
-                  label={t("route_user_details.tenant_id")}
+                  label={t("route_edit_user.tenant_id")}
                   fullWidth
                   slotProps={{ input: { readOnly: true } }}
                   value={userToChange?.tenantId}
@@ -187,7 +187,7 @@ export default function EditUser() {
 
               <Grid size={12}>
                 <TextField
-                  label={t("route_user_details.name")}
+                  label={t("route_edit_user.name")}
                   fullWidth
                   name="name"
                   value={userToChange?.name}
@@ -200,7 +200,7 @@ export default function EditUser() {
 
               <Grid size={12}>
                 <TextField
-                  label={t("route_user_details.mail")}
+                  label={t("route_edit_user.mail")}
                   fullWidth
                   name="mail"
                   value={userToChange?.mail}
@@ -215,7 +215,7 @@ export default function EditUser() {
                 <TextField
                   select
                   fullWidth
-                  label={t("route_add_user.grid_role")}
+                  label={t("route_edit_user.role")}
                   name="role"
                   value={userToChange.role}
                   onChange={handleChange}
@@ -257,7 +257,7 @@ export default function EditUser() {
                     startIcon={<SaveIcon />}
                     variant="outlined"
                   >
-                    {t("route_add_user.save_button")}
+                    {t("route_edit_user.save_button")}
                   </LoadingButton>
                 </Grid>
             </Grid>
