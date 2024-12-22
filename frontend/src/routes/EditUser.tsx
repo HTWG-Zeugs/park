@@ -5,7 +5,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axiosAuthenticated from "src/services/Axios";
 import "src/components/thumbnail/Thumbs.css";
 import { useTranslation } from "react-i18next";
-import { jwtDecode } from "jwt-decode";
 import { UserObject } from "shared/UserObject";
 import { UserRoleObject } from "shared/UserRoleObject";
 import LoadingButton from "@mui/lab/LoadingButton";
@@ -31,7 +30,11 @@ export default function EditUser() {
   });
   const AUTHENTICATION_URL = import.meta.env.VITE_AUTHENTICATION_SERVICE_URL;
   const { t } = useTranslation();
-  const [formErrors, setFormErrors] = useState({ name: "", mail: "", role: "" });
+  const [formErrors, setFormErrors] = useState({
+    name: "",
+    mail: "",
+    role: "",
+  });
 
   useEffect(() => {
     if (id) {
@@ -66,7 +69,7 @@ export default function EditUser() {
       const parsedValue = parseInt(value);
       if (!validRoles.includes(parsedValue)) return "Invalid role";
       return "";
-    }
+    },
   };
 
   const handleChange = (e: { target: { name: string; value: any } }) => {
@@ -100,7 +103,9 @@ export default function EditUser() {
     for (const field in userToChange) {
       const validationFunction = validationFunctions[field];
       if (!validationFunction) continue;
-      const error = validationFunction(userToChange[field as keyof UserObject].toString());
+      const error = validationFunction(
+        userToChange[field as keyof UserObject].toString()
+      );
       if (error) isValid = false;
       errors[field as keyof FormErrors] = error;
     }
@@ -119,7 +124,10 @@ export default function EditUser() {
     if (!validateAllFields()) return;
 
     try {
-      await axiosAuthenticated.put(`${AUTHENTICATION_URL}/user/${userToChange.id}`, user);
+      await axiosAuthenticated.put(
+        `${AUTHENTICATION_URL}/user/${userToChange.id}`,
+        user
+      );
       navigate("/users");
     } catch (error) {
       console.error(error);
@@ -218,7 +226,9 @@ export default function EditUser() {
                   >
                     {t(`route_add_user.role_select.operational_manager`)}
                   </MenuItem>
-                  <MenuItem value={UserRoleObject.customer.valueOf().toString()}>
+                  <MenuItem
+                    value={UserRoleObject.customer.valueOf().toString()}
+                  >
                     {t(`route_add_user.role_select.customer`)}
                   </MenuItem>
                   <MenuItem
@@ -229,19 +239,19 @@ export default function EditUser() {
                 </TextField>
               </Grid>
               <Grid size={12}>
-                  <LoadingButton
-                    type="submit"
-                    color="primary"
-                    loadingPosition="start"
-                    startIcon={<SaveIcon />}
-                    variant="outlined"
-                  >
-                    {t("route_edit_user.save_button")}
-                  </LoadingButton>
-                </Grid>
+                <LoadingButton
+                  type="submit"
+                  color="primary"
+                  loadingPosition="start"
+                  startIcon={<SaveIcon />}
+                  variant="outlined"
+                >
+                  {t("route_edit_user.save_button")}
+                </LoadingButton>
+              </Grid>
             </Grid>
           </form>
-          </Paper>
+        </Paper>
       </Grid>
     </Grid>
   );
