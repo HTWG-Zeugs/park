@@ -22,7 +22,6 @@ export default function EditUser() {
   const location = useLocation();
   const { id } = location.state || {};
   const navigate = useNavigate();
-  const [loggedInUser, setLoggedInUser] = useState<UserObject>();
   const [userToChange, setUserToChange] = useState<UserObject>({
     id: "",
     tenantId: "",
@@ -37,27 +36,7 @@ export default function EditUser() {
   useEffect(() => {
     if (id) {
       try {
-        // parse user jwt token to get user_id of the logged in user
-        const token = localStorage.getItem("jwt_token");
-        if (!token) {
-          console.error("Token is null");
-          return;
-        }
-        const decodedToken: any = jwtDecode(token);
-        console.log(decodedToken);
-        const userId = decodedToken.user_id;
-        // fetch all infos about the logged in user
-        axiosAuthenticated
-          .get(`${AUTHENTICATION_URL}/user/${userId}`)
-          .then((response) => {
-            if (!response.data) {
-              throw new Error("No data");
-            }
-            const user: UserObject = response.data;
-            setLoggedInUser(user);
-          });
         // fetch all infos about the user to change
-        console.log(`${AUTHENTICATION_URL}/user/${id}`);
         axiosAuthenticated
           .get(`${AUTHENTICATION_URL}/user/${id}`)
           .then((response) => {

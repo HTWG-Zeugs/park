@@ -57,7 +57,6 @@ export class FirestoreRepository implements Repository {
       .where("mail", "==", mail)
       .limit(1)
       .get();
-    console.log(usersSnapshot);
     if (!usersSnapshot.empty) {
       const userDoc = usersSnapshot.docs[0];
       return userDoc.data().tenantId;

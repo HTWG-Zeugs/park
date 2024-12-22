@@ -74,7 +74,6 @@ export default function UserTable() {
   };
 
   const handleChangeRoleClicked = (id: GridRowId) => async () => {
-    console.log(`Change role clicked: ${id}`);
     navigate("/users/edit", {
       state: {
         id: id,

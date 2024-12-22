@@ -25,7 +25,6 @@ const SignIn: React.FC = () => {
       if (!auth.tenantId) {
         const response = await axios.get(`${AUTHENTICATION_BACKEND}/tenant-id/${email}`);
         auth.tenantId = response.data;
-        console.log(response);
       } else {
         auth.tenantId = tenantId;
       }
@@ -67,7 +66,6 @@ const SignIn: React.FC = () => {
       const tenantId = import.meta.env.VITE_TENANT_ID;
       if (!auth.tenantId) {
         const response = await axios.get(`${AUTHENTICATION_BACKEND}/tenant-id/${email}`);
-        console.log(response);
         auth.tenantId = response.data.tenant_id;
       } else {
         auth.tenantId = tenantId;
