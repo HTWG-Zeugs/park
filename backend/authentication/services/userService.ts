@@ -2,6 +2,7 @@ import { User } from "../models/user";
 import { Role } from "../models/role";
 import { Repository } from "../repositories/repository";
 import { CreateUserRequestObject } from "../../../shared/CreateUserRequestObject";
+import { EditUserRequestObject } from "../../../shared/EditUserRequestObject";
 
 /**
  * Handles interactions with the user repository.
@@ -74,23 +75,31 @@ export class UserService {
   }
 
   /**
-   * Sets the role of a user.
-   * @param user User to set the role for.
-   * @param role The new role of the user.
+   * Updates a user.
+   * @param user User that gets updated.
+   * @param attributesToChange The new user attributes.
    */
-  async setUserRole(signedInUser: User, user: User, role: Role): Promise<void> {
+  async updateUser(signedInUser: User, user: User, attributesToChange: EditUserRequestObject): Promise<void> {
+    const newUser: User = new User(
+      user.id,
+      attributesToChange.role,
+      user.tenantId,
+      attributesToChange.mail,
+      attributesToChange.name
+    );
     if (signedInUser.role === Role.solution_admin) {
-      await this.repo.setUserRole(user, role);
+      await this.repo.updateUser(newUser);
     } else {
       // signed-in user role must be higher than the user to set the role for and must be the same tenant
       if (
         signedInUser.role >= user.role &&
-        signedInUser.tenantId === user.tenantId
+        signedInUser.tenantId === user.tenantId &&
+        signedInUser.role >= newUser.role
       ) {
-        await this.repo.setUserRole(user, role);
+        await this.repo.updateUser(newUser);
       } else {
-        console.error("User not allowed to set role");
-        throw new Error("User not allowed to set role");
+        console.error("User not allowed edit user");
+        throw new Error("User not allowed edit user");
       }
     }
   }

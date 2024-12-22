@@ -28,11 +28,10 @@ export interface Repository {
   getUser(userId: string): Promise<User>;
 
   /**
-   * Sets the role of a user.
-   * @param user User to set the role for.
-   * @param role The new role of the user.
+   * Updates the user.
+   * @param user User with the updated values.
    */
-  setUserRole(user: User, role: Role): Promise<void>;
+  updateUser(user: User): Promise<void>;
 
   /**
    * Deletes a user.

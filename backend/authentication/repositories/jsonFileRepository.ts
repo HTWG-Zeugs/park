@@ -18,6 +18,33 @@ export class JsonFileRepository implements Repository {
   private constructor() {}
 
   /**
+   * Updates an existing user in the JSON file.
+   * @param user The user object with updated data.
+   * @returns Returns a promise that resolves when the user is updated.
+   */
+  async updateUser(user: User): Promise<void> {
+    const data = await promises.readFile(USER_COLLECTION_PATH, "utf-8");
+    const jsonData = JSON.parse(data);
+    const index = jsonData.findIndex((u: User) => u.id === user.id);
+    if (index !== -1) {
+      jsonData[index] = {
+        id: user.id,
+        role: user.role.valueOf(),
+        tenantId: user.tenantId,
+        mail: user.mail,
+        name: user.name,
+      };
+      await promises.writeFile(
+        USER_COLLECTION_PATH,
+        JSON.stringify(jsonData),
+        "utf-8"
+      );
+    } else {
+      throw new Error("User not found");
+    }
+  }
+
+  /**
    * Gets the tenant ID for a specific user by their email.
    * @param mail The email of the user.
    * @returns Returns a promise that resolves to the tenant ID.
@@ -83,25 +110,6 @@ export class JsonFileRepository implements Repository {
         jsonData[index].name
       );
       return userToGet;
-    }
-  }
-
-  /**
-   * @inheritdoc
-   */
-  async setUserRole(user: User, role: Role): Promise<void> {
-    const data = await promises.readFile(USER_COLLECTION_PATH, "utf-8");
-    const jsonData = JSON.parse(data);
-    const index = jsonData.findIndex((u: User) => u.id === user.id);
-    if (index !== -1) {
-      jsonData[index].role = role;
-      await promises.writeFile(
-        USER_COLLECTION_PATH,
-        JSON.stringify(jsonData),
-        "utf-8"
-      );
-    } else {
-      throw new Error("User not found");
     }
   }
 

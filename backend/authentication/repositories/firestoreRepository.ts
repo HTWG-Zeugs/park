@@ -24,6 +24,31 @@ export class FirestoreRepository implements Repository {
   }
 
   /**
+   * Updates a user in the Firestore database.
+   * @param user The user to update.
+   * @returns Returns a promise that resolves when the user is updated.
+   */
+  async updateUser(user: User): Promise<void> {
+    try {
+      const tenantAwareAuth = auth().tenantManager().authForTenant(user.tenantId);
+      const userRecord = await tenantAwareAuth.updateUser(user.id, {
+        email: user.mail,
+        displayName: user.name,
+      });
+    } catch (err) {
+      console.error(err);
+      throw new Error("Error updating user in identity plattform");
+    }
+    const userRef = this.db.collection(this.USER_COLLECTION_PATH).doc(user.id);
+    const doc = await userRef.get();
+    if (doc.exists) {
+      await userRef.update(user.toPlainObject());
+    } else {
+      throw new Error("User not found");
+    }
+  }
+
+  /**
    * Gets the tenant ID for a given email.
    * @param mail The email of the user.
    * @returns Returns a promise that resolves to the tenant ID.
@@ -115,21 +140,6 @@ export class FirestoreRepository implements Repository {
   /**
    * @inheritdoc
    */
-  async setUserRole(user: User, role: Role): Promise<void> {
-    const userRef = this.db.collection(this.USER_COLLECTION_PATH).doc(user.id);
-    const doc = await userRef.get();
-    if (doc.exists) {
-      await userRef.update({
-        role: role.valueOf(),
-      });
-    } else {
-      throw new Error("User not found");
-    }
-  }
-
-  /**
-   * @inheritdoc
-   */
   async deleteUser(user: User): Promise<void> {
     const userRef = this.db.collection(this.USER_COLLECTION_PATH).doc(user.id);
     const doc = await userRef.get();
@@ -154,7 +164,6 @@ export class FirestoreRepository implements Repository {
         displayName: user.name,
         password: user.password
       });
-      console.log(userRecord);
       const userToCreate: User = new User(
         userRecord.uid,
         user.role,
