@@ -125,6 +125,14 @@
     "reported_at": "Gemeldet am",
     "last_modified_at": "Zuletzt geändert am"
   },
+  "route_user_details": {
+   "user_details": "Benutzer Details",
+    "name": "Name",
+    "mail": "E-Mail",
+    "tenant_id": "Mandanten ID",
+    "user_id": "Benutzer ID",
+    "role": "Rolle"
+  },
   "component_garageList": {
     "buttons": {
       "add_garage": "Parkhaus hinzufügen"

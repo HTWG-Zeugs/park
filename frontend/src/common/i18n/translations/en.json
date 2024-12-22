@@ -128,6 +128,14 @@
     "reported_at": "Reported at",
     "last_modified_at": "Last modified at"
   },
+  "route_user_details": {
+    "user_details": "User Details",
+     "name": "Name",
+     "mail": "Mail",
+     "tenant_id": "Tenant ID",
+     "user_id": "User ID",
+     "role": "Role"
+   },
   "component_garageList": {
     "buttons": {
       "add_garage": "Add Garage"

@@ -108,7 +108,7 @@ export default function AddUsers() {
   };
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
-    //TODO: extract later
+    //TODO: refactor later
     // extract tenant_id from jwt_token
     const token = localStorage.getItem('jwt_token');
     if (!token) {
@@ -191,11 +191,6 @@ export default function AddUsers() {
                   onChange={handleChange}
                   error={!!formErrors.role}
                   helperText={formErrors.role}
-                  // slotProps={{
-                  //   select: {
-                  //     native: true,
-                  //   },
-                  // }}
                 >
                   <MenuItem value={UserRoleObject.solution_admin.valueOf().toString()}>
                     {t(`route_add_user.role_select.solution_admin`)}
