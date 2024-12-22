@@ -18,9 +18,7 @@ export class JsonFileRepository implements Repository {
   private constructor() {}
 
   /**
-   * Updates an existing user in the JSON file.
-   * @param user The user object with updated data.
-   * @returns Returns a promise that resolves when the user is updated.
+   * @inheritdoc
    */
   async updateUser(user: User): Promise<void> {
     const data = await promises.readFile(USER_COLLECTION_PATH, "utf-8");
@@ -45,9 +43,7 @@ export class JsonFileRepository implements Repository {
   }
 
   /**
-   * Gets the tenant ID for a specific user by their email.
-   * @param mail The email of the user.
-   * @returns Returns a promise that resolves to the tenant ID.
+   * @inheritdoc
    */
   async getTenantId(mail: string): Promise<string> {
     const data = await promises.readFile(USER_COLLECTION_PATH, "utf-8");
@@ -61,8 +57,7 @@ export class JsonFileRepository implements Repository {
   }
   
   /**
-   * Gets all users from the JSON file.
-   * @returns Returns a promise that resolves to an array of users.
+   * @inheritdoc
    */
   async getAllUsers(): Promise<User[]> {
     const data = await promises.readFile(USER_COLLECTION_PATH, "utf-8");
@@ -71,9 +66,7 @@ export class JsonFileRepository implements Repository {
   }
 
   /**
-   * Gets all users for a specific tenant from the JSON file.
-   * @param tenantId The tenant ID to filter users by.
-   * @returns Returns a promise that resolves to an array of users.
+   * @inheritdoc
    */
   async getAllTenantUsers(tenantId: string): Promise<User[]> {
     const data = await promises.readFile(USER_COLLECTION_PATH, "utf-8");
@@ -84,8 +77,7 @@ export class JsonFileRepository implements Repository {
   }
 
   /**
-   * Gets the singleton instance of the repository.
-   * @returns Returns the singleton instance.
+   * @inheritdoc
    */
   public static getInstance(): JsonFileRepository {
     if (!JsonFileRepository.instance) {

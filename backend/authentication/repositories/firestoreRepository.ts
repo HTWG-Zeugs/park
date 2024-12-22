@@ -24,13 +24,13 @@ export class FirestoreRepository implements Repository {
   }
 
   /**
-   * Updates a user in the Firestore database.
-   * @param user The user to update.
-   * @returns Returns a promise that resolves when the user is updated.
+   * @inheritdoc
    */
   async updateUser(user: User): Promise<void> {
     try {
-      const tenantAwareAuth = auth().tenantManager().authForTenant(user.tenantId);
+      const tenantAwareAuth = auth()
+        .tenantManager()
+        .authForTenant(user.tenantId);
       const userRecord = await tenantAwareAuth.updateUser(user.id, {
         email: user.mail,
         displayName: user.name,
@@ -49,12 +49,11 @@ export class FirestoreRepository implements Repository {
   }
 
   /**
-   * Gets the tenant ID for a given email.
-   * @param mail The email of the user.
-   * @returns Returns a promise that resolves to the tenant ID.
+   * @inheritdoc
    */
   async getTenantId(mail: string): Promise<string> {
-    const usersSnapshot = await this.db.collection(this.USER_COLLECTION_PATH)
+    const usersSnapshot = await this.db
+      .collection(this.USER_COLLECTION_PATH)
       .where("mail", "==", mail)
       .limit(1)
       .get();
@@ -66,13 +65,14 @@ export class FirestoreRepository implements Repository {
   }
 
   /**
-   * Gets all users from the Firestore database.
-   * @returns Returns a promise that resolves to an array of users.
+   * @inheritdoc
    */
   async getAllUsers(): Promise<User[]> {
-    const usersSnapshot = await this.db.collection(this.USER_COLLECTION_PATH).get();
+    const usersSnapshot = await this.db
+      .collection(this.USER_COLLECTION_PATH)
+      .get();
     const users: User[] = [];
-    usersSnapshot.forEach(doc => {
+    usersSnapshot.forEach((doc) => {
       const user = new User(
         doc.data().id,
         getRoleById(doc.data().role),
@@ -86,16 +86,15 @@ export class FirestoreRepository implements Repository {
   }
 
   /**
-   * Gets all users for a specific tenant from the Firestore database.
-   * @param tenantId The ID of the tenant.
-   * @returns Returns a promise that resolves to an array of users.
+   * @inheritdoc
    */
   async getAllTenantUsers(tenantId: string): Promise<User[]> {
-    const usersSnapshot = await this.db.collection(this.USER_COLLECTION_PATH)
+    const usersSnapshot = await this.db
+      .collection(this.USER_COLLECTION_PATH)
       .where("tenantId", "==", tenantId)
       .get();
     const users: User[] = [];
-    usersSnapshot.forEach(doc => {
+    usersSnapshot.forEach((doc) => {
       const user = new User(
         doc.data().id,
         getRoleById(doc.data().role),
@@ -109,8 +108,7 @@ export class FirestoreRepository implements Repository {
   }
 
   /**
-   * Gets the singleton instance of the repository.
-   * @returns Returns the singleton instance.
+   * @inheritdoc
    */
   public static getInstance(): FirestoreRepository {
     if (!FirestoreRepository.instance) {
@@ -145,7 +143,9 @@ export class FirestoreRepository implements Repository {
     const doc = await userRef.get();
     if (doc.exists) {
       await userRef.delete();
-      const tenantAwareAuth = auth().tenantManager().authForTenant(user.tenantId);
+      const tenantAwareAuth = auth()
+        .tenantManager()
+        .authForTenant(user.tenantId);
       await tenantAwareAuth.deleteUser(user.id);
     } else {
       throw new Error("User not found");
@@ -157,12 +157,14 @@ export class FirestoreRepository implements Repository {
    */
   async createUser(user: CreateUserRequestObject): Promise<void> {
     try {
-      const tenantAwareAuth = auth().tenantManager().authForTenant(user.tenantId);
+      const tenantAwareAuth = auth()
+        .tenantManager()
+        .authForTenant(user.tenantId);
       const userRecord = await tenantAwareAuth.createUser({
         email: user.mail,
         emailVerified: false,
         displayName: user.name,
-        password: user.password
+        password: user.password,
       });
       const userToCreate: User = new User(
         userRecord.uid,
