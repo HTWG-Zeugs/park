@@ -13,6 +13,8 @@ identityPlatForm:
 gateway:
   name: "park-external-http"
 
+domain: null
+
 authenticationService:
   image:
     name: "authentication-service"

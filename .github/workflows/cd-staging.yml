@@ -17,6 +17,7 @@ permissions:
   
 env:
   GCR_REPO: "${{ vars.REGION }}-docker.pkg.dev/${{ vars.STAGING_PROJECT_ID }}/${{ vars.STAGING_ARTIFACT_REPO }}"
+  DOMAIN: "park-app.tech"
 
 jobs:
   apply-terraform:
@@ -46,6 +47,7 @@ jobs:
           auto_approve: true
           variables: |
             is_github_actions=true
+            domain_name="$DOMAIN"
             tenants=
             [
               {
@@ -93,24 +95,7 @@ jobs:
             --set identityPlatForm.apiKey=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }} \
             --set identityPlatForm.authDomain=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
             --set gc_project_id=${{ vars.STAGING_PROJECT_ID }}
-            
-      - name: Wait for API gateway IP assignment
-        run: |
-          # Loop until the API gateway has an assigned external IP.
-          for i in {1..30}; do
-            IP=$(kubectl -n infra-ns get gateway -o jsonpath="{.items[0].status.addresses[0].value}")
-            if [ -n "$IP" ] && [ "$IP" != "<pending>" ]; then
-              echo "API gateway IP found: $IP"
-              echo "BACKEND_URL=http://$IP" >> $GITHUB_ENV
-              break
-            fi
-            echo "Waiting for the API gateway external IP..."
-            sleep 10
-          done
-          if [ -z "$IP" ] || [ "$IP" == "<pending>" ]; then
-            echo "Timed out waiting for the API gateway external IP."
-            exit 1
-          fi
+            --set domain=$DOMAIN
 
       - name: Get list of tenants
         run: |
@@ -127,8 +112,9 @@ jobs:
               --set gitTag=${{ inputs.git_tag }} \
               --set identityPlatForm.apiKey=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }} \
               --set identityPlatForm.authDomain=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
-              --set gc_project_id=${{ vars.STAGING_PROJECT_ID }}
-              --set tenant=$TENANT
+              --set gc_project_id=${{ vars.STAGING_PROJECT_ID }} \
+              --set domain=$DOMAIN \
+              --set subdomain=$TENANT
           done
       
 
@@ -143,5 +129,7 @@ jobs:
               --set identityPlatForm.apiKey=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }} \
               --set identityPlatForm.authDomain=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
               --set gc_project_id=${{ vars.STAGING_PROJECT_ID }} \
-              --set backendUrl=$BACKEND_URL \
+              --set backendUrl=http://$TENANT.$DOMAIN \
+              --set domain=$DOMAIN \
+              --set subdomain=$TENANT
           done

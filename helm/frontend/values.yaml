@@ -14,6 +14,9 @@ gateway:
   name: "park-external-http"
   namespace: "infra-ns"
 
+domain: null
+subdomain: null
+
 frontend:
   image:
     name: "frontend"
