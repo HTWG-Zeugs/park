@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-property-management
+  name: property-management
   labels:
-    app: {{ .Release.Name }}
+    app: park-{{ .Release.Namespace }}
     component: property-management
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Release.Name }}
+      app: park-{{ .Release.Namespace }}
       component: property-management
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}
+        app: park-{{ .Release.Namespace }}
         component: property-management
     spec:
-      serviceAccountName: {{ .Values.propertyManagement.serviceAccount.name }}
+      serviceAccountName: property-management-sa
       containers:
         - name: property-management
           image: "{{ .Values.repository }}/{{.Values.propertyManagement.image.name}}:{{ .Values.gitTag }}"
@@ -32,7 +32,7 @@ spec:
             - name: PORT
               value: "{{ .Values.propertyManagement.service.port }}"
             - name: PARKING_MANAGEMENT_BACKEND_URL
-              value: "http://{{ .Values.parkingManagement.service.name }}:{{ .Values.parkingManagement.service.port }}"
+              value: "http://parking-management:{{ .Values.parkingManagement.service.port }}"
           livenessProbe:
             httpGet:
               path: {{ .Values.propertyManagement.healthCheck.endpoint }}

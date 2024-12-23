@@ -6,12 +6,14 @@ spec:
   parentRefs:
     - kind: Gateway
       name: {{ .Values.gateway.name }}
-      namespace: infra-ns
+      namespace: {{ .Release.Namespace }}
+  hostnames:
+    - {{ .Values.domain }}
   rules:
     - matches:
         - path:
             type: PathPrefix
-            value: /authentication-service
+            value: {{ .Values.authenticationService.route.prefix }}
       filters:
         - type: URLRewrite
           urlRewrite:
@@ -19,5 +21,5 @@ spec:
               type: ReplacePrefixMatch
               replacePrefixMatch: /
       backendRefs:
-        - name: {{ .Values.authenticationService.service.name }}
+        - name: authentication-service
           port: {{ .Values.authenticationService.service.port }}

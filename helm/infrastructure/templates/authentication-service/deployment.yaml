@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-authentication-service
+  name: authentication-service
   labels:
-    app: {{ .Release.Name }}
+    app: park-{{ .Release.Namespace }}
     component: authentication-service
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Release.Name }}
+      app: park-{{ .Release.Namespace }}
       component: authentication-service
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}
+        app: park-{{ .Release.Namespace }}
         component: authentication-service
     spec:
-      serviceAccountName: {{ .Values.authenticationService.serviceAccount.name }}
+      serviceAccountName: authentication-service-sa
       containers:
         - name: authentication-service
           image: "{{ .Values.repository }}/{{.Values.authenticationService.image.name}}:{{ .Values.gitTag }}"

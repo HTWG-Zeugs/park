@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-parking-management
+  name: parking-management
   labels:
-    app: {{ .Release.Name }}
+    app: park-{{ .Release.Namespace }}
     component: parking-management
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Release.Name }}
+      app: park-{{ .Release.Namespace }}
       component: parking-management
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}
+        app: park-{{ .Release.Namespace }}
         component: parking-management
     spec:
-      serviceAccountName: {{ .Values.parkingManagement.serviceAccount.name }}
+      serviceAccountName: parking-management-sa
       containers:
         - name: parking-management
           image: "{{ .Values.repository }}/{{.Values.parkingManagement.image.name}}:{{ .Values.gitTag }}"

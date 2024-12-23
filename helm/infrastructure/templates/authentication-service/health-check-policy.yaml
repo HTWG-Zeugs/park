@@ -1,7 +1,7 @@
 apiVersion: networking.gke.io/v1
 kind: HealthCheckPolicy
 metadata:
-  name: {{ .Values.authenticationService.service.name }}-healthcheck
+  name: authentication-service-healthcheck
 spec:
   default:
     checkIntervalSec: {{ .Values.authenticationService.healthCheck.periodSeconds }}
@@ -16,4 +16,4 @@ spec:
   targetRef:
     group: ""
     kind: Service
-    name: {{ .Values.authenticationService.service.name }}
+    name: authentication-service

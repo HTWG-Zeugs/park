@@ -1,7 +1,7 @@
 apiVersion: networking.gke.io/v1
 kind: HealthCheckPolicy
 metadata:
-  name: {{ .Values.parkingManagement.service.name }}-healthcheck
+  name: parking-management-healthcheck
 spec:
   default:
     checkIntervalSec: {{ .Values.parkingManagement.healthCheck.periodSeconds }}
@@ -16,4 +16,4 @@ spec:
   targetRef:
     group: ""
     kind: Service
-    name: {{ .Values.parkingManagement.service.name }}
+    name: parking-management

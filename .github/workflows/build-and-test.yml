@@ -6,6 +6,11 @@ on:
       - main
       - dev
 
+permissions:
+  id-token: write 
+  contents: read 
+  pull-requests: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,7 +34,6 @@ jobs:
           docker build \
             -f ${{ matrix.service.dockerfile }} \
             . \
-            --no-cache \
             --platform linux/amd64
 
   test:
@@ -62,3 +66,30 @@ jobs:
       run: |
         cd ${{ matrix.service }}
         npm test --if-present
+
+  plan-terraform:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.3
+
+      - name: Login to Google Cloud
+        uses: 'google-github-actions/auth@v2'
+        with:
+          service_account: '${{ secrets.STAGING_GITHUB_SA }}'
+          workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
+
+      - name: terraform plan
+        uses: dflook/terraform-plan@v1
+        with:
+          path: terraform/staging
+          variables: |
+            is_github_actions=true
