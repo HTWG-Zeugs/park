@@ -19,7 +19,48 @@ env:
   GCR_REPO: "${{ vars.REGION }}-docker.pkg.dev/${{ vars.STAGING_PROJECT_ID }}/${{ vars.STAGING_ARTIFACT_REPO }}"
 
 jobs:
+  apply-terraform:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.3
+
+      - name: Login to Google Cloud
+        uses: 'google-github-actions/auth@v2'
+        with:
+          service_account: '${{ secrets.STAGING_GITHUB_SA }}'
+          workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
+
+      - name: terraform apply
+        uses: dflook/terraform-apply@v1
+        with:
+          path: terraform/staging
+          auto_approve: true
+          variables: |
+            is_github_actions=true
+            tenants=
+            [
+              {
+              id = "free"
+              domain = "free"
+              },
+              {
+              id = "premium"
+              domain = "premium"
+              }
+            ]
+
+
   deploy-backend:
+    needs: apply-terraform
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -71,34 +112,24 @@ jobs:
             exit 1
           fi
 
-      # - name: Get list of tenants
-      #   run: |
-      #     TENANTS=$(curl -s -X GET "https://example.com/api/tenants" | jq -r '.tenants[]')
-      #     FREE_TENANT="free"
-      #     PREMIUM_TENANT="premium"
-      #     TENANTS="$TENANTS $FREE_TENANT $PREMIUM_TENANT"
-      #     echo "TENANTS=$TENANTS" >> $GITHUB_ENV
-
       - name: Get list of tenants
         run: |
-          FREE_TENANT="free"
-          PREMIUM_TENANT="premium"
-          TENANTS="$FREE_TENANT $PREMIUM_TENANT"
+          TENANTS=array=( free premium )
           echo "TENANTS=$TENANTS" >> $GITHUB_ENV
 
       - name: Deploy backend for each tenant
         run: |
           for TENANT in $TENANTS; do
-          helm upgrade --install park-backend-$TENANT ./helm/backend \
-            --namespace $TENANT \
-            --create-namespace \
-            --set repository=${{ env.GCR_REPO }} \
-            --set gitTag=${{ inputs.git_tag }} \
-            --set identityPlatForm.apiKey=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }} \
-            --set identityPlatForm.authDomain=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
-            --set gc_project_id=${{ vars.STAGING_PROJECT_ID }}
-            --set tenant=$TENANT
-            done
+            helm upgrade --install park-backend-$TENANT ./helm/backend \
+              --namespace $TENANT \
+              --create-namespace \
+              --set repository=${{ env.GCR_REPO }} \
+              --set gitTag=${{ inputs.git_tag }} \
+              --set identityPlatForm.apiKey=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }} \
+              --set identityPlatForm.authDomain=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
+              --set gc_project_id=${{ vars.STAGING_PROJECT_ID }}
+              --set tenant=$TENANT
+          done
       
 
       - name: Deploy frontend for each tenant

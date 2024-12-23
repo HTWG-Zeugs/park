@@ -61,8 +61,6 @@ module "per_tenant" {
   app_namespace = each.value.domain
 }
 
-
-
 output "github_sa_email" {
   value = module.ci_cd_infrastructure.github_sa_email
 }
