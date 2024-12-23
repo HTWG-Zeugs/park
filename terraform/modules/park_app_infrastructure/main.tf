@@ -51,6 +51,14 @@ output "dns_zone_domain_name" {
   value = google_dns_managed_zone.park_domain.dns_name
 }
 
+resource "google_dns_record_set" "root_dns_record" {
+  managed_zone = google_dns_managed_zone.park_domain.name
+  name    = google_dns_managed_zone.park_domain.dns_name
+  type    = "A"
+  rrdatas = [google_compute_address.public_ip_address.address]
+  ttl     = 300
+}
+
 
 ### Application resources for the park app
 

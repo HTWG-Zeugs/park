@@ -13,6 +13,11 @@ variable project_id {
   default = "park-staging-444913"
 }
 
+variable domain_name {
+  type    = string
+  default = "park-app.tech"
+}
+
 variable create_cluster {
   type    = bool
   default = true
