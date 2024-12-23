@@ -77,7 +77,7 @@ jobs:
     needs: apply-terraform
     runs-on: ubuntu-latest
     env:
-      TENANTS: ${{ fromJson('["free", "premium"]') }} 
+      TENANTS: '(free premium)' # TODO: Update this to query the tenants
 
     steps:
       - name: Checkout code
