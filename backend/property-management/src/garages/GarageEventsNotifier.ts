@@ -51,6 +51,7 @@ export class GarageEventsNotifier {
       closingTime: garage.ClosingTime,
       chargingStations: garage.ChargingStations.map(cs => ({
         id: cs.Id,
+        name: cs.Name,
         chargingSpeedInKw: cs.ChargingSpeedInKw,
         pricePerKwh: cs.PricePerKwh,
       })),

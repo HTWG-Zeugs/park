@@ -150,6 +150,7 @@
   },
   "route_add_garage": {
     "add_garage": "Create new garage",
+    "edit_garage": "Edit garage",
     "name": "Name",
     "open": "Open",
     "closed": "Closed",
@@ -157,13 +158,22 @@
     "price_per_hour": "Price per hour",
     "opening_time": "Opening time",
     "closing_time": "Closing time",
+    "charging_stations": {
+      "title": "Charging stations",
+      "station": "Charging station",
+      "name": "Name",
+      "charging_speed": "Charging speed",
+      "price": "Price per  KWh"
+    },
     "errors": {
       "name_required": "Name is required",
       "number_parking_spots_positive": "Number of parking spots must be a positive number",
       "price_per_hour_positive": "Price per hour must be a positive number",
       "opening_time_invalid": "Opening time is invalid",
       "closing_time_invalid": "Closing time is invalid",
-      "closing_after_opening": "Closing time must be after opening time"
+      "closing_after_opening": "Closing time must be after opening time",
+      "charging_speed_positive": "Charging speed must be a positive number",
+      "price_per_kwh_positive": "Price per KWh must be a positive number"
     }
   },
   "route_edit_garage": {
