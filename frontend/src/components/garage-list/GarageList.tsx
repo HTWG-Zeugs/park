@@ -89,13 +89,14 @@ export default function DefectTable() {
     {
       field: "Name",
       headerName: t("component_garageList.table.column_name"),
-      width: 100,
+      flex: 1,
+      minWidth: 200,
     },
     {
       field: "LastModifiedAt",
       headerName: t("component_garageList.table.column_last_modified"),
       flex: 1,
-      minWidth: 175,
+      minWidth: 100,
     },
     {
       field: "actions",
