@@ -24,6 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TENANTS: ${{ '[{id = "free", domain = "free" }, {id = "premium", domain = "premium"}]'}}
 
     steps:
       - name: Checkout code
@@ -48,22 +49,16 @@ jobs:
           variables: |
             is_github_actions=true
             domain_name="$DOMAIN"
-            tenants=
-            [
-              {
-              id = "free"
-              domain = "free"
-              },
-              {
-              id = "premium"
-              domain = "premium"
-              }
-            ]
+            tenants=$TENANTS
+            
 
 
   deploy-backend:
     needs: apply-terraform
     runs-on: ubuntu-latest
+    env:
+      TENANTS: ${{ fromJson('["free", "premium"]') }} 
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -97,11 +92,6 @@ jobs:
             --set gc_project_id=${{ vars.STAGING_PROJECT_ID }}
             --set domain=$DOMAIN
 
-      - name: Get list of tenants
-        run: |
-          TENANTS=array=( free premium )
-          echo "TENANTS=$TENANTS" >> $GITHUB_ENV
-
       - name: Deploy backend for each tenant
         run: |
           for TENANT in $TENANTS; do
@@ -117,7 +107,6 @@ jobs:
               --set subdomain=$TENANT
           done
       
-
       - name: Deploy frontend for each tenant
         run: |
           for TENANT in $TENANTS; do
