@@ -66,7 +66,7 @@
       "column_actions": "Aktionen"
     },
     "actions": {
-      "change_role": "Rolle ändern",
+      "edit_user": "Benutzer bearbeiten",
       "delete": "Löschen"
     }
   },
@@ -124,6 +124,15 @@
     "status": "Status",
     "reported_at": "Gemeldet am",
     "last_modified_at": "Zuletzt geändert am"
+  },
+  "route_edit_user": {
+   "user_details": "Benutzer Details",
+    "name": "Name",
+    "mail": "E-Mail",
+    "tenant_id": "Mandanten ID",
+    "user_id": "Benutzer ID",
+    "role": "Rolle",
+    "save_button": "Speichern"
   },
   "component_garageList": {
     "buttons": {

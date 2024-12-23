@@ -39,6 +39,7 @@ export default function UserTable() {
   const [users, setUsers] = useState<UserObject[]>([]);
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const AUTHENTICATION_BACKEND = import.meta.env.VITE_AUTHENTICATION_SERVICE_URL;
 
@@ -73,15 +74,18 @@ export default function UserTable() {
   };
 
   const handleChangeRoleClicked = (id: GridRowId) => async () => {
-    //TODO: Implement change role
-    console.log("Change role for user with id:", id);
+    navigate("/users/edit", {
+      state: {
+        id: id,
+      },
+    });
   };
 
   const columns: GridColDef[] = [
     {
       field: "id",
       headerName: t("component_userList.table.column_user_id"),
-      width: 200,
+      width: 300,
     },
     {
       field: "name",
@@ -93,19 +97,19 @@ export default function UserTable() {
       field: "mail",
       headerName: t("component_userList.table.column_mail"),
       flex: 1,
-      minWidth: 200,
+      minWidth: 240,
     },
     {
       field: "role",
       headerName: t("component_userList.table.column_role"),
       flex: 1,
-      minWidth: 200,
+      minWidth: 180,
     },
     {
       field: "tenantId",
       headerName: t("component_userList.table.column_tenant_id"),
       flex: 1,
-      minWidth: 200,
+      minWidth: 180,
     },
     {
       field: "actions",
@@ -124,10 +128,10 @@ export default function UserTable() {
               color="inherit"
             />
           </Tooltip>,
-          <Tooltip title={t("component_userList.actions.change_role")}>
+          <Tooltip title={t("component_userList.actions.edit_user")}>
             <GridActionsCellItem
               icon={<DescriptionIcon color="primary" />}
-              label={t("component_userList.actions.change_role")}
+              label={t("component_userList.actions.edit_user")}
               onClick={handleChangeRoleClicked(id)}
               color="inherit"
             />

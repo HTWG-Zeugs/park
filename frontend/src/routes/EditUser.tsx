@@ -1,49 +1,59 @@
-import { useState } from "react";
-import { TextField, Typography, Paper, MenuItem } from "@mui/material";
+import { useEffect, useState } from "react";
+import { TextField, Paper, Typography, MenuItem } from "@mui/material";
 import Grid from "@mui/material/Grid2";
+import { useLocation, useNavigate } from "react-router-dom";
+import axiosAuthenticated from "src/services/Axios";
+import "src/components/thumbnail/Thumbs.css";
+import { useTranslation } from "react-i18next";
+import { UserObject } from "shared/UserObject";
+import { UserRoleObject } from "shared/UserRoleObject";
 import LoadingButton from "@mui/lab/LoadingButton";
 import SaveIcon from "@mui/icons-material/Save";
-import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { CreateUserRequestObject } from "shared/CreateUserRequestObject";
-import axiosAuthenticated from "src/services/Axios";
-import { UserRoleObject } from "shared/UserRoleObject";
-import { jwtDecode } from "jwt-decode";
-
-const AUTHENTICATION_URL = import.meta.env.VITE_AUTHENTICATION_SERVICE_URL;
-
-interface FormData {
-  name: string;
-  mail: string;
-  password: string;
-  role: string;
-}
+import { EditUserRequestObject } from "shared/EditUserRequestObject";
 
 interface FormErrors {
   name: string;
   mail: string;
-  password: string;
   role: string;
 }
 
-export default function AddUsers() {
+export default function EditUser() {
+  const location = useLocation();
+  const { id } = location.state || {};
   const navigate = useNavigate();
-
+  const [userToChange, setUserToChange] = useState<UserObject>({
+    id: "",
+    tenantId: "",
+    name: "",
+    mail: "",
+    role: 0,
+  });
+  const AUTHENTICATION_URL = import.meta.env.VITE_AUTHENTICATION_SERVICE_URL;
   const { t } = useTranslation();
-
-  const [formData, setFormData] = useState<FormData>({
+  const [formErrors, setFormErrors] = useState({
     name: "",
     mail: "",
     role: "",
-    password: "",
   });
 
-  const [formErrors, setFormErrors] = useState<FormErrors>({
-    name: "",
-    mail: "",
-    password: "",
-    role: "",
-  });
+  useEffect(() => {
+    if (id) {
+      try {
+        // fetch all infos about the user to change
+        axiosAuthenticated
+          .get(`${AUTHENTICATION_URL}/user/${id}`)
+          .then((response) => {
+            if (!response.data) {
+              throw new Error("No data");
+            }
+            const user: UserObject = response.data;
+            setUserToChange(user);
+          });
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      }
+    }
+  }, [id]);
 
   const validationFunctions: { [key: string]: (value: string) => string } = {
     name: (value: string) => {
@@ -60,16 +70,12 @@ export default function AddUsers() {
       if (!validRoles.includes(parsedValue)) return "Invalid role";
       return "";
     },
-    password: (value: string) => {
-      if (value.length < 1) return "Password is required";
-      return "";
-    },
   };
 
   const handleChange = (e: { target: { name: string; value: any } }) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setUserToChange({
+      ...userToChange,
       [name]: value,
     });
     validateField(name, value);
@@ -91,14 +97,15 @@ export default function AddUsers() {
       name: "",
       mail: "",
       role: "",
-      password: "",
     };
     let isValid = true;
 
-    for (const field in formData) {
+    for (const field in userToChange) {
       const validationFunction = validationFunctions[field];
       if (!validationFunction) continue;
-      const error = validationFunction(formData[field as keyof FormData]);
+      const error = validationFunction(
+        userToChange[field as keyof UserObject].toString()
+      );
       if (error) isValid = false;
       errors[field as keyof FormErrors] = error;
     }
@@ -108,29 +115,19 @@ export default function AddUsers() {
   };
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
-    //TODO: refactor later
-    // extract tenant_id from jwt_token
-    const token = localStorage.getItem('jwt_token');
-    if (!token) {
-      console.error("Token is null");
-      return;
-    }
-    const decodedToken: any = jwtDecode(token);
-    const tenantId = decodedToken.firebase.tenant;
-
-    // start of normal function
     e.preventDefault();
-    let userToCreate: CreateUserRequestObject = {
-      name: formData.name,
-      mail: formData.mail,
-      role: parseInt(formData.role),
-      password: formData.password,
-      tenantId: tenantId,
+    let user: EditUserRequestObject = {
+      name: userToChange.name,
+      mail: userToChange.mail,
+      role: userToChange.role,
     };
     if (!validateAllFields()) return;
 
     try {
-      await axiosAuthenticated.post(`${AUTHENTICATION_URL}/user`, userToCreate);
+      await axiosAuthenticated.put(
+        `${AUTHENTICATION_URL}/user/${userToChange.id}`,
+        user
+      );
       navigate("/users");
     } catch (error) {
       console.error(error);
@@ -151,17 +148,37 @@ export default function AddUsers() {
             <Grid container spacing={2}>
               <Grid size={12}>
                 <Typography variant="h6">
-                  {t("route_add_user.add_user")}
+                  {t("route_edit_user.user_details")}
                 </Typography>
               </Grid>
 
               <Grid size={12}>
                 <TextField
-                  id="outlined-error"
+                  label={t("route_edit_user.user_id")}
                   fullWidth
-                  label={t("route_add_user.grid_name")}
+                  slotProps={{ input: { readOnly: true } }}
+                  value={userToChange?.id}
+                  variant="outlined"
+                />
+              </Grid>
+
+              <Grid size={12}>
+                <TextField
+                  label={t("route_edit_user.tenant_id")}
+                  fullWidth
+                  slotProps={{ input: { readOnly: true } }}
+                  value={userToChange?.tenantId}
+                  variant="outlined"
+                />
+              </Grid>
+
+              <Grid size={12}>
+                <TextField
+                  label={t("route_edit_user.name")}
+                  fullWidth
                   name="name"
-                  value={formData.name}
+                  value={userToChange?.name}
+                  variant="outlined"
                   onChange={handleChange}
                   error={!!formErrors.name}
                   helperText={formErrors.name}
@@ -170,11 +187,11 @@ export default function AddUsers() {
 
               <Grid size={12}>
                 <TextField
-                  id="outlined-error"
+                  label={t("route_edit_user.mail")}
                   fullWidth
-                  label={t("route_add_user.grid_mail")}
                   name="mail"
-                  value={formData.mail}
+                  value={userToChange?.mail}
+                  variant="outlined"
                   onChange={handleChange}
                   error={!!formErrors.mail}
                   helperText={formErrors.mail}
@@ -185,44 +202,42 @@ export default function AddUsers() {
                 <TextField
                   select
                   fullWidth
-                  label={t("route_add_user.grid_role")}
+                  label={t("route_edit_user.role")}
                   name="role"
-                  value={formData.role}
+                  value={userToChange.role}
                   onChange={handleChange}
                   error={!!formErrors.role}
                   helperText={formErrors.role}
                 >
-                  <MenuItem value={UserRoleObject.solution_admin.valueOf().toString()}>
+                  <MenuItem
+                    value={UserRoleObject.solution_admin.valueOf().toString()}
+                  >
                     {t(`route_add_user.role_select.solution_admin`)}
                   </MenuItem>
-                  <MenuItem value={UserRoleObject.tenant_admin.valueOf().toString()}>
+                  <MenuItem
+                    value={UserRoleObject.tenant_admin.valueOf().toString()}
+                  >
                     {t(`route_add_user.role_select.tenant_admin`)}
                   </MenuItem>
-                  <MenuItem value={UserRoleObject.operational_manager.valueOf().toString()}>
+                  <MenuItem
+                    value={UserRoleObject.operational_manager
+                      .valueOf()
+                      .toString()}
+                  >
                     {t(`route_add_user.role_select.operational_manager`)}
                   </MenuItem>
-                  <MenuItem value={UserRoleObject.customer.valueOf().toString()}>
+                  <MenuItem
+                    value={UserRoleObject.customer.valueOf().toString()}
+                  >
                     {t(`route_add_user.role_select.customer`)}
                   </MenuItem>
-                  <MenuItem value={UserRoleObject.third_party.valueOf().toString()}>
+                  <MenuItem
+                    value={UserRoleObject.third_party.valueOf().toString()}
+                  >
                     {t(`route_add_user.role_select.third_party`)}
                   </MenuItem>
                 </TextField>
               </Grid>
-
-              <Grid size={12}>
-                <TextField
-                  fullWidth
-                  label={t("route_add_user.grid_password")}
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  error={!!formErrors.password}
-                  helperText={formErrors.password}
-                />
-              </Grid>
-
               <Grid size={12}>
                 <LoadingButton
                   type="submit"
@@ -231,7 +246,7 @@ export default function AddUsers() {
                   startIcon={<SaveIcon />}
                   variant="outlined"
                 >
-                  {t("route_add_user.save_button")}
+                  {t("route_edit_user.save_button")}
                 </LoadingButton>
               </Grid>
             </Grid>
