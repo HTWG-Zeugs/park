@@ -138,6 +138,7 @@
   },
   "route_add_garage": {
     "add_garage": "Neues Parkhaus anlegen",
+    "edit_garage": "Garage bearbeiten",
     "name": "Name",
     "open": "Geöffnet",
     "closed": "Geschlossen",

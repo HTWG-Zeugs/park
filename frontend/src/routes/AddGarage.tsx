@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TextField, Typography, Paper, FormControlLabel, Switch, Button, IconButton } from "@mui/material";
+import { TextField, Typography, Paper, FormControlLabel, Switch, IconButton } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import LoadingButton from "@mui/lab/LoadingButton";
 import SaveIcon from "@mui/icons-material/Save";
@@ -196,14 +196,14 @@ export default function AddGarage() {
       errors[index].pricePerKwh = t("route_add_garage.errors.price_per_kwh_positive");
     }
     setChargingStationFormErrors(errors);
-    // if (!(Number.isNaN(chargingSpeedInKw) || Number.isNaN(pricePerKwh))) {
+    if (!(Number.isNaN(chargingSpeedInKw) || Number.isNaN(pricePerKwh))) {
       setFormData((prevFormData) => ({
         ...prevFormData,
         chargingStations: prevFormData.chargingStations.map((station, i) =>
           i === index ? { ...station, name: name, chargingSpeedInKw: chargingSpeedInKw, pricePerKwh: pricePerKwh }: station
         ),
       }));
-    // }
+    }
   };
 
   // Handler for removing a charging station

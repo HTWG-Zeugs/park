@@ -141,6 +141,7 @@
   },
   "route_add_garage": {
     "add_garage": "Create new garage",
+    "edit_garage": "Edit garage",
     "name": "Name",
     "open": "Open",
     "closed": "Closed",
