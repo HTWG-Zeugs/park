@@ -95,21 +95,23 @@ jobs:
         run: |
           cd terraform/staging
           cat <<EOF > terraform.auto.tfvars.json
-          "is_github_actions" : true
-          "region"            : "europe-west1"
-          "project_id"        : "park-staging-444913"
-          "domain_name"       : "park-app.tech"
-          "create_cluster"    : true
-          "tenants" : [
-            {
-              "id"     : "free"
-              "domain" : "free"
-            },
-            {
-              "id"     : "premium"
-              "domain" : "premium"
-            }
-          ]
+          {
+            "is_github_actions" : true,
+            "region"            : "europe-west1",
+            "project_id"        : "park-staging-444913",
+            "domain_name"       : "park-app.tech",
+            "create_cluster"    : true,
+            "tenants" : [
+              {
+                "id"     : "free",
+                "domain" : "free"
+              },
+              {
+                "id"     : "premium",
+                "domain" : "premium"
+              }
+            ]
+          }
           EOF
 
       - name: terraform plan
