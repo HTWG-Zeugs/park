@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      TENANTS: ${{ '[{id = "free", domain = "free" }, {id = "premium", domain = "premium"}]'}}
+      TENANTS: '[{id = "free", domain = "free" }, {id = "premium", domain = "premium"}]'
 
     steps:
       - name: Checkout code
@@ -48,8 +48,8 @@ jobs:
           auto_approve: true
           variables: |
             is_github_actions=true
-            domain_name="$DOMAIN"
-            tenants=$TENANTS
+            domain_name=${{ env.DOMAIN}}
+            tenants=${{ env.TENANTS}}
             
 
 

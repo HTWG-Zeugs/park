@@ -11,6 +11,9 @@ permissions:
   contents: read 
   pull-requests: write
 
+env:
+  DOMAIN: "park-app.tech"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -71,6 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TENANTS: '[{id = "free", domain = "free" }, {id = "premium", domain = "premium"}]'
 
     steps:
       - name: Checkout code
@@ -93,3 +97,5 @@ jobs:
           path: terraform/staging
           variables: |
             is_github_actions=true
+            domain_name="${{ env.DOMAIN }}"
+            tenants="${{ env.TENANTS }}"
