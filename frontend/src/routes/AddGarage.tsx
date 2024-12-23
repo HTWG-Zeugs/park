@@ -189,19 +189,21 @@ export default function AddGarage() {
     if (name.length < 1 || !name) {
       errors[index].name = t("route_add_garage.errors.name_required");
     }
-    if (Number.isNaN(chargingSpeedInKw) || chargingSpeedInKw < 1) {
+    if (Number.isNaN(chargingSpeedInKw) || chargingSpeedInKw < 0.001) {
       errors[index].chargingSpeed = t("route_add_garage.errors.charging_speed_positive");
     }
-    if (Number.isNaN(pricePerKwh) || pricePerKwh < 1) {
+    if (Number.isNaN(pricePerKwh) || pricePerKwh < 0.001) {
       errors[index].pricePerKwh = t("route_add_garage.errors.price_per_kwh_positive");
     }
     setChargingStationFormErrors(errors);
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      chargingStations: prevFormData.chargingStations.map((station, i) =>
-        i === index ? { ...station, name: name, chargingSpeedInKw: chargingSpeedInKw, pricePerKwh: pricePerKwh }: station
-      ),
-    }));
+    // if (!(Number.isNaN(chargingSpeedInKw) || Number.isNaN(pricePerKwh))) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        chargingStations: prevFormData.chargingStations.map((station, i) =>
+          i === index ? { ...station, name: name, chargingSpeedInKw: chargingSpeedInKw, pricePerKwh: pricePerKwh }: station
+        ),
+      }));
+    // }
   };
 
   // Handler for removing a charging station
@@ -366,6 +368,7 @@ export default function AddGarage() {
                       <Grid size={12}>
                         <TextField
                           fullWidth
+                          type="number"
                           label={t("route_add_garage.charging_stations.charging_speed")}
                           name="charging-speed"
                           value={station.chargingSpeedInKw}
@@ -379,6 +382,7 @@ export default function AddGarage() {
                       <Grid size={12}>
                         <TextField
                           fullWidth
+                          type="number"
                           label={t("route_add_garage.charging_stations.price")}
                           name="price"
                           value={station.pricePerKwh}
