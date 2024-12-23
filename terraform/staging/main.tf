@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "google" {
-  credentials = file("terraform-key.json")
+  credentials = var.is_github_actions ? null : file("terraform-key.json")
   project     = var.project_id
   region      = var.region
 }

@@ -95,4 +95,4 @@ jobs:
       - name: Terraform Plan
         run: |
           cd terraform/staging
-          terraform plan
+          terraform plan -var 'is_github_actions=true'

@@ -1,3 +1,8 @@
+variable is_github_actions {
+  type    = bool
+  default = false
+}
+
 variable region {
   type    = string
   default = "europe-west1"
