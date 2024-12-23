@@ -9,6 +9,7 @@ on:
 permissions:
   id-token: write 
   contents: read 
+  pull-requests: write
 
 jobs:
   build:
@@ -76,7 +77,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.0.0
+          terraform_version: 1.10.3
 
       - name: Login to Google Cloud
         uses: 'google-github-actions/auth@v2'
@@ -87,12 +88,7 @@ jobs:
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Terraform Init
-        run: |
-          cd terraform/staging
-          terraform init
-
-      - name: Terraform Plan
-        run: |
-          cd terraform/staging
-          terraform plan -var 'is_github_actions=true'
+      - name: terraform plan
+        uses: dflook/terraform-plan@v1
+        with:
+          path: terraform/staging
