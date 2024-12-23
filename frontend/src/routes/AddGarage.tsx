@@ -37,6 +37,12 @@ interface FormErrors {
   closingTime: string;
 }
 
+interface ChargingStationFormErrors {
+  name: string;
+  chargingSpeed: string;
+  pricePerKwh: string;
+}
+
 export default function AddGarage() {
   const PROPERTY_MANAGEMENT_URL = import.meta.env.VITE_PROPERTY_MANAGEMENT_SERVICE_URL;
   const navigate = useNavigate();
@@ -61,6 +67,8 @@ export default function AddGarage() {
     openingTime: "",
     closingTime: "",
   });
+
+  const [chargingStationFormErrors, setChargingStationFormErrors] = useState<ChargingStationFormErrors[]>([]);
 
   const validationFunctions: Map = {
     name: (value: string) => {
@@ -148,6 +156,12 @@ export default function AddGarage() {
       errors[field as keyof FormErrors] = error;
     }
 
+    chargingStationFormErrors.forEach(obj => {
+      if (!!obj.name || !!obj.chargingSpeed || !!obj.pricePerKwh) {
+        isValid = false;
+      }
+    });
+
     setFormErrors({ ...errors });
     return isValid;
   };
@@ -161,26 +175,47 @@ export default function AddGarage() {
         { name: "", chargingSpeedInKw: 0, pricePerKwh: 0 }
       ],
     }));
+    setChargingStationFormErrors([...chargingStationFormErrors, {
+      name: "",
+      chargingSpeed: "",
+      pricePerKwh: ""
+    }])
   };
 
   // Handler for updating charging station properties
-  const handleChargingStationChange = (name: string, chargingSpeedInKw: number, pricePerKwh: number) => {
+  const handleChargingStationChange = (index: number, name: string, chargingSpeedInKw: number, pricePerKwh: number) => {
+    let errors = chargingStationFormErrors;
+    errors[index] = { name: "", chargingSpeed: "", pricePerKwh: "" };
+    if (name.length < 1 || !name) {
+      errors[index].name = t("route_add_garage.errors.name_required");
+    }
+    if (Number.isNaN(chargingSpeedInKw) || chargingSpeedInKw < 1) {
+      errors[index].chargingSpeed = t("route_add_garage.errors.charging_speed_positive");
+    }
+    if (Number.isNaN(pricePerKwh) || pricePerKwh < 1) {
+      errors[index].pricePerKwh = t("route_add_garage.errors.price_per_kwh_positive");
+    }
+    setChargingStationFormErrors(errors);
     setFormData((prevFormData) => ({
       ...prevFormData,
-      chargingStations: prevFormData.chargingStations.map((station) =>
-        station.name === name ? { ...station, chargingSpeedInKw: chargingSpeedInKw, pricePerKwh: pricePerKwh }: station
+      chargingStations: prevFormData.chargingStations.map((station, i) =>
+        i === index ? { ...station, name: name, chargingSpeedInKw: chargingSpeedInKw, pricePerKwh: pricePerKwh }: station
       ),
     }));
   };
 
   // Handler for removing a charging station
-  const removeChargingStation = (name: string) => {
+  const removeChargingStation = (index: number) => {
     setFormData((setFormData) => ({
       ...setFormData,
       chargingStations: setFormData.chargingStations.filter(
-        (station) => station.name !== name
+        (_, i) => i !== index
       ),
     }));
+    let errors = chargingStationFormErrors.filter(
+      (_, i) => i !== index
+    );
+    setChargingStationFormErrors(errors);
   };
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
@@ -311,7 +346,7 @@ export default function AddGarage() {
                         {t("route_add_garage.charging_stations.station")} {index + 1} 
                         <IconButton
                           type="button"
-                          onClick={() => removeChargingStation(station.name)}>
+                          onClick={() => removeChargingStation(index)}>
                             <DeleteOutlineIcon/>
                         </IconButton>
                       </Typography>
@@ -322,10 +357,10 @@ export default function AddGarage() {
                           name="name"
                           value={station.name}
                           onChange={(e) =>
-                            handleChargingStationChange(e.target.value, station.chargingSpeedInKw, station.pricePerKwh)
+                            handleChargingStationChange(index, e.target.value, station.chargingSpeedInKw, station.pricePerKwh)
                           }
-                          error={!!formErrors.closingTime}
-                          helperText={formErrors.closingTime}
+                          error={!!chargingStationFormErrors.at(index)?.name}
+                          helperText={chargingStationFormErrors.at(index)?.name}
                         />
                       </Grid>
                       <Grid size={12}>
@@ -335,10 +370,10 @@ export default function AddGarage() {
                           name="charging-speed"
                           value={station.chargingSpeedInKw}
                           onChange={(e) =>
-                            handleChargingStationChange(station.name, +e.target.value, station.pricePerKwh)
+                            handleChargingStationChange(index, station.name, +e.target.value, station.pricePerKwh)
                           }
-                          error={!!formErrors.closingTime}
-                          helperText={formErrors.closingTime}
+                          error={!!chargingStationFormErrors.at(index)?.chargingSpeed}
+                          helperText={chargingStationFormErrors.at(index)?.chargingSpeed}
                         />
                       </Grid>
                       <Grid size={12}>
@@ -348,10 +383,10 @@ export default function AddGarage() {
                           name="price"
                           value={station.pricePerKwh}
                           onChange={(e) =>
-                            handleChargingStationChange(station.name, station.chargingSpeedInKw, +e.target.value)
+                            handleChargingStationChange(index, station.name, station.chargingSpeedInKw, +e.target.value)
                           }
-                          error={!!formErrors.closingTime}
-                          helperText={formErrors.closingTime}
+                          error={!!chargingStationFormErrors.at(index)?.pricePerKwh}
+                          helperText={chargingStationFormErrors.at(index)?.pricePerKwh}
                         />
                       </Grid>
                     </Grid>
@@ -367,8 +402,7 @@ export default function AddGarage() {
                   loading={saving}
                   loadingPosition="start"
                   startIcon={<SaveIcon />}
-                  variant="outlined"
-                >
+                  variant="outlined">
                   {t("common.save_button")}
                 </LoadingButton>
               </Grid>

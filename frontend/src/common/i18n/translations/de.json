@@ -158,7 +158,9 @@
       "price_per_hour_positive": "Preis pro Stunde muss eine positive Zahl sein",
       "opening_time_invalid": "Öffnungszeit ist ungültig",
       "closing_time_invalid": "Schließzeit ist ungültig",
-      "closing_after_opening": "Schließzeit muss nach der Öffnungszeit liegen"
+      "closing_after_opening": "Schließzeit muss nach der Öffnungszeit liegen",
+      "charging_speed_positive": "Ladegeschwindigkeit muss eine positive Zahl sein",
+      "price_per_kwh_positive": "Preis pro KWh muss eine positive Zahl sein"
     }
   },
   "route_edit_garage": {
