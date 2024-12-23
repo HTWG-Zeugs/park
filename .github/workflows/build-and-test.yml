@@ -11,6 +11,9 @@ permissions:
   contents: read 
   pull-requests: write
 
+env:
+  DOMAIN: "park-app.tech"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -71,6 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TENANTS: '[{id = "free", domain = "free" }, {id = "premium", domain = "premium"}]'
 
     steps:
       - name: Checkout code
@@ -87,9 +91,30 @@ jobs:
           service_account: '${{ secrets.STAGING_GITHUB_SA }}'
           workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
 
+      - name: Write Terraform Variables File
+        run: |
+          cd terraform/staging
+          cat <<EOF > terraform.auto.tfvars.json
+          {
+            "is_github_actions" : true,
+            "region"            : "europe-west1",
+            "project_id"        : "park-staging-444913",
+            "domain_name"       : "park-app.tech",
+            "create_cluster"    : true,
+            "tenants" : [
+              {
+                "id"     : "free",
+                "domain" : "free"
+              },
+              {
+                "id"     : "premium",
+                "domain" : "premium"
+              }
+            ]
+          }
+          EOF
+
       - name: terraform plan
         uses: dflook/terraform-plan@v1
         with:
           path: terraform/staging
-          variables: |
-            is_github_actions=true

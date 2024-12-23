@@ -24,6 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TENANTS: '[{id = "free", domain = "free" }, {id = "premium", domain = "premium"}]'
 
     steps:
       - name: Checkout code
@@ -40,30 +41,44 @@ jobs:
           service_account: '${{ secrets.STAGING_GITHUB_SA }}'
           workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
 
+
+      - name: Write Terraform Variables File
+        run: |
+          cd terraform/staging
+          cat <<EOF > terraform.auto.tfvars.json
+          {
+            "is_github_actions" : true,
+            "region"            : "europe-west1",
+            "project_id"        : "park-staging-444913",
+            "domain_name"       : "park-app.tech",
+            "create_cluster"    : true,
+            "tenants" : [
+              {
+                "id"     : "free",
+                "domain" : "free"
+              },
+              {
+                "id"     : "premium",
+                "domain" : "premium"
+              }
+            ]
+          }
+          EOF
+
       - name: terraform apply
         uses: dflook/terraform-apply@v1
         with:
           path: terraform/staging
           auto_approve: true
-          variables: |
-            is_github_actions=true
-            domain_name="$DOMAIN"
-            tenants=
-            [
-              {
-              id = "free"
-              domain = "free"
-              },
-              {
-              id = "premium"
-              domain = "premium"
-              }
-            ]
+            
 
 
   deploy-backend:
     needs: apply-terraform
     runs-on: ubuntu-latest
+    env:
+      TENANTS: ${{ fromJson('["free", "premium"]') }} 
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -97,11 +112,6 @@ jobs:
             --set gc_project_id=${{ vars.STAGING_PROJECT_ID }}
             --set domain=$DOMAIN
 
-      - name: Get list of tenants
-        run: |
-          TENANTS=array=( free premium )
-          echo "TENANTS=$TENANTS" >> $GITHUB_ENV
-
       - name: Deploy backend for each tenant
         run: |
           for TENANT in $TENANTS; do
@@ -117,7 +127,6 @@ jobs:
               --set subdomain=$TENANT
           done
       
-
       - name: Deploy frontend for each tenant
         run: |
           for TENANT in $TENANTS; do
