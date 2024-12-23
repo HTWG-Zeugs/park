@@ -223,6 +223,7 @@ export class GarageService {
       garageDto.closingTime,
       garageDto.chargingStations.map(cs => ({
         id: cs.id,
+        name: cs.name,
         isOccupied: false,
         isCharging: false,
         chargingSpeedInKw: cs.chargingSpeedInKw,

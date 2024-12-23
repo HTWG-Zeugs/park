@@ -147,6 +147,7 @@
   },
   "route_add_garage": {
     "add_garage": "Neues Parkhaus anlegen",
+    "edit_garage": "Garage bearbeiten",
     "name": "Name",
     "open": "Geöffnet",
     "closed": "Geschlossen",
@@ -154,13 +155,22 @@
     "price_per_hour": "Preis pro Stunde",
     "opening_time": "Öffnungszeit",
     "closing_time": "Schließzeit",
+    "charging_stations": {
+      "title": "Ladestationen",
+      "station": "Ladestation",
+      "name": "Name",
+      "charging_speed": "Ladegeschwindigkeit",
+      "price": "Preis pro KWh"
+    },
     "errors": {
       "name_required": "Name ist erforderlich",
       "number_parking_spots_positive": "Anzahl der Parkplätze muss eine positive Zahl sein",
       "price_per_hour_positive": "Preis pro Stunde muss eine positive Zahl sein",
       "opening_time_invalid": "Öffnungszeit ist ungültig",
       "closing_time_invalid": "Schließzeit ist ungültig",
-      "closing_after_opening": "Schließzeit muss nach der Öffnungszeit liegen"
+      "closing_after_opening": "Schließzeit muss nach der Öffnungszeit liegen",
+      "charging_speed_positive": "Ladegeschwindigkeit muss eine positive Zahl sein",
+      "price_per_kwh_positive": "Preis pro KWh muss eine positive Zahl sein"
     }
   },
   "route_edit_garage": {

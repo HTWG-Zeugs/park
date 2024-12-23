@@ -1,15 +1,17 @@
 import { useState } from "react";
-import { TextField, Typography, Paper, FormControlLabel, Switch } from "@mui/material";
+import { TextField, Typography, Paper, FormControlLabel, Switch, IconButton } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import LoadingButton from "@mui/lab/LoadingButton";
 import SaveIcon from "@mui/icons-material/Save";
 import { GarageRequestObject } from "shared/GarageRequestObject";
-
 import { useNavigate } from "react-router-dom";
 import axiosAuthenticated from "src/services/Axios";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { useTranslation } from "react-i18next";
+import { ChargingStationRequestObject } from "shared/ChargingStationRequestObject";
+import AddIcon from '@mui/icons-material/Add';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 dayjs.extend(utc);
 
@@ -23,7 +25,8 @@ interface FormData {
   numberParkingSpots: number;
   pricePerHour: number;
   openingTime: string;
-  closingTime: string; 
+  closingTime: string;
+  chargingStations: ChargingStationRequestObject[]; 
 }
 
 interface FormErrors {
@@ -32,6 +35,12 @@ interface FormErrors {
   pricePerHour: string;
   openingTime: string;
   closingTime: string;
+}
+
+interface ChargingStationFormErrors {
+  name: string;
+  chargingSpeed: string;
+  pricePerKwh: string;
 }
 
 export default function AddGarage() {
@@ -48,6 +57,7 @@ export default function AddGarage() {
     pricePerHour: 1,
     openingTime: "06:00",
     closingTime: "23:00",
+    chargingStations: []
   });
 
   const [formErrors, setFormErrors] = useState<FormErrors>({
@@ -57,6 +67,8 @@ export default function AddGarage() {
     openingTime: "",
     closingTime: "",
   });
+
+  const [chargingStationFormErrors, setChargingStationFormErrors] = useState<ChargingStationFormErrors[]>([]);
 
   const validationFunctions: Map = {
     name: (value: string) => {
@@ -144,8 +156,68 @@ export default function AddGarage() {
       errors[field as keyof FormErrors] = error;
     }
 
+    chargingStationFormErrors.forEach(obj => {
+      if (!!obj.name || !!obj.chargingSpeed || !!obj.pricePerKwh) {
+        isValid = false;
+      }
+    });
+
     setFormErrors({ ...errors });
     return isValid;
+  };
+
+  // Handler for adding a new charging station
+  const addChargingStation = () => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      chargingStations: [
+        ...prevFormData.chargingStations,
+        { name: "", chargingSpeedInKw: 0, pricePerKwh: 0 }
+      ],
+    }));
+    setChargingStationFormErrors([...chargingStationFormErrors, {
+      name: "",
+      chargingSpeed: "",
+      pricePerKwh: ""
+    }])
+  };
+
+  // Handler for updating charging station properties
+  const handleChargingStationChange = (index: number, name: string, chargingSpeedInKw: number, pricePerKwh: number) => {
+    let errors = chargingStationFormErrors;
+    errors[index] = { name: "", chargingSpeed: "", pricePerKwh: "" };
+    if (name.length < 1 || !name) {
+      errors[index].name = t("route_add_garage.errors.name_required");
+    }
+    if (Number.isNaN(chargingSpeedInKw) || chargingSpeedInKw < 0.001) {
+      errors[index].chargingSpeed = t("route_add_garage.errors.charging_speed_positive");
+    }
+    if (Number.isNaN(pricePerKwh) || pricePerKwh < 0.001) {
+      errors[index].pricePerKwh = t("route_add_garage.errors.price_per_kwh_positive");
+    }
+    setChargingStationFormErrors(errors);
+    if (!(Number.isNaN(chargingSpeedInKw) || Number.isNaN(pricePerKwh))) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        chargingStations: prevFormData.chargingStations.map((station, i) =>
+          i === index ? { ...station, name: name, chargingSpeedInKw: chargingSpeedInKw, pricePerKwh: pricePerKwh }: station
+        ),
+      }));
+    }
+  };
+
+  // Handler for removing a charging station
+  const removeChargingStation = (index: number) => {
+    setFormData((setFormData) => ({
+      ...setFormData,
+      chargingStations: setFormData.chargingStations.filter(
+        (_, i) => i !== index
+      ),
+    }));
+    let errors = chargingStationFormErrors.filter(
+      (_, i) => i !== index
+    );
+    setChargingStationFormErrors(errors);
   };
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
@@ -162,7 +234,7 @@ export default function AddGarage() {
       pricePerHourInEuros: formData.pricePerHour,
       openingTime: formData.openingTime,
       closingTime: formData.closingTime,
-      chargingStations: [],
+      chargingStations: formData.chargingStations,
     };
 
     try {
@@ -188,7 +260,7 @@ export default function AddGarage() {
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
               <Grid size={12}>
-                <Typography variant="h6">
+                <Typography variant="h4">
                   {t("route_add_garage.add_garage")}
                 </Typography>
               </Grid>
@@ -267,6 +339,66 @@ export default function AddGarage() {
                 />
               </Grid>
 
+              <Typography variant="h5">
+                {t("route_add_garage.charging_stations.title")}
+              </Typography>
+                {formData.chargingStations.map((station, index) => (
+                    <Grid container spacing={2}>
+                      <Typography variant="h6">
+                        {t("route_add_garage.charging_stations.station")} {index + 1} 
+                        <IconButton
+                          type="button"
+                          onClick={() => removeChargingStation(index)}>
+                            <DeleteOutlineIcon/>
+                        </IconButton>
+                      </Typography>
+                      <Grid size={12}>
+                        <TextField
+                          fullWidth
+                          label={t("route_add_garage.charging_stations.name")}
+                          name="name"
+                          value={station.name}
+                          onChange={(e) =>
+                            handleChargingStationChange(index, e.target.value, station.chargingSpeedInKw, station.pricePerKwh)
+                          }
+                          error={!!chargingStationFormErrors.at(index)?.name}
+                          helperText={chargingStationFormErrors.at(index)?.name}
+                        />
+                      </Grid>
+                      <Grid size={12}>
+                        <TextField
+                          fullWidth
+                          type="number"
+                          label={t("route_add_garage.charging_stations.charging_speed")}
+                          name="charging-speed"
+                          value={station.chargingSpeedInKw}
+                          onChange={(e) =>
+                            handleChargingStationChange(index, station.name, +e.target.value, station.pricePerKwh)
+                          }
+                          error={!!chargingStationFormErrors.at(index)?.chargingSpeed}
+                          helperText={chargingStationFormErrors.at(index)?.chargingSpeed}
+                        />
+                      </Grid>
+                      <Grid size={12}>
+                        <TextField
+                          fullWidth
+                          type="number"
+                          label={t("route_add_garage.charging_stations.price")}
+                          name="price"
+                          value={station.pricePerKwh}
+                          onChange={(e) =>
+                            handleChargingStationChange(index, station.name, station.chargingSpeedInKw, +e.target.value)
+                          }
+                          error={!!chargingStationFormErrors.at(index)?.pricePerKwh}
+                          helperText={chargingStationFormErrors.at(index)?.pricePerKwh}
+                        />
+                      </Grid>
+                    </Grid>
+                ))}
+                <IconButton type="button" onClick={addChargingStation}>
+                  <AddIcon/>
+                </IconButton>
+
               <Grid size={12}>
                 <LoadingButton
                   type="submit"
@@ -274,8 +406,7 @@ export default function AddGarage() {
                   loading={saving}
                   loadingPosition="start"
                   startIcon={<SaveIcon />}
-                  variant="outlined"
-                >
+                  variant="outlined">
                   {t("common.save_button")}
                 </LoadingButton>
               </Grid>
