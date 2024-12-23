@@ -2,12 +2,11 @@ import { Repository } from "./repositories/repository";
 import { FirestoreRepository } from "./repositories/firestoreRepository";
 import { UserService } from "./services/userService";
 import { Config } from "./config";
-import { getRoleById } from "./models/role";
 import validateFirebaseIdToken from "./middleware/validateFirebaseIdToken";
 import { User } from "./models/user";
-import { Role } from "./models/role";
 import cors from "cors";
 import { CreateUserRequestObject } from "../../shared/CreateUserRequestObject";
+import { EditUserRequestObject } from "../../shared/EditUserRequestObject";
 
 const express = require("express");
 const app = express();
@@ -60,7 +59,6 @@ app.post("/user", validateFirebaseIdToken, async (req, res) => {
   const signedInUser: User = res.user;
   try {
     const userToCreate: CreateUserRequestObject = req.body;
-    console.log("Creating user:", userToCreate);
     await userService.createUser(signedInUser, userToCreate);
     res.status(200).send("User created");
   } catch (e) {
@@ -69,33 +67,27 @@ app.post("/user", validateFirebaseIdToken, async (req, res) => {
 });
 
 /**
- * Sets user role.
+ * Updates user.
  */
 app.put(
-  "/user/:userId/role/:role",
+  "/user/:userId",
   validateFirebaseIdToken,
   async (req, res) => {
     // check if all parameters are valid
     const signedInUser: User = res.user;
     try {
       const userId: string = req.params.userId;
+      const attributesToChange: EditUserRequestObject = req.body;
       let user: User;
       try {
         user = await userService.getUser(signedInUser, userId);
       } catch (e) {
         return res.status(404).send("User not found");
       }
-      let roleId: number = parseInt(req.params.role, 10);
-      if (isNaN(roleId)) {
-        return res.status(400).send("Invalid role ID");
-      }
-      const role: Role = getRoleById(roleId);
-
-      // all roles are valid, now set the role
-      await userService.setUserRole(signedInUser, user, role);
-      res.status(200).send("User role updated");
+      await userService.updateUser(signedInUser, user, attributesToChange);
+      res.status(200).send("User updated");
     } catch (e) {
-      res.status(500).send("Setting user role failed: " + e);
+      res.status(500).send("Updating user failed: " + e);
     }
   }
 );
