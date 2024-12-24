@@ -15,6 +15,7 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import axiosAuthenticated from "src/services/Axios";
+import { UserRoleObject } from "shared/UserRoleObject";
 
 function EditToolbar() {
   const navigate = useNavigate();
@@ -35,8 +36,16 @@ function EditToolbar() {
   );
 }
 
+interface UserTableEntry {
+  id: string;
+  name: string;
+  mail: string;
+  role: string;
+  tenantId: string;
+}
+
 export default function UserTable() {
-  const [users, setUsers] = useState<UserObject[]>([]);
+  const [users, setUsers] = useState<UserTableEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -52,7 +61,14 @@ export default function UserTable() {
           throw new Error(t("component_userList.error_fetching_data"));
         }
         const responseData: UserObject[] = response.data;
-        setUsers(responseData);
+        const users: UserTableEntry[] = responseData.map((user) => ({
+          id: user.id,
+          name: user.name,
+          mail: user.mail,
+          role: getRoleById(user.role) || "-",
+          tenantId: user.tenantId,
+        }));
+        setUsers(users);
       })
       .catch((error) => {
         console.error("Failed to fetch data:", error);
@@ -62,7 +78,25 @@ export default function UserTable() {
 
   useEffect(() => {
     fetchAllUsers();
-  }, [loading]);
+  }, [loading, t]);
+
+  function getRoleById(roleId: number): string | undefined {
+    const role = Object.values(UserRoleObject).find((value) => value === roleId);
+    switch (role) {
+      case UserRoleObject.solution_admin:
+        return t("component_userList.roles.solution_admin");
+      case UserRoleObject.tenant_admin:
+        return t("component_userList.roles.tenant_admin");
+      case UserRoleObject.operational_manager:
+        return t("component_userList.roles.operational_manager");
+      case UserRoleObject.customer:
+        return t("component_userList.roles.customer");
+      case UserRoleObject.third_party:
+        return t("component_userList.roles.third_party");
+      default:
+        return undefined
+    }
+  }
 
   const handleDeleteClicked = (id: GridRowId) => async () => {
     try {

@@ -68,6 +68,13 @@
       "column_tenant_id": "Tenant ID",
       "column_actions": "Actions"
     },
+    "roles": {
+      "solution_admin": "Solution Admin",
+      "tenant_admin": "Tenant Admin",
+      "operational_manager": "Operational Staff",
+      "customer": "Customer",
+      "third_party": "Third Party"
+    },
     "actions": {
       "edit_user": "Edit user",
       "delete": "Delete"

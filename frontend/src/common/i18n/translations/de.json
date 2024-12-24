@@ -65,6 +65,13 @@
       "column_tenant_id": "Mandanten ID",
       "column_actions": "Aktionen"
     },
+    "roles": {
+      "solution_admin": "Solution Admin",
+      "tenant_admin": "Mandanten Admin",
+      "operational_manager": "Betriebsmitarbeitender",
+      "customer": "Kunde",
+      "third_party": "Drittanbieter"
+    },
     "actions": {
       "edit_user": "Benutzer bearbeiten",
       "delete": "Löschen"
