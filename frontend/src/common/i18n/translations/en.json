@@ -54,7 +54,7 @@
     },
     "actions": {
       "delete": "Delete",
-      "details": "details"
+      "details": "Details"
     }
   },
   "component_userList": {
@@ -137,13 +137,13 @@
   },
   "route_edit_user": {
     "user_details": "User Details",
-     "name": "Name",
-     "mail": "Mail",
-     "tenant_id": "Tenant ID",
-     "user_id": "User ID",
-     "role": "Role",
-     "save_button": "Save"
-   },
+    "name": "Name",
+    "mail": "Mail",
+    "tenant_id": "Tenant ID",
+    "user_id": "User ID",
+    "role": "Role",
+    "save_button": "Save"
+  },
   "component_garageList": {
     "buttons": {
       "add_garage": "Add Garage"

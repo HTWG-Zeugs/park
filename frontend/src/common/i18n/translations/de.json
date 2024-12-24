@@ -52,6 +52,10 @@
       "column_last_modified": "Zuletzt geändert am",
       "column_status": "Status",
       "column_actions": "Aktionen"
+    },
+    "actions": {
+      "delete": "Löschen",
+      "details": "Details"
     }
   },
   "component_userList": {
@@ -133,7 +137,7 @@
     "last_modified_at": "Zuletzt geändert am"
   },
   "route_edit_user": {
-   "user_details": "Benutzer Details",
+    "user_details": "Benutzer Details",
     "name": "Name",
     "mail": "E-Mail",
     "tenant_id": "Mandanten ID",
