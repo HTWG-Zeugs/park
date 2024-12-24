@@ -26,6 +26,7 @@ export default function DefectDetailsView() {
   const [images, setImages] = useState<{ name: string; url: string; hasUrlError: boolean }[]>([]);
   const [selectedImage, setSelectedImage] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const PROPERTY_MANAGEMENT_URL = import.meta.env.VITE_PROPERTY_MANAGEMENT_SERVICE_URL;
 
   const [defectData, setDefectData] = useState({
     object: "",
@@ -110,7 +111,7 @@ export default function DefectDetailsView() {
 
   function fetchDefect(id: string) {
     axiosAuthenticated
-      .get(`/defects/${id}`)
+      .get(`${PROPERTY_MANAGEMENT_URL}/defects/${id}`)
       .then((response) => {
         const defectData = response.data as DefectResponseObject;
         const formattedData = {
