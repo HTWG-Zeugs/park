@@ -62,7 +62,7 @@ export default function UserTable() {
 
   useEffect(() => {
     fetchAllUsers();
-  }, []);
+  }, [loading]);
 
   const handleDeleteClicked = (id: GridRowId) => async () => {
     try {

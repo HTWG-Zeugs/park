@@ -1,5 +1,5 @@
 import { User } from "../models/user";
-import { Role } from "../models/role";
+import { Role, getRoleById } from "../models/role";
 import { Repository } from "../repositories/repository";
 import { CreateUserRequestObject } from "../../../shared/CreateUserRequestObject";
 import { EditUserRequestObject } from "../../../shared/EditUserRequestObject";
@@ -82,7 +82,7 @@ export class UserService {
   async updateUser(signedInUser: User, user: User, attributesToChange: EditUserRequestObject): Promise<void> {
     const newUser: User = new User(
       user.id,
-      attributesToChange.role,
+      getRoleById(attributesToChange.role),
       user.tenantId,
       attributesToChange.mail,
       attributesToChange.name
