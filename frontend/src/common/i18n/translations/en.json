@@ -153,6 +153,10 @@
       "column_name": "Name",
       "column_last_modified": "Last modified at",
       "column_actions": "Actions"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
     }
   },
   "route_add_garage": {
