@@ -2,12 +2,13 @@ import { GarageDto } from "../shared/garageDto";
 import { FirestoreRepository } from "./repositories/firestoreRepository";
 import { Repository } from "./repositories/repository";
 import { GarageService } from "./services/garageService";
+import { GarageInfoObject } from '../../shared/GarageInfoObject';
 import cors from "cors";
 import "dotenv/config";
 
 const express = require("express");
 const app = express();
-const port = process.env.PORT ?? 8081;
+const port = process.env.PORT ?? 8080;
 
 app.use(cors());
 app.use(express.json());
@@ -15,7 +16,17 @@ app.use(express.json());
 const repo: Repository = new FirestoreRepository();
 const garageService: GarageService = new GarageService(repo);
 
-app.put("/garage/create", async (req, res) => {
+app.get("/garage/:garageId", async (req, res) => {
+  try {
+    const garageId: string = req.params.garageId;
+    const garage: GarageInfoObject = await garageService.getGarage(garageId);
+    res.status(200).send(garage);
+  } catch (e) {
+    res.status(500).send(`Getting garage with ID ${req.params.garageId} failed: ${e}`);
+  }
+});
+
+app.post("/garage/create", async (req, res) => {
   try {
     const garageDto: GarageDto = req.body;
     await garageService.createGarage(garageDto);
@@ -32,6 +43,16 @@ app.put("/garage/update", async (req, res) => {
     res.status(200).send("success");
   } catch (e) {
     res.status(500).send("updating garage failed: " + e);
+  }
+});
+
+app.delete("/garage/delete/:garageId", async (req, res) => {
+  try {
+    const garageId: string = req.params.garageId;
+    await garageService.deleteGarage(garageId);
+    res.status(200).send("deleted");
+  } catch (e) {
+    res.status(500).send("deleting garage failed: " + e);
   }
 });
 
@@ -146,6 +167,11 @@ app.get("/garage/charging/invoice/:sessionId", async (req, res) => {
   } catch (e) {
     res.status(500).send("Getting charging invoice failed: " + e);
   }
+});
+
+
+app.get("/livez", (req, res) => {
+  res.status(200).send("Parking management service is running.");
 });
 
 app.listen(port, () => {

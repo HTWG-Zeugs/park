@@ -1,7 +1,7 @@
 
 export class ChargingStationDto {
     id: string;
-    isOccupied: boolean;
+    name: string;
     chargingSpeedInKw: number;
     pricePerKwh: number;
 }

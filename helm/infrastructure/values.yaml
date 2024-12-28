@@ -1,0 +1,30 @@
+replicaCount: 1
+
+repository: ""
+gitTag: ""
+
+gc_project_id: "PROJECT_ID"
+
+identityPlatForm:
+  apiKey: "API_KEY"
+  authDomain: "AUTH_DOMAIN"
+  tenantId: "DEFECT_ID"
+
+gateway:
+  name: "park-external-http"
+
+domain: null
+
+authenticationService:
+  image:
+    name: "authentication-service"
+    pullPolicy: IfNotPresent
+  service:
+    port: 8082
+  route:
+    prefix: "/auth"
+  healthCheck:
+    endpoint: "/livez"
+    initialDelaySeconds: 3
+    periodSeconds: 5
+    timeoutSeconds: 3

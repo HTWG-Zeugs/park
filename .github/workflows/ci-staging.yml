@@ -1,0 +1,61 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - dev
+
+permissions:
+  id-token: write 
+  contents: read 
+
+env:
+  TAG_ID: "${{ github.sha }}"
+  GCR_REPO: "${{ vars.REGION }}-docker.pkg.dev/${{ vars.STAGING_PROJECT_ID }}/${{ vars.STAGING_ARTIFACT_REPO }}"
+
+jobs:
+  build-and-push-images:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - { name: "property-management", dockerfile: "./property-management.Dockerfile" }
+          - { name: "parking-management", dockerfile: "./parking-management.Dockerfile" }
+          - { name: "authentication-service", dockerfile: "./authentication-service.Dockerfile" }
+          - { name: "frontend", dockerfile: "./frontend.Dockerfile" }
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Google Cloud
+        uses: 'google-github-actions/auth@v2'
+        with:
+          service_account: '${{ secrets.STAGING_GITHUB_SA }}'
+          workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Google Cloud
+        run: gcloud auth configure-docker ${{ vars.REGION }}-docker.pkg.dev
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -f ${{ matrix.service.dockerfile }} \
+            . \
+            -t ${{ matrix.service.name }}:${{ env.TAG_ID }} \
+            --no-cache \
+            --platform linux/amd64
+
+      - name: Tag Docker image
+        run: |
+          docker tag ${{ matrix.service.name }}:${{ env.TAG_ID }} ${{ env.GCR_REPO }}/${{ matrix.service.name }}:${{ env.TAG_ID }}
+
+      - name: Push Docker image to GCR
+        run: |
+          docker push ${{ env.GCR_REPO }}/${{ matrix.service.name }}:${{ env.TAG_ID }}

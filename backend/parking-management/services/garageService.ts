@@ -1,6 +1,8 @@
+import { GarageInfoObject } from "../../../shared/GarageInfoObject";
 import { GarageDto } from "../../shared/garageDto";
 import { ChargingInvoice } from "../models/chargingInvoice";
 import { ChargingSession } from "../models/chargingSession";
+import { ChargingStation } from "../models/chargingStation";
 import { Garage } from "../models/garage";
 import { OccupancyStatus } from "../models/occupancyStatus";
 import { Ticket } from "../models/ticket";
@@ -13,6 +15,10 @@ export class GarageService {
     this.repo = repository;
   }
 
+  async getGarage(garageId: string): Promise<GarageInfoObject> {
+    return this.getGarageInfoObjectFromGarage(await this.repo.getGarage(garageId));
+  }
+
   async createGarage(garageDto: GarageDto): Promise<void> {
     const garage: Garage = this.getGarageFromDto(garageDto);
     await this.repo.createGarage(garage);
@@ -21,6 +27,10 @@ export class GarageService {
   async updateGarage(garageDto: GarageDto): Promise<void> {
     const garage: Garage = this.getGarageFromDto(garageDto);
     this.repo.updateGarage(garage);
+  }
+
+  async deleteGarage(garageId: string) {
+    this.repo.deleteGarage(garageId);
   }
 
   async getParkingOccupancy(garageId: string): Promise<OccupancyStatus> {
@@ -202,12 +212,38 @@ export class GarageService {
   private getGarageFromDto(garageDto: GarageDto): Garage {
     return new Garage(
       garageDto.id,
+      garageDto.name,
       garageDto.isOpen,
       garageDto.totalParkingSpaces,
       0,
       garageDto.totalChargingSpaces,
       0,
-      garageDto.chargingStations
+      garageDto.pricePerHourInEuros,
+      garageDto.openingTime,
+      garageDto.closingTime,
+      garageDto.chargingStations.map(cs => ({
+        id: cs.id,
+        name: cs.name,
+        isOccupied: false,
+        isCharging: false,
+        chargingSpeedInKw: cs.chargingSpeedInKw,
+        pricePerKwh: cs.pricePerKwh,
+      } as ChargingStation))
     );
+  }
+
+  private getGarageInfoObjectFromGarage(garage: Garage): GarageInfoObject {
+    return {
+      Id: garage.id,
+      Name: garage.name,
+      IsOpen: garage.isOpen,
+      ParkingPlacesTotal: garage.parkingPlacesTotal,
+      ParkingPlacesOccupied: garage.parkingPlacesOccupied,
+      ChargingPlacesTotal: garage.chargingPlacesTotal,
+      ChargingPlacesOccupied: garage.chargingPlacesOccupied,
+      PricePerHourInEuros: garage.pricePerHourInEuros,
+      OpeningTime: garage.openingTime,
+      ClosingTime:garage.closingTime
+    } as GarageInfoObject
   }
 }

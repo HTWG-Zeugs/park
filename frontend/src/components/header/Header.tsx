@@ -5,29 +5,35 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Button, Container, Menu, MenuItem } from "@mui/material";
+import { Button, Container, Menu, MenuItem, Tooltip } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "src/services/AuthContext";
 import { auth } from "src/services/FirebaseConfig";
 import { useTranslation } from "react-i18next";
+import HomeIcon from '@mui/icons-material/Home';
+import LogoutIcon from '@mui/icons-material/Logout';
+import LoginIcon from '@mui/icons-material/Login';
+import TranslateIcon from '@mui/icons-material/Translate';
+import Flag from 'react-flagkit';
 
-
-const pages = [
-  { text: "Home", href: "/home" },
-  { text: "Defects", href: "/defects" },
-  { text: "Contact", href: "/contact" },
-];
-
-export default function Header() {
+export default function Header() {  
+  const { t, i18n } = useTranslation();
+  const pages = [
+    { text: <HomeIcon/>, href: "/home" },
+    { text: t("component_header.occupancy"), href: "/occupancy"},
+    { text: t("component_header.garages"), href: "/garages" },
+    { text: t("component_header.defects"), href: "/defects" },
+    { text: t("component_header.users"), href: "/users" },
+    { text: t("component_header.contact"), href: "/contact" },
+  ];
   const navigate = useNavigate();
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
 
-  const { t } = useTranslation();
-
   const { isAuthenticated, logout } = useAuth();
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [language, setLanguage] = useState<string>('GB');
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -49,12 +55,22 @@ export default function Header() {
     setAnchorElNav(null);
   };
 
+  const toggleLanguage = () => {
+    if (language == 'GB') {
+      setLanguage('DE');
+      i18n.changeLanguage('de')
+    } else {
+      setLanguage('GB')
+      i18n.changeLanguage('en')
+    }
+  }
+
   const handleLogout = async () => {
     await logout();
     try {
       localStorage.removeItem("jwt_token");
       navigate("/");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error signing out: ", error);
     }
   };
@@ -115,7 +131,7 @@ export default function Header() {
               >
                 {pages.map((page) => (
                   <MenuItem
-                    key={page.text}
+                    key={page.href}
                     onClick={() => handleCloseNavMenu(page.href)}
                   >
                     <Typography sx={{ textAlign: "center" }}>
@@ -146,7 +162,7 @@ export default function Header() {
             <Box sx={{ flexGrow: 1, display: { xs: "none", sm: "flex" } }}>
               {pages.map((page) => (
                 <Button
-                  key={page.text}
+                  key={page.href}
                   onClick={() => handleCloseNavMenu(page.href)}
                   sx={{ my: 2, color: "white", display: "block" }}
                 >
@@ -154,27 +170,33 @@ export default function Header() {
                 </Button>
               ))}
             </Box>
-
+            <Button style={{marginRight: "10px"}}
+              onClick={() => toggleLanguage()}
+              sx={{ color: "white", fontWeight: "bold" }}>
+              <TranslateIcon style={{marginRight: "5px"}}/><Flag country={language} />
+            </Button>
             {isAuthenticated && userEmail && (
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <Typography sx={{ color: "white", mr: 2 }}>
                   {userEmail}
                 </Typography>
-                <Button
-                  onClick={handleLogout}
-                  sx={{ color: "white", fontWeight: "bold" }}
-                >
-                  {t("component_header.sign_out")}
-                </Button>
+                <Tooltip title={t("component_header.sign_out")}>
+                  <IconButton
+                    onClick={handleLogout}
+                    sx={{ color: "white", fontWeight: "bold" }}>
+                    <LogoutIcon/>
+                  </IconButton>
+                </Tooltip>
               </Box>
             )}
             {!isAuthenticated && (
-              <Button
-                onClick={() => navigate("/sign-in")}
-                sx={{ color: "white", fontWeight: "bold" }}
-              >
-                {t("component_header.sign_in")}
-              </Button>
+              <Tooltip title={t("component_header.sign_in")}>
+                <IconButton
+                  onClick={() => navigate("/sign-in")}
+                  sx={{ color: "white", fontWeight: "bold" }}>
+                  <LoginIcon/>
+                </IconButton>
+              </Tooltip>
             )}
           </Toolbar>
         </Container>

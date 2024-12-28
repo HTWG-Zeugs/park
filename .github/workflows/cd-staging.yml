@@ -1,0 +1,144 @@
+name: Deploy to Staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      git_tag:
+        description: "Git tag to deploy"
+        required: true
+      branch:
+        description: 'The branch to run this workflow on'
+        required: true
+        default: 'dev'
+
+permissions:
+  id-token: write 
+  contents: read 
+  
+env:
+  GCR_REPO: "${{ vars.REGION }}-docker.pkg.dev/${{ vars.STAGING_PROJECT_ID }}/${{ vars.STAGING_ARTIFACT_REPO }}"
+  DOMAIN: "park-app.tech"
+
+jobs:
+  apply-terraform:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TENANTS: '[{id = "free", domain = "free" }, {id = "premium", domain = "premium"}]'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.3
+
+      - name: Login to Google Cloud
+        uses: 'google-github-actions/auth@v2'
+        with:
+          service_account: '${{ secrets.STAGING_GITHUB_SA }}'
+          workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
+
+
+      - name: Write Terraform Variables File
+        run: |
+          cd terraform/staging
+          cat <<EOF > terraform.auto.tfvars.json
+          {
+            "is_github_actions" : true,
+            "region"            : "europe-west1",
+            "project_id"        : "park-staging-444913",
+            "domain_name"       : "park-app.tech",
+            "create_cluster"    : true,
+            "tenants" : [
+              {
+                "id"     : "free",
+                "domain" : "free"
+              },
+              {
+                "id"     : "premium",
+                "domain" : "premium"
+              }
+            ]
+          }
+          EOF
+
+      - name: terraform apply
+        uses: dflook/terraform-apply@v1
+        with:
+          path: terraform/staging
+          auto_approve: true
+            
+
+
+  deploy-backend:
+    needs: apply-terraform
+    runs-on: ubuntu-latest
+    env:
+      TENANTS: '(free premium)' # TODO: Update this to query the tenants
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Login to Google Cloud
+        uses: 'google-github-actions/auth@v2'
+        with:
+          service_account: '${{ secrets.STAGING_GITHUB_SA }}'
+          workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Get GKE credentials
+        uses: 'google-github-actions/get-gke-credentials@v2'
+        with:
+          cluster_name: ${{ vars.STAGING_CLUSTER_NAME }}
+          location: ${{vars.REGION}}
+
+      - name: Deploy infrastructure services
+        run: |
+          helm upgrade --install infra ./helm/infrastructure \
+            --namespace infra-ns \
+            --create-namespace \
+            --set repository=${{ env.GCR_REPO }} \
+            --set gitTag=${{ inputs.git_tag }} \
+            --set identityPlatForm.apiKey=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }} \
+            --set identityPlatForm.authDomain=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
+            --set gc_project_id=${{ vars.STAGING_PROJECT_ID }}
+            --set domain=$DOMAIN
+
+      - name: Deploy backend for each tenant
+        run: |
+          for TENANT in $TENANTS; do
+            helm upgrade --install park-backend-$TENANT ./helm/backend \
+              --namespace $TENANT \
+              --create-namespace \
+              --set repository=${{ env.GCR_REPO }} \
+              --set gitTag=${{ inputs.git_tag }} \
+              --set identityPlatForm.apiKey=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }} \
+              --set identityPlatForm.authDomain=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
+              --set gc_project_id=${{ vars.STAGING_PROJECT_ID }} \
+              --set domain=$DOMAIN \
+              --set subdomain=$TENANT
+          done
+      
+      - name: Deploy frontend for each tenant
+        run: |
+          for TENANT in $TENANTS; do
+            helm upgrade --install park-frontend-$TENANT ./helm/frontend \
+              --namespace tenant-$TENANT \
+              --create-namespace \
+              --set repository=${{ env.GCR_REPO }} \
+              --set gitTag=${{ inputs.git_tag }} \
+              --set identityPlatForm.apiKey=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }} \
+              --set identityPlatForm.authDomain=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
+              --set gc_project_id=${{ vars.STAGING_PROJECT_ID }} \
+              --set backendUrl=http://$TENANT.$DOMAIN \
+              --set domain=$DOMAIN \
+              --set subdomain=$TENANT
+          done

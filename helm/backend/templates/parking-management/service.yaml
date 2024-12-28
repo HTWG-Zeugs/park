@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: parking-management
+  labels:
+    app: park-{{ .Release.Namespace }}
+    component: parking-management
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.parkingManagement.service.port }}
+      targetPort: {{ .Values.parkingManagement.service.port }}
+      protocol: TCP
+      name: http
+  selector:
+    app: park-{{ .Release.Namespace }}
+    component: parking-management

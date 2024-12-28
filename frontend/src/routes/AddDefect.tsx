@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { TextField, MenuItem, Typography, Paper } from "@mui/material";
+import { TextField, Typography, Paper } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import LoadingButton from "@mui/lab/LoadingButton";
 import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 import { CreateDefectRequestObject } from "shared/CreateDefectRequestObject";
 
-import { DefectReportStatus } from "src/models/DefectReportStatus";
 import { useNavigate } from "react-router-dom";
 import axiosAuthenticated from "src/services/Axios";
 import dayjs from "dayjs";
@@ -16,11 +15,11 @@ import { ImageFile } from "src/models/ImageFile";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const BACKEND_URL = import.meta.env.VITE_PROPERTY_MANAGEMENT_SERVICE_URL;
 dayjs.extend(utc);
 
 interface Map {
-  [key: string]: (data: any) => string;
+  [key: string]: (data: string) => string;
 }
 
 interface FormData {
@@ -28,14 +27,12 @@ interface FormData {
   location: string;
   shortDescription: string;
   detailedDescription: string;
-  status: string;
 }
 
 interface FormErrors {
   object: string;
   location: string;
   shortDescription: string;
-  status: string;
 }
 
 export default function AddDefect() {
@@ -52,15 +49,13 @@ export default function AddDefect() {
     object: "",
     location: "",
     shortDescription: "",
-    detailedDescription: "",
-    status: "",
+    detailedDescription: ""
   });
 
   const [formErrors, setFormErrors] = useState<FormErrors>({
     object: "",
     location: "",
-    shortDescription: "",
-    status: "",
+    shortDescription: ""
   });
 
   const [images, setImages] = useState<ImageFile[]>([]);
@@ -94,7 +89,7 @@ export default function AddDefect() {
     },
   };
 
-  const handleChange = (e: { target: { name: string; value: any } }) => {
+  const handleChange = (e: { target: { name: string; value: string } }) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
@@ -103,7 +98,7 @@ export default function AddDefect() {
     validateField(name, value);
   };
 
-  const validateField = (name: string, value: any) => {
+  const validateField = (name: string, value: string) => {
     const validationFunction = validationFunctions[name];
     if (validationFunction) {
       const error = validationFunction(value);
@@ -144,7 +139,7 @@ export default function AddDefect() {
       image.uploadUrl = response.data.uploadUrl as string;
       image.deleteUrl = response.data.deleteUrl as string;
       image.uploadedName = response.data.name as string;
-    } catch (error) {
+    } catch {
       console.error("Error fetching signed url for image upload");
     }
   }
@@ -172,7 +167,7 @@ export default function AddDefect() {
         });
         image.isUploaded = true;
         image.hasUploadError = false;
-      } catch (error) {
+      } catch {
         image.hasUploadError = true;
         image.isUploaded = false;
         continue;
@@ -206,7 +201,6 @@ export default function AddDefect() {
       Location: formData.location,
       ShortDesc: formData.shortDescription,
       DetailedDesc: formData.detailedDescription,
-      Status: formData.status,
       ImageNames: images.map((image) => image.uploadedName), // use the uploaded name because the uploaded name is unique
     };
 
@@ -337,25 +331,6 @@ export default function AddDefect() {
               </Grid>
 
               <Grid size={12}>
-                <TextField
-                  fullWidth
-                  select
-                  label={t("route_add_defect.grid_status")}
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  error={!!formErrors.status}
-                  helperText={formErrors.status}
-                >
-                  {Object.values(DefectReportStatus).map((option) => (
-                    <MenuItem key={option} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-
-              <Grid size={12}>
                 <LoadingButton
                   type="submit"
                   color="primary"
@@ -364,7 +339,7 @@ export default function AddDefect() {
                   startIcon={<SaveIcon />}
                   variant="outlined"
                 >
-                  {t("route_add_defect.save_button")}
+                  {t("common.save_button")}
                 </LoadingButton>
               </Grid>
             </Grid>

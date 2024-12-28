@@ -1,5 +1,9 @@
 # Cloud Application Development
 
+## Prerequisites
+
+- Install helm: https://helm.sh/docs/intro/install/
+
 ### Used technology
 
 - Backend: NodeJS (version v20.18.0)

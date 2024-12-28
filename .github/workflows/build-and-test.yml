@@ -1,0 +1,120 @@
+name: Build and Test
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+
+permissions:
+  id-token: write 
+  contents: read 
+  pull-requests: write
+
+env:
+  DOMAIN: "park-app.tech"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - { name: "property-management", dockerfile: "./property-management.Dockerfile" }
+          - { name: "parking-management", dockerfile: "./parking-management.Dockerfile" }
+          - { name: "authentication-service", dockerfile: "./authentication-service.Dockerfile" }
+          - { name: "frontend", dockerfile: "./frontend.Dockerfile" }
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -f ${{ matrix.service.dockerfile }} \
+            . \
+            --platform linux/amd64
+
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service: [
+          backend/property-management,
+          backend/parking-management,
+          backend/authentication,
+          frontend
+        ]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      run: |
+        cd ${{ matrix.service }}
+        npm ci
+
+    - name: Run tests
+      run: |
+        cd ${{ matrix.service }}
+        npm test --if-present
+
+  plan-terraform:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TENANTS: '[{id = "free", domain = "free" }, {id = "premium", domain = "premium"}]'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.3
+
+      - name: Login to Google Cloud
+        uses: 'google-github-actions/auth@v2'
+        with:
+          service_account: '${{ secrets.STAGING_GITHUB_SA }}'
+          workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
+
+      - name: Write Terraform Variables File
+        run: |
+          cd terraform/staging
+          cat <<EOF > terraform.auto.tfvars.json
+          {
+            "is_github_actions" : true,
+            "region"            : "europe-west1",
+            "project_id"        : "park-staging-444913",
+            "domain_name"       : "park-app.tech",
+            "create_cluster"    : true,
+            "tenants" : [
+              {
+                "id"     : "free",
+                "domain" : "free"
+              },
+              {
+                "id"     : "premium",
+                "domain" : "premium"
+              }
+            ]
+          }
+          EOF
+
+      - name: terraform plan
+        uses: dflook/terraform-plan@v1
+        with:
+          path: terraform/staging

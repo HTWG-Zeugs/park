@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: parking-management
+  labels:
+    app: park-{{ .Release.Namespace }}
+    component: parking-management
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: park-{{ .Release.Namespace }}
+      component: parking-management
+  template:
+    metadata:
+      labels:
+        app: park-{{ .Release.Namespace }}
+        component: parking-management
+    spec:
+      serviceAccountName: parking-management-sa
+      containers:
+        - name: parking-management
+          image: "{{ .Values.repository }}/{{.Values.parkingManagement.image.name}}:{{ .Values.gitTag }}"
+          imagePullPolicy: {{ .Values.parkingManagement.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.parkingManagement.service.port }}
+          env:
+            - name: FIRESTORE_DB_ID
+              value: "{{ .Values.gc_project_id }}-park-ma-{{ .Release.Namespace }}"
+            - name: PORT
+              value: "{{ .Values.parkingManagement.service.port }}"
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.parkingManagement.healthCheck.endpoint }}
+              port: {{ .Values.parkingManagement.service.port }}
+            initialDelaySeconds: {{ .Values.parkingManagement.healthCheck.initialDelaySeconds }}
+            periodSeconds: {{ .Values.parkingManagement.healthCheck.periodSeconds }}

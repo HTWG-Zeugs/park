@@ -1,6 +1,6 @@
 {
   "ignore": [".git", "node_modules", "dist"],
   "watch": ["./"],
-  "exec": "ts-node ./main.ts",
+  "exec": "ts-node ./src/main.ts",
   "ext": "ts"
 }

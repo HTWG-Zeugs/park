@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: authentication-service
+  labels:
+    app: park-{{ .Release.Namespace }}
+    component: authentication-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.authenticationService.service.port }}
+      targetPort: {{ .Values.authenticationService.service.port }}
+      protocol: TCP
+      name: http
+  selector:
+    app: park-{{ .Release.Namespace }}
+    component: authentication-service

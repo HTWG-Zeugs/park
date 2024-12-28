@@ -2,10 +2,11 @@ import { Repository } from "./repositories/repository";
 import { FirestoreRepository } from "./repositories/firestoreRepository";
 import { UserService } from "./services/userService";
 import { Config } from "./config";
-import { getRoleById } from "./models/role";
 import validateFirebaseIdToken from "./middleware/validateFirebaseIdToken";
 import { User } from "./models/user";
-import { Role } from "./models/role";
+import cors from "cors";
+import { CreateUserRequestObject } from "../../shared/CreateUserRequestObject";
+import { EditUserRequestObject } from "../../shared/EditUserRequestObject";
 
 const express = require("express");
 const app = express();
@@ -13,11 +14,18 @@ const port = Config.PORT;
 
 app.use(express.json());
 
+app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
 const repo: Repository = FirestoreRepository.getInstance();
 const userService: UserService = UserService.getInstance(repo);
 
 /**
- * Get a user by ID.
+ * Gets an user by ID.
  */
 app.get("/user/:userId", validateFirebaseIdToken, async (req, res) => {
   const signedInUser: User = res.user;
@@ -32,12 +40,25 @@ app.get("/user/:userId", validateFirebaseIdToken, async (req, res) => {
 });
 
 /**
- * Create a new user.
+ * Get all users.
+ */
+app.get("/all-users", validateFirebaseIdToken, async (req, res) => {
+  const signedInUser: User = res.user;
+  try {
+    const users = await userService.getAllUsers(signedInUser);
+    res.status(200).send(users);
+  } catch (e) {
+    res.status(404).send("User not found");
+  }
+});
+
+/**
+ * Creates a new user.
  */
 app.post("/user", validateFirebaseIdToken, async (req, res) => {
   const signedInUser: User = res.user;
   try {
-    const userToCreate: User = req.body;
+    const userToCreate: CreateUserRequestObject = req.body;
     await userService.createUser(signedInUser, userToCreate);
     res.status(200).send("User created");
   } catch (e) {
@@ -46,39 +67,33 @@ app.post("/user", validateFirebaseIdToken, async (req, res) => {
 });
 
 /**
- * Set user role.
+ * Updates user.
  */
 app.put(
-  "/user/:userId/role/:role",
+  "/user/:userId",
   validateFirebaseIdToken,
   async (req, res) => {
     // check if all parameters are valid
     const signedInUser: User = res.user;
     try {
       const userId: string = req.params.userId;
+      const attributesToChange: EditUserRequestObject = req.body;
       let user: User;
       try {
         user = await userService.getUser(signedInUser, userId);
       } catch (e) {
         return res.status(404).send("User not found");
       }
-      let roleId: number = parseInt(req.params.role, 10);
-      if (isNaN(roleId)) {
-        return res.status(400).send("Invalid role ID");
-      }
-      const role: Role = getRoleById(roleId);
-
-      // all roles are valid, now set the role
-      await userService.setUserRole(signedInUser, user, role);
-      res.status(200).send("User role updated");
+      await userService.updateUser(signedInUser, user, attributesToChange);
+      res.status(200).send("User updated");
     } catch (e) {
-      res.status(500).send("Setting user role failed: " + e);
+      res.status(500).send("Updating user failed: " + e);
     }
   }
 );
 
 /**
- * Delete user.
+ * Deletes user.
  */
 app.delete("/user/:userId", validateFirebaseIdToken, async (req, res) => {
   const signedInUser: User = res.user;
@@ -103,7 +118,7 @@ app.delete("/user/:userId", validateFirebaseIdToken, async (req, res) => {
 });
 
 /**
- * Health check the service.
+ * Health checks the service.
  */
 app.get("/health", validateFirebaseIdToken, (req, res) => {
   res.status(200).send("Authentication service is running.");
@@ -121,6 +136,28 @@ app.get("/help", validateFirebaseIdToken, (req, res) => {
         <p>DELETE /user/:userId - Delete user</p>
         <p>GET /health - Check service health</p>
         `);
+});
+
+/**
+ * Gets the tenant ID for a given user.
+ */
+app.get("/tenant-id/:mail", async (req, res) => {
+  if (!req.params.mail) {
+    return res.status(400).send("Mail is required");
+  }
+  const mail = req.params.mail;
+  try {
+    await userService.getTenantId(mail).then((tenantId) => {
+      res.status(200).send(tenantId);
+    });
+  } catch (e) {
+    res.status(404).send("User not found");
+  }
+});
+
+
+app.get("/livez", (req, res) => {
+  res.status(200).send("Authentication service is running.");
 });
 
 app.listen(port, () => {
