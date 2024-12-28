@@ -1,7 +1,7 @@
 {
   "name": "property-management",
-  "version": "0.0.0",
-  "description": "Parking management solution",
+  "version": "1.0.0",
+  "description": "property management service",
   "main": "src/main.ts",
   "scripts": {
     "test": "jest",
