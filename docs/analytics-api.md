@@ -74,3 +74,29 @@ GET analytics/requests/:tenant
 POST analytics/tenants/record
 GET analytics/tenants
 ```
+
+
+# Notes
+
+There has to be a collection per garage, so there has to be a database per analytics stat that is stored. E.g.:
+
+parking-status-analytics > garageId > status entries with timestamp
+charging-status-analytics > garageId > status entries with stationIds and timestamp (simplified: just store status with timestamp)
+charging-consumption-analytics > garageId > consumption entries with stationId and timestamp
+charging-turnover-analytics > garageId > turnover entries with stationId and timestamp
+parking-duration-analytics > garageId > parking duration entries with start and end timestamp
+defects-created-analytics > garageId > defect creation entries with timestamp
+defects-edit-analytics > garageId > defect edit entries with defect id, new status and timestamp
+
+How to handle multitenancy? -> suffix the analytics databases with the tenant id
+
+
+solution wide analytics:
+
+tenant-analytics > requests > tenant id with timestamp (for each request one entry is stored)
+
+or 
+
+tenant-analytics > requests > tenantId (for each request the number of requests is updated) -> unable to say in which time range how many requests where executed.
+
+tenant-analytics > tenants > tenant entries (infos about tenants, new entry everytime a tenant is added)
