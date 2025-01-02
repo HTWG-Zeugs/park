@@ -6,14 +6,14 @@ In this document we collect all information and endpoints that seem interesting 
 
 **Occupancy Status for parking spaces (current status and its evolution)**
 ```
-POST analytics/parking/status/update
+POST analytics/parking/status
 GET analytics/parking/status/:timestamp
 GET analytics/parking/status/:start/:end
 ```
 
 **Occupancy Status for charging (current status, running sessions and their evolution)**
 ```
-POST analytics/charging/status/update
+POST analytics/charging/status
 GET analytics/charging/status/:timestamp
 GET analytics/charging/status/:start/:end
 ```
