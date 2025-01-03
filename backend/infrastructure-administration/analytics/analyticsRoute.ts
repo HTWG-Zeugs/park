@@ -1,13 +1,26 @@
 import { Router } from "express";
 import { AnalyticsRepo } from "./analyticsRepo";
+import { OccupancyStatus } from "../../../shared/OccupancyStatus"
+import { OccupancyRecord } from "./models/occupancyRecord";
 
 const router = Router();
 
 const repository = new AnalyticsRepo();
 
-//declare endpoints
 router.put("/parking/status/:garageId", (req, res) => {
   // save timestamp and Occupancy status in the garageId collection at this time
+  try {
+    const status: OccupancyStatus = req.body
+    const record: OccupancyRecord = {
+      timestamp: new Date(),
+      totalSpaces: status.totalSpaces,
+      occupiedSpaces: status.occupiedSpaces
+    }
+    // store record in repo
+    res.status(200).send('success')
+  } catch (e) {
+    res.status(500).send('Failed to record parking occupancy update: '+ e)
+  }
 })
 
 router.get("/parking/status/:garageId/:timestamp", (req, res) => {
@@ -29,6 +42,18 @@ router.get("/parking/duration/:garageId/:start/:end", () => {
 
 router.put("/charging/status/:garageId", (req, res) => {
   // save timestamp and charging occupancy in the garageId collection at this timestamp
+  try {
+    const status: OccupancyStatus = req.body
+    const record: OccupancyRecord = {
+      timestamp: new Date(),
+      totalSpaces: status.totalSpaces,
+      occupiedSpaces: status.occupiedSpaces
+    }
+    // store record in repo
+    res.status(200).send('success')
+  } catch (e) {
+    res.status(500).send('Failed to record charging occupancy update: '+ e)
+  }
 })
 
 router.get("/charging/status/:garageId/:timestamp", (req, res) => {
