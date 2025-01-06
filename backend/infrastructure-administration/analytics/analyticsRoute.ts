@@ -9,7 +9,7 @@ const router = Router();
 
 const repository = new AnalyticsRepo();
 
-router.put("/parking/status/:garageId", (req, res) => {
+router.put("/parking/status/:garageId", async (req, res) => {
   // save timestamp and Occupancy status in the garageId collection at this time
   try {
     const garageId: string = req.params.garageId;
@@ -19,34 +19,34 @@ router.put("/parking/status/:garageId", (req, res) => {
       totalSpaces: status.totalSpaces,
       occupiedSpaces: status.occupiedSpaces
     }
-    // store record in repo with garageId as param
+    repository.createParkingStatusRecord(garageId, record);
     res.status(200).send('success');
   } catch (e) {
     res.status(500).send('Failed to record parking occupancy update: '+ e);
   }
 })
 
-router.get("/parking/status/:garageId/:timestamp", (req, res) => {
+router.get("/parking/status/:garageId/:timestamp", async (req, res) => {
   // get parking status for the timestamp or the last saved timestamp
   try {
     const garageId: string = req.params.garageId;
     const timestamp: string = req.params.timestamp;
-    // get parking status record from garageId repo with timestamp as param
-    const status: OccupancyRecord = {}
+    const status: OccupancyRecord = await repository.getParkingStatusRecord(garageId, new Date(timestamp));
     res.status(200).send(status);
   } catch (e) {
     res.status(500).send(`Failed getting parking occupancy status for garage with id ${req.params.garageId}: ${e}`);
   }
 })
 
-router.get("/parking/status/:garageId/:start/:end", (req, res) => {
+router.get("/parking/status/:garageId/:start/:end", async (req, res) => {
   // get parking status array in range
   try {
     const garageId: string = req.params.garageId;
     const start: string = req.params.start;
     const end: string = req.params.end;
-    // get parking status record in range from garageId repo with timestamps as params
-    const statusEntries: OccupancyRecord[] = []
+    const statusEntries: OccupancyRecord[] = await repository.getParkingStatusRecords(
+      garageId, new Date(start), new Date(end)
+    );
     res.status(200).send(statusEntries);
   } catch (e) {
     res.status(500).send(`Failed getting parking occupancy status entries for garage with id ${req.params.garageId}: ${e}`);
@@ -106,7 +106,7 @@ router.get("/charging/status/:garageId/:timestamp", (req, res) => {
     const garageId: string = req.params.garageId;
     const timestamp: string = req.params.timestamp;
     // get charging status record from garageId repo with timestamp as param
-    const status: OccupancyRecord = {}
+    //const status: OccupancyRecord = {}
     res.status(200).send(status);
   } catch (e) {
     res.status(500).send(`Failed getting charging occupancy status for garage with id ${req.params.garageId}: ${e}`);
@@ -207,8 +207,8 @@ router.get("/defects/status/:garageId/:timestamp", (req, res) => {
     const garageId: string = req.params.garageId;
     const start: string = req.params.timestamp;
     // get defect status record at timestamp from garageId repo
-    const defectStatus: DefectStatusRecord= {}
-    res.status(200).send(defectStatus);
+    //const defectStatus: DefectStatusRecord= {}
+    //res.status(200).send(defectStatus);
   } catch (e) {
     res.status(500).send(`Failed getting defect status for garage with id ${req.params.garageId}: ${e}`);
   }
