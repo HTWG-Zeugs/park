@@ -332,14 +332,25 @@ router.get("/defects/status/:garageId/:start/:end", async (req, res) => {
   }
 });
 
-router.put("/requests/:tenantId/:timestamp", (req, res) => {
+router.put("/requests/:tenantId", async (req, res) => {
   // increase request count entry for that day or create new entry for a new day
   try {
-    const garageId: string = req.params.tenantId;
-    const start: string = req.params.timestamp;
-    //get request count from repo
-    //increase count
-    //store new count in repo
+    const tenantId: string = getTenantId(req);
+    const timestamp: Date = new Date();
+
+    const requestsRecord = await repository.getRequests(tenantId, new Date(timestamp))
+
+    if (requestsRecord.timestamp.getDate() == timestamp.getDate()) {
+      requestsRecord.value++;
+      await repository.updateRequestRecord(tenantId, requestsRecord);
+    } else {
+      const newRecord = {
+        timestamp: timestamp,
+        value: 1
+      } as NumberRecord
+      await repository.storeRequestRecord(tenantId, newRecord);
+    }
+    
     res.status(200).send("success");
   } catch (e) {
     res
