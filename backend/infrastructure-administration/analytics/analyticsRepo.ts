@@ -35,7 +35,11 @@ export class AnalyticsRepo {
     garageId: string,
     status: OccupancyRecord
   ): Promise<void> {
-    await this.createRecord(tenantId, this.parkingStatusPrefix + garageId, status);
+    await this.createRecord(
+      tenantId,
+      this.parkingStatusPrefix + garageId,
+      status
+    );
   }
 
   async getParkingStatusRecord(
@@ -77,7 +81,11 @@ export class AnalyticsRepo {
     garageId: string,
     record: NumberRecord
   ): Promise<void> {
-    await this.createRecord(tenantId, this.parkingDurationPrefix + garageId, record);
+    await this.createRecord(
+      tenantId,
+      this.parkingDurationPrefix + garageId,
+      record
+    );
   }
 
   async getParkingDurationRecords(
@@ -101,7 +109,11 @@ export class AnalyticsRepo {
     garageId: string,
     status: OccupancyRecord
   ): Promise<void> {
-    await this.createRecord(tenantId, this.chargingStatusPrefix + garageId, status);
+    await this.createRecord(
+      tenantId,
+      this.chargingStatusPrefix + garageId,
+      status
+    );
   }
 
   async getChargingStatusRecord(
@@ -143,7 +155,11 @@ export class AnalyticsRepo {
     garageId: string,
     record: NumberRecord
   ): Promise<void> {
-    await this.createRecord(tenantId, this.powerConsumptionPrefix + garageId, record);
+    await this.createRecord(
+      tenantId,
+      this.powerConsumptionPrefix + garageId,
+      record
+    );
   }
 
   async getPowerConsumptionRecords(
@@ -191,7 +207,11 @@ export class AnalyticsRepo {
     garageId: string,
     record: DefectStatusRecord
   ): Promise<void> {
-    await this.createRecord(tenantId, this.defectStatusPrefix + garageId, record);
+    await this.createRecord(
+      tenantId,
+      this.defectStatusPrefix + garageId,
+      record
+    );
   }
 
   async getDefectStatusRecord(
@@ -228,21 +248,30 @@ export class AnalyticsRepo {
     return querySnapshot.docs.map((doc) => doc.data() as DefectStatusRecord);
   }
 
-  async storeRequestRecord(tenantId: string, requestsRecord: NumberRecord): Promise<void> {
+  async storeRequestRecord(
+    tenantId: string,
+    requestsRecord: NumberRecord
+  ): Promise<void> {
     await this.firestore
-      .collection(tenantId).doc()
+      .collection(tenantId)
+      .doc()
       .collection("requests")
       .doc()
       .set(JSON.parse(JSON.stringify(requestsRecord)));
   }
 
-  async updateRequestRecord(tenantId: string, requestsRecord: NumberRecord): Promise<void> {
+  async updateRequestRecord(
+    tenantId: string,
+    requestsRecord: NumberRecord
+  ): Promise<void> {
     await this.firestore
-      .collection(tenantId).doc()
+      .collection(tenantId)
+      .doc()
       .collection("requests")
       .where("timestamp", "<=", requestsRecord.timestamp.toISOString())
       .orderBy("timestamp", "desc")
-      .limit(1)[0].ref.update(JSON.parse(JSON.stringify(requestsRecord)));
+      .limit(1)[0]
+      .ref.update(JSON.parse(JSON.stringify(requestsRecord)));
   }
 
   async getRequest(tenantId: string, timestamp: Date): Promise<NumberRecord> {
@@ -259,7 +288,11 @@ export class AnalyticsRepo {
     }
   }
 
-  async getRequests(tenantId: string, from: Date, to: Date): Promise<NumberRecord[]> {
+  async getRequests(
+    tenantId: string,
+    from: Date,
+    to: Date
+  ): Promise<NumberRecord[]> {
     const querySnapshot = await this.queryDocInRange(
       tenantId,
       "requests",
@@ -270,9 +303,14 @@ export class AnalyticsRepo {
     return querySnapshot.docs.map((doc) => doc.data() as NumberRecord);
   }
 
-  private async createRecord(collection: string, subCollection: string, obj: any): Promise<void> {
+  private async createRecord(
+    collection: string,
+    subCollection: string,
+    obj: any
+  ): Promise<void> {
     await this.firestore
-      .collection(collection).doc()
+      .collection(collection)
+      .doc()
       .collection(subCollection)
       .doc()
       .set(JSON.parse(JSON.stringify(obj)));
@@ -284,7 +322,8 @@ export class AnalyticsRepo {
     timestamp: Date
   ): Promise<FirebaseFirestore.QuerySnapshot<any>> {
     return await this.firestore
-      .collection(collection).doc()
+      .collection(collection)
+      .doc()
       .collection(subCollection)
       .where("timestamp", "<=", timestamp.toISOString())
       .orderBy("timestamp", "desc")
@@ -299,7 +338,8 @@ export class AnalyticsRepo {
     to: Date
   ): Promise<FirebaseFirestore.QuerySnapshot<any>> {
     const startQuerySnapshot = await this.firestore
-      .collection(collection).doc()
+      .collection(collection)
+      .doc()
       .collection(subCollection)
       .where("timestamp", "<=", from.toISOString())
       .orderBy("timestamp", "desc")
@@ -314,7 +354,8 @@ export class AnalyticsRepo {
     }
 
     return await this.firestore
-      .collection(collection).doc()
+      .collection(collection)
+      .doc()
       .collection(subCollection)
       .where("timestamp", ">=", new Date(latestTimestamp).toISOString())
       .where("timestamp", "<=", to.toISOString())

@@ -82,7 +82,11 @@ router.put("/parking/duration/:garageId", async (req, res) => {
       timestamp: new Date(),
       value: parkingDuration,
     };
-    await repository.createParkingDurationRecord(tenantId, garageId, durationRecord);
+    await repository.createParkingDurationRecord(
+      tenantId,
+      garageId,
+      durationRecord
+    );
     res.status(200).send("success");
   } catch (e) {
     res
@@ -190,7 +194,11 @@ router.put("/charging/powerConsumed/:garageId", async (req, res) => {
       timestamp: new Date(),
       value: powerConsumed,
     };
-    await repository.createPowerConsumptionRecord(tenantId, garageId, consumptionRecord);
+    await repository.createPowerConsumptionRecord(
+      tenantId,
+      garageId,
+      consumptionRecord
+    );
     res.status(200).send("success");
   } catch (e) {
     res
@@ -297,7 +305,11 @@ router.get("/defects/status/:garageId/:timestamp", async (req, res) => {
     const garageId: string = req.params.garageId;
     const timestamp: string = req.params.timestamp;
     const defectStatus: DefectStatusRecord =
-      await repository.getDefectStatusRecord(tenantId, garageId, new Date(timestamp));
+      await repository.getDefectStatusRecord(
+        tenantId,
+        garageId,
+        new Date(timestamp)
+      );
     res.status(200).send(defectStatus);
   } catch (e) {
     res
@@ -338,7 +350,10 @@ router.put("/requests/:tenantId", async (req, res) => {
     const tenantId: string = getTenantId(req);
     const timestamp: Date = new Date();
 
-    const requestsRecord = await repository.getRequest(tenantId, new Date(timestamp))
+    const requestsRecord = await repository.getRequest(
+      tenantId,
+      new Date(timestamp)
+    );
 
     if (requestsRecord.timestamp.getDate() == timestamp.getDate()) {
       requestsRecord.value++;
@@ -346,11 +361,11 @@ router.put("/requests/:tenantId", async (req, res) => {
     } else {
       const newRecord = {
         timestamp: timestamp,
-        value: 1
-      } as NumberRecord
+        value: 1,
+      } as NumberRecord;
       await repository.storeRequestRecord(tenantId, newRecord);
     }
-    
+
     res.status(200).send("success");
   } catch (e) {
     res
@@ -367,7 +382,11 @@ router.get("/requests/:tenantId/:from/:to", async (req, res) => {
     const tenantId: string = getTenantId(req);
     const start: string = req.params.from;
     const end: string = req.params.to;
-    const tenantRequestEntries: NumberRecord[] = await repository.getRequests(tenantId, new Date(start), new Date(end));
+    const tenantRequestEntries: NumberRecord[] = await repository.getRequests(
+      tenantId,
+      new Date(start),
+      new Date(end)
+    );
     res.status(200).send(tenantRequestEntries);
   } catch (e) {
     res
