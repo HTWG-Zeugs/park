@@ -91,7 +91,8 @@
     "contact": "Kontakt",
     "sign_out": "Abmelden",
     "sign_in": "Anmelden",
-    "users": "Benutzer"
+    "users": "Benutzer",
+    "analytics": "Analysen"
   },
   "component_sign_in": {
     "title": "Anmelden",
@@ -251,5 +252,8 @@
     "password": "Passwort:",
     "confirm_password": "Passwort bestätigen:",
     "sign_up_button": "Registrieren"
+  },
+  "route_analytics": {
+    "title": "Analysen"
   }
 }

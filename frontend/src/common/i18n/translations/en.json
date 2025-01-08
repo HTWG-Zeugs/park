@@ -90,7 +90,8 @@
     "contact": "Contact",
     "sign_out": "Sign out",
     "sign_in": "Sign in",
-    "users": "Users"
+    "users": "Users",
+    "analytics": "Analytics"
   },
   "component_sign_in": {
     "title": "Sign-In",
@@ -250,5 +251,8 @@
     "password": "Password:",
     "confirm_password": "Confirm Password:",
     "sign_up_button": "Sign Up"
+  },
+  "route_analytics": {
+    "title": "Analytics"
   }
 }
