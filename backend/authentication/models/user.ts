@@ -34,7 +34,7 @@ export class User {
   toPlainObject() {
     return {
       id: this.id,
-      role: this.role,
+      role: this.role.valueOf(),
       tenantId: this.tenantId,
       mail: this.mail,
       name: this.name,

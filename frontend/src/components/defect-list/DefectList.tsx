@@ -10,7 +10,7 @@ import {
   GridSlots,
   GridToolbarContainer,
 } from "@mui/x-data-grid";
-import { Button } from "@mui/material";
+import { Button, Tooltip } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DescriptionIcon from "@mui/icons-material/Description";
 import axiosAuthenticated from "src/services/Axios";
@@ -146,18 +146,22 @@ export default function DefectTable() {
       cellClassName: "actions",
       getActions: ({ id }) => {
         return [
-          <GridActionsCellItem
-            icon={<DeleteIcon />}
-            label={t("component_defectList.actions.delete")}
-            onClick={handleDeleteClicked(id)}
-            color="inherit"
-          />,
-          <GridActionsCellItem
-            icon={<DescriptionIcon />}
-            label={t("component_defectList.actions.details")}
-            onClick={handleShowDetailsClicked(id)}
-            color="inherit"
-          />,
+          <Tooltip title={t("component_defectList.actions.delete")}>
+            <GridActionsCellItem
+              icon={<DeleteIcon color="error" />}
+              label={t("component_defectList.actions.delete")}
+              onClick={handleDeleteClicked(id)}
+              color="inherit"
+            />
+          </Tooltip>,
+          <Tooltip title={t("component_defectList.actions.details")}>
+            <GridActionsCellItem
+              icon={<DescriptionIcon color="primary" />}
+              label={t("component_defectList.actions.details")}
+              onClick={handleShowDetailsClicked(id)}
+              color="inherit"
+            />
+          </Tooltip>,
         ];
       },
     },
