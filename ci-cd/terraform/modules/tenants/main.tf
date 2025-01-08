@@ -16,6 +16,12 @@ resource "google_storage_bucket" "property_management_bucket" {
   name     = "${var.project_id}-prop-ma-${var.app_namespace}"
   location = var.region
   public_access_prevention = "enforced"
+  cors {
+    origin          = ["*"]
+    method          = ["GET", "HEAD", "PUT", "POST", "DELETE"]
+    response_header = ["*"]
+    max_age_seconds = 3600
+  }
 }
 
 
