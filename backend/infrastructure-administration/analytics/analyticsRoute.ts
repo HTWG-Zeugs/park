@@ -338,7 +338,7 @@ router.put("/requests/:tenantId", async (req, res) => {
     const tenantId: string = getTenantId(req);
     const timestamp: Date = new Date();
 
-    const requestsRecord = await repository.getRequests(tenantId, new Date(timestamp))
+    const requestsRecord = await repository.getRequest(tenantId, new Date(timestamp))
 
     if (requestsRecord.timestamp.getDate() == timestamp.getDate()) {
       requestsRecord.value++;
@@ -361,14 +361,13 @@ router.put("/requests/:tenantId", async (req, res) => {
   }
 });
 
-router.get("/requests/:tenantId/:from/:to", (req, res) => {
+router.get("/requests/:tenantId/:from/:to", async (req, res) => {
   // get request count array for the days in the range
   try {
-    const garageId: string = req.params.tenantId;
+    const tenantId: string = getTenantId(req);
     const start: string = req.params.from;
     const end: string = req.params.to;
-    // get the request counts for the days in range(from,to)
-    const tenantRequestEntries: NumberRecord[] = [];
+    const tenantRequestEntries: NumberRecord[] = await repository.getRequests(tenantId, new Date(start), new Date(end));
     res.status(200).send(tenantRequestEntries);
   } catch (e) {
     res

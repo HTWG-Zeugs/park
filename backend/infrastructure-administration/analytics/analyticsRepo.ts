@@ -245,7 +245,7 @@ export class AnalyticsRepo {
       .limit(1)[0].ref.update(JSON.parse(JSON.stringify(requestsRecord)));
   }
 
-  async getRequests(tenantId: string, timestamp: Date): Promise<NumberRecord> {
+  async getRequest(tenantId: string, timestamp: Date): Promise<NumberRecord> {
     const querySnapshot = await this.queryDocForTimestamp(
       tenantId,
       "requests",
@@ -257,6 +257,17 @@ export class AnalyticsRepo {
     } else {
       throw new Error("Unable to find occupancy record");
     }
+  }
+
+  async getRequests(tenantId: string, from: Date, to: Date): Promise<NumberRecord[]> {
+    const querySnapshot = await this.queryDocInRange(
+      tenantId,
+      "requests",
+      from,
+      to
+    );
+
+    return querySnapshot.docs.map((doc) => doc.data() as NumberRecord);
   }
 
   private async createRecord(collection: string, subCollection: string, obj: any): Promise<void> {
