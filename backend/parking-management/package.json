@@ -4,7 +4,7 @@
   "description": "parking management service",
   "main": "main.ts",
   "scripts": {
-    "start": "cross-env GOOGLE_APPLICATION_CREDENTIALS=./../../certs/service-account-credentials.json nodemon",
+    "start": "cross-env GOOGLE_APPLICATION_CREDENTIALS=./../../certs/park-staging-444913-508a80fcf0ae.json nodemon",
     "test": "npx jest",
     "build": "npx tsc"
   },

@@ -1,5 +1,4 @@
 import { Router } from "express";
-import validateFirebaseIdToken from "../middleware/validateFirebaseIdToken";
 import { GarageRepository } from "./GarageRepo";
 import { Garage } from "./models/Garage";
 import { GarageResponseObject } from "../../../../shared/GarageResponseObject";

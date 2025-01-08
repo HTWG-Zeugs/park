@@ -1,8 +1,6 @@
 import { ChargingInvoice } from "../models/chargingInvoice";
 import { ChargingSession } from "../models/chargingSession";
-import { ChargingStation } from "../models/chargingStation";
 import { Garage } from "../models/garage";
-import { OccupancyStatus } from "../models/occupancyStatus";
 import { ParkingInvoice } from "../models/parkingInvoice";
 import { Ticket } from "../models/ticket";
 import { Repository } from "./repository";
