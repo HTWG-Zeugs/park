@@ -10,30 +10,48 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "src/services/AuthContext";
 import { auth } from "src/services/FirebaseConfig";
 import { useTranslation } from "react-i18next";
-import HomeIcon from '@mui/icons-material/Home';
-import LogoutIcon from '@mui/icons-material/Logout';
-import LoginIcon from '@mui/icons-material/Login';
-import TranslateIcon from '@mui/icons-material/Translate';
-import Flag from 'react-flagkit';
+import HomeIcon from "@mui/icons-material/Home";
+import LogoutIcon from "@mui/icons-material/Logout";
+import LoginIcon from "@mui/icons-material/Login";
+import TranslateIcon from "@mui/icons-material/Translate";
+import Flag from "react-flagkit";
+import axiosAuthenticated from "src/services/Axios";
+import { UserRoleObject } from "shared/UserRoleObject";
 
-export default function Header() {  
+export default function Header() {
   const { t, i18n } = useTranslation();
-  const pages = [
-    { text: <HomeIcon/>, href: "/home" },
-    { text: t("component_header.occupancy"), href: "/occupancy"},
-    { text: t("component_header.garages"), href: "/garages" },
-    { text: t("component_header.defects"), href: "/defects" },
-    { text: t("component_header.users"), href: "/users" },
-    { text: t("component_header.contact"), href: "/contact" },
-  ];
   const navigate = useNavigate();
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
 
+  const AUTHENTICATION_SERVICE_URL = import.meta.env.VITE_AUTHENTICATION_SERVICE_URL;
+
   const { isAuthenticated, logout } = useAuth();
+  const pages = [
+    { text: <HomeIcon />, href: "/home" },
+    { text: t("component_header.occupancy"), href: "/occupancy" },
+    { text: t("component_header.contact"), href: "/contact" },
+  ];
+
+  if (isAuthenticated) {
+    pages.push(
+      { text: t("component_header.garages"), href: "/garages" },
+      { text: t("component_header.defects"), href: "/defects" }
+    );
+  }
+
+  const [userRole, setUserRole] = useState<number>(0);
+
+  if (
+    isAuthenticated && // signed-in
+    (userRole == UserRoleObject.tenant_admin || // has required role permission
+      userRole == UserRoleObject.solution_admin)
+  ) {
+    pages.push({ text: t("component_header.users"), href: "/users" });
+  }
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [language, setLanguage] = useState<string>('GB');
+  const [language, setLanguage] = useState<string>("GB");
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -46,6 +64,20 @@ export default function Header() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      try {
+        axiosAuthenticated
+          .get(`${AUTHENTICATION_SERVICE_URL}/user/${auth.currentUser?.uid}`)
+          .then((response) => {
+            setUserRole(response.data.role);
+          });
+      } catch (error) {
+        console.error("Error getting user role: ", error);
+      }
+    }
+  }, [isAuthenticated]);
+
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
   };
@@ -56,14 +88,14 @@ export default function Header() {
   };
 
   const toggleLanguage = () => {
-    if (language == 'GB') {
-      setLanguage('DE');
-      i18n.changeLanguage('de')
+    if (language == "GB") {
+      setLanguage("DE");
+      i18n.changeLanguage("de");
     } else {
-      setLanguage('GB')
-      i18n.changeLanguage('en')
+      setLanguage("GB");
+      i18n.changeLanguage("en");
     }
-  }
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -170,10 +202,13 @@ export default function Header() {
                 </Button>
               ))}
             </Box>
-            <Button style={{marginRight: "10px"}}
+            <Button
+              style={{ marginRight: "10px" }}
               onClick={() => toggleLanguage()}
-              sx={{ color: "white", fontWeight: "bold" }}>
-              <TranslateIcon style={{marginRight: "5px"}}/><Flag country={language} />
+              sx={{ color: "white", fontWeight: "bold" }}
+            >
+              <TranslateIcon style={{ marginRight: "5px" }} />
+              <Flag country={language} />
             </Button>
             {isAuthenticated && userEmail && (
               <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -183,8 +218,9 @@ export default function Header() {
                 <Tooltip title={t("component_header.sign_out")}>
                   <IconButton
                     onClick={handleLogout}
-                    sx={{ color: "white", fontWeight: "bold" }}>
-                    <LogoutIcon/>
+                    sx={{ color: "white", fontWeight: "bold" }}
+                  >
+                    <LogoutIcon />
                   </IconButton>
                 </Tooltip>
               </Box>
@@ -193,8 +229,9 @@ export default function Header() {
               <Tooltip title={t("component_header.sign_in")}>
                 <IconButton
                   onClick={() => navigate("/sign-in")}
-                  sx={{ color: "white", fontWeight: "bold" }}>
-                  <LoginIcon/>
+                  sx={{ color: "white", fontWeight: "bold" }}
+                >
+                  <LoginIcon />
                 </IconButton>
               </Tooltip>
             )}
