@@ -254,6 +254,17 @@
     "sign_up_button": "Registrieren"
   },
   "route_analytics": {
-    "title": "Analysen"
+    "title": "Analysen",
+    "mean_daily_turnover": "Durchschnittlicher Tagesumsatz",
+    "mean_parking_duration": "Durchschnittliche Parkdauer",
+    "total_kwh_charged": "Gesamt geladene KWh",
+    "parking_occupancy": "Belegung Parkplätze",
+    "charging_occupancy": "Belegung Ladestationen",
+    "defect_status": "Mängel Status",
+    "last_30_days": "letzte 30 Tage",
+    "open": "offen",
+    "in_work": "in arbeit",
+    "closed": "geschlossen",
+    "rejected": "abgewiesen"
   }
 }

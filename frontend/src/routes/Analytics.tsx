@@ -103,8 +103,8 @@ export default function Analytics() {
       <Grid size={{ xs: 1, sm: 1, md: 1, lg: 2 }}>
         <Card>
           <CardContent>
-            <Typography variant="h6">Total Sales</Typography>
-            <Typography variant="h5">$150,000</Typography>
+            <Typography variant="h6"> {t('route_analytics.mean_daily_turnover')}<br /> ({t('route_analytics.last_30_days')})</Typography>
+            <Typography variant="h5">$18,000</Typography>
           </CardContent>
         </Card>
       </Grid>
@@ -113,8 +113,8 @@ export default function Analytics() {
       <Grid size={{ xs: 1, sm: 1, md: 1, lg: 2 }}>
         <Card>
           <CardContent>
-            <Typography variant="h6">Total Revenue</Typography>
-            <Typography variant="h5">$500,000</Typography>
+            <Typography variant="h6">{t('route_analytics.mean_parking_duration')} <br /> ({t('route_analytics.last_30_days')})</Typography>
+            <Typography variant="h5">90 min </Typography>
           </CardContent>
         </Card>
       </Grid>
@@ -123,8 +123,8 @@ export default function Analytics() {
       <Grid size={{ xs: 1, sm: 1, md: 1, lg: 2 }}>
         <Card>
           <CardContent>
-            <Typography variant="h6">Total Traffic</Typography>
-            <Typography variant="h5">1,200,000</Typography>
+            <Typography variant="h6">{t('route_analytics.total_kwh_charged')} <br /> ({t('route_analytics.last_30_days')})</Typography>
+            <Typography variant="h5">1000 KWh</Typography>
           </CardContent>
         </Card>
       </Grid>
@@ -135,10 +135,10 @@ export default function Analytics() {
       <Grid  size={{ xs: 1, sm: 1, md: 2, lg: 3 }}>
         <Card>
           <CardContent>
-            <Typography variant="h6">Sales Over Time</Typography>
+            <Typography variant="h6">{t('route_analytics.parking_occupancy')} ({t('route_analytics.last_30_days')})</Typography>
             <LineChart 
                 xAxis={[{ data: [1,2,3,4] }]}
-                series={[{ data: [1,4,2,3], color: '#f28e2c', area: true }]}
+                series={[{ data: [3,4,2,3], color: '#f28e2c', area: true }]}
                 width={450}
                 height={320}>
               </LineChart>
@@ -150,10 +150,10 @@ export default function Analytics() {
       <Grid size={{ xs: 1, sm: 1, md: 2, lg: 3 }}>
         <Card>
           <CardContent>
-            <Typography variant="h6">Revenue Over Time</Typography>
+            <Typography variant="h6">{t('route_analytics.charging_occupancy')} ({t('route_analytics.last_30_days')})</Typography>
               <LineChart 
-                xAxis={[{ data: [1,2,3,4] }]}
-                series={[{ data: [1,4,2,3], color: '#f28e2c', area: true }]}
+                xAxis={[{ data: [1,2,3,4,5,6] }]}
+                series={[{ data: [4,2,4,3,1,3], color: '#f28e2c', area: true }]}
                 width={450}
                 height={320}>
               </LineChart>
@@ -165,12 +165,18 @@ export default function Analytics() {
       <Grid size={{ xs: 1, sm: 1, md: 2, lg: 3 }}>
         <Card>
           <CardContent>
-            <Typography variant="h6">Traffic Over Time</Typography>
+            <Typography variant="h6">{t('route_analytics.defect_status')} ({t('route_analytics.last_30_days')})</Typography>
               <LineChart 
                 xAxis={[{ data: [1,2,3,4] }]}
-                series={[{ data: [1,4,2,3], color: '#f28e2c', area: true }]}
+                series={[
+                  { data: [1,4,2,3], label: t('route_analytics.open') },
+                  { data: [2,2,3,2], label: t('route_analytics.in_work') },
+                  { data: [1,0,2,4], label: t('route_analytics.closed') },
+                  { data: [0,0,1,0], label: t('route_analytics.rejected') },
+                ]}
                 width={450}
-                height={320}>
+                height={320}
+                >
               </LineChart>
           </CardContent>
         </Card>

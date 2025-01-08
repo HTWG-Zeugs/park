@@ -253,6 +253,17 @@
     "sign_up_button": "Sign Up"
   },
   "route_analytics": {
-    "title": "Analytics"
+    "title": "Analytics",
+    "mean_daily_turnover": "Mean daily turnover",
+    "mean_parking_duration": "Mean parking duration",
+    "total_kwh_charged": "Total KWh charged",
+    "parking_occupancy": "Parking occupancy",
+    "charging_occupancy": "Charging occupancy",
+    "defect_status": "Defect status",
+    "last_30_days": "last 30 days",
+    "open": "open",
+    "in_work": "in work",
+    "closed": "closed",
+    "rejected": "rejected"
   }
 }
