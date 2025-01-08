@@ -54,7 +54,7 @@
     },
     "actions": {
       "delete": "Delete",
-      "details": "details"
+      "details": "Details"
     }
   },
   "component_userList": {
@@ -67,6 +67,13 @@
       "column_role": "Role",
       "column_tenant_id": "Tenant ID",
       "column_actions": "Actions"
+    },
+    "roles": {
+      "solution_admin": "Solution Admin",
+      "tenant_admin": "Tenant Admin",
+      "operational_manager": "Operational Staff",
+      "customer": "Customer",
+      "third_party": "Third Party"
     },
     "actions": {
       "edit_user": "Edit user",
@@ -130,13 +137,13 @@
   },
   "route_edit_user": {
     "user_details": "User Details",
-     "name": "Name",
-     "mail": "Mail",
-     "tenant_id": "Tenant ID",
-     "user_id": "User ID",
-     "role": "Role",
-     "save_button": "Save"
-   },
+    "name": "Name",
+    "mail": "Mail",
+    "tenant_id": "Tenant ID",
+    "user_id": "User ID",
+    "role": "Role",
+    "save_button": "Save"
+  },
   "component_garageList": {
     "buttons": {
       "add_garage": "Add Garage"
@@ -146,6 +153,10 @@
       "column_name": "Name",
       "column_last_modified": "Last modified at",
       "column_actions": "Actions"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
     }
   },
   "route_add_garage": {

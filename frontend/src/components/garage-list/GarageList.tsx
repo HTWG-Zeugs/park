@@ -8,7 +8,7 @@ import {
   GridSlots,
   GridToolbarContainer,
 } from "@mui/x-data-grid";
-import { Button } from "@mui/material";
+import { Button, Tooltip } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import axiosAuthenticated from "src/services/Axios";
@@ -107,18 +107,22 @@ export default function DefectTable() {
       cellClassName: "actions",
       getActions: ({ id }) => {
         return [
+        <Tooltip title={t("component_garageList.actions.delete")}>
           <GridActionsCellItem
-            icon={<DeleteIcon />}
+            icon={<DeleteIcon color="error" />}
             label="Delete"
             onClick={handleDeleteClicked(id)}
             color="inherit"
-          />,
+          />
+        </Tooltip>,
+        <Tooltip title={t("component_garageList.actions.edit")}>
           <GridActionsCellItem
-            icon={<EditIcon />}
+            icon={<EditIcon color="primary" />}
             label="Edit"
             onClick={handleEditClicked(id)}
             color="inherit"
-          />,
+          />
+        </Tooltip>,
         ];
       },
     },
