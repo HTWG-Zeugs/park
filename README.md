@@ -31,7 +31,8 @@ Firestore local: https://firebase.google.com/docs/admin/setup?hl=de#initialize_t
 ### Project ID's
 
 - Production: `cloud-park-app`
-- Staging: `tensile-spirit-438110-i2`
+- Staging Jonas: `tensile-spirit-438110-i2`
+- Staging Lukas: `park-staging-444913`
 
 ### Important commands
 

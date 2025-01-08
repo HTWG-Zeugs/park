@@ -52,6 +52,10 @@
       "column_last_modified": "Zuletzt geändert am",
       "column_status": "Status",
       "column_actions": "Aktionen"
+    },
+    "actions": {
+      "delete": "Löschen",
+      "details": "Details"
     }
   },
   "component_userList": {
@@ -64,6 +68,13 @@
       "column_role": "Rolle",
       "column_tenant_id": "Mandanten ID",
       "column_actions": "Aktionen"
+    },
+    "roles": {
+      "solution_admin": "Solution Admin",
+      "tenant_admin": "Mandanten Admin",
+      "operational_manager": "Betriebsmitarbeitender",
+      "customer": "Kunde",
+      "third_party": "Drittanbieter"
     },
     "actions": {
       "edit_user": "Benutzer bearbeiten",
@@ -126,7 +137,7 @@
     "last_modified_at": "Zuletzt geändert am"
   },
   "route_edit_user": {
-   "user_details": "Benutzer Details",
+    "user_details": "Benutzer Details",
     "name": "Name",
     "mail": "E-Mail",
     "tenant_id": "Mandanten ID",
@@ -143,6 +154,10 @@
       "column_name": "Name",
       "column_last_modified": "Zuletzt geändert am",
       "column_actions": "Aktionen"
+    },
+    "actions": {
+      "edit": "Bearbeiten",
+      "delete": "Löschen"
     }
   },
   "route_add_garage": {

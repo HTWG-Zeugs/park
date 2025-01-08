@@ -209,31 +209,21 @@ export default function EditUser() {
                   error={!!formErrors.role}
                   helperText={formErrors.role}
                 >
-                  <MenuItem
-                    value={UserRoleObject.solution_admin.valueOf().toString()}
-                  >
+                  <MenuItem value={UserRoleObject.solution_admin.valueOf()}>
                     {t(`route_add_user.role_select.solution_admin`)}
                   </MenuItem>
-                  <MenuItem
-                    value={UserRoleObject.tenant_admin.valueOf().toString()}
-                  >
+                  <MenuItem value={UserRoleObject.tenant_admin.valueOf()}>
                     {t(`route_add_user.role_select.tenant_admin`)}
                   </MenuItem>
                   <MenuItem
-                    value={UserRoleObject.operational_manager
-                      .valueOf()
-                      .toString()}
+                    value={UserRoleObject.operational_manager.valueOf()}
                   >
                     {t(`route_add_user.role_select.operational_manager`)}
                   </MenuItem>
-                  <MenuItem
-                    value={UserRoleObject.customer.valueOf().toString()}
-                  >
+                  <MenuItem value={UserRoleObject.customer.valueOf()}>
                     {t(`route_add_user.role_select.customer`)}
                   </MenuItem>
-                  <MenuItem
-                    value={UserRoleObject.third_party.valueOf().toString()}
-                  >
+                  <MenuItem value={UserRoleObject.third_party.valueOf()}>
                     {t(`route_add_user.role_select.third_party`)}
                   </MenuItem>
                 </TextField>
