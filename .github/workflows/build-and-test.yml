@@ -84,7 +84,7 @@ jobs:
         with:
           python-version: '3.x'
           cache: 'pip'
-      - run: pip install -r requirements.txt
+      - run: pip install -r ci-cd/requirements.txt
 
       - name: Login to Google Cloud
         uses: 'google-github-actions/auth@v2'

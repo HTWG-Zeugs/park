@@ -43,7 +43,7 @@ jobs:
         with:
           python-version: '3.x'
           cache: 'pip'
-      - run: pip install -r requirements.txt
+      - run: pip install -r ci-cd/requirements.txt
 
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
