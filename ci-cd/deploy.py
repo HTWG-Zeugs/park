@@ -233,8 +233,12 @@ def run_terraform_plan(tfvars_file="tenants.tfvars.json"):
         text=True,
         cwd="./terraform/staging"
     )
-    print(proc.stdout)
-    print(proc.stderr)
+    if proc.returncode != 0:
+      print("Terraform init failed!")
+      print("Return code:", proc.returncode)
+      print(proc.stderr)
+    else:
+      print(proc.stdout)
 
     print("Running 'terraform plan'...")
     proc = subprocess.run(
@@ -244,8 +248,12 @@ def run_terraform_plan(tfvars_file="tenants.tfvars.json"):
         text=True,
         cwd="./terraform/staging"
     )
-    print(proc.stdout)
-    print(proc.stderr)
+    if proc.returncode != 0:
+      print("Terraform plan failed!")
+      print("Return code:", proc.returncode)
+      print(proc.stderr)
+    else:
+      print(proc.stdout)
 
 
 # ------------------------------------------------------------------------------
@@ -264,9 +272,12 @@ def run_terraform_apply(tfvars_file="tenants.tfvars.json"):
         text=True,
         cwd="./terraform/staging"
     )
-    print(proc.stdout)
-    if proc.stderr:
-        print(proc.stderr)
+    if proc.returncode != 0:
+      print("Terraform apply failed!")
+      print("Return code:", proc.returncode)
+      print(proc.stderr)
+    else:
+      print(proc.stdout)
 
 
 # ------------------------------------------------------------------------------
