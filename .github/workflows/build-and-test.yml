@@ -94,7 +94,8 @@ jobs:
 
       - name: Run Terraform plan
         working-directory: ci-cd
-        run: python deploy.py \
+        run: |
+          python deploy.py \
           --action plan \
           --create-cluster \
           --project-id park-staging-444913 \

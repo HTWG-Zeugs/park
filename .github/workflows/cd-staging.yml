@@ -50,7 +50,8 @@ jobs:
 
       - name: Run deploy script
         working-directory: ci-cd
-        run: python deploy.py \
+        run: |
+          python deploy.py \
           --action apply \
           --create-cluster \
           --project-id ${{ vars.STAGING_PROJECT_ID }} \
