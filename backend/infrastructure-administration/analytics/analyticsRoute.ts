@@ -4,12 +4,13 @@ import { OccupancyStatus } from "../../../shared/OccupancyStatus";
 import { DefectStatusRecord } from "../../../shared/DefectStatusRecord";
 import { OccupancyRecord } from "./models/occupancyRecord";
 import { NumberRecord } from "./models/numberRecord";
+import validateFirebaseIdToken from "../middleware/validateFirebaseIdToken";
 import jwt from "jsonwebtoken";
 
 const router = Router();
 const repository = new AnalyticsRepo();
 
-router.put("/parking/status/:garageId", async (req, res) => {
+router.put("/parking/status/:garageId", validateFirebaseIdToken, async (req, res) => {
   // save timestamp and Occupancy status in the garageId collection at this time
   try {
     const tenantId: string = getTenantId(req);
@@ -27,7 +28,7 @@ router.put("/parking/status/:garageId", async (req, res) => {
   }
 });
 
-router.get("/parking/status/:garageId/:timestamp", async (req, res) => {
+router.get("/parking/status/:garageId/:timestamp", validateFirebaseIdToken, async (req, res) => {
   // get parking status for the timestamp or the last saved timestamp
   try {
     const tenantId: string = getTenantId(req);
@@ -48,7 +49,7 @@ router.get("/parking/status/:garageId/:timestamp", async (req, res) => {
   }
 });
 
-router.get("/parking/status/:garageId/:start/:end", async (req, res) => {
+router.get("/parking/status/:garageId/:start/:end", validateFirebaseIdToken, async (req, res) => {
   // get parking status array in range
   try {
     const tenantId: string = getTenantId(req);
@@ -72,7 +73,7 @@ router.get("/parking/status/:garageId/:start/:end", async (req, res) => {
   }
 });
 
-router.put("/parking/duration/:garageId", async (req, res) => {
+router.put("/parking/duration/:garageId", validateFirebaseIdToken, async (req, res) => {
   // add new parking duration record from parking session
   try {
     const tenantId: string = getTenantId(req);
@@ -97,7 +98,7 @@ router.put("/parking/duration/:garageId", async (req, res) => {
   }
 });
 
-router.get("/parking/duration/:garageId/:start/:end", async (req, res) => {
+router.get("/parking/duration/:garageId/:start/:end", validateFirebaseIdToken, async (req, res) => {
   // get parking duration array for garage in range
   try {
     const tenantId: string = getTenantId(req);
@@ -121,7 +122,7 @@ router.get("/parking/duration/:garageId/:start/:end", async (req, res) => {
   }
 });
 
-router.put("/charging/status/:garageId", async (req, res) => {
+router.put("/charging/status/:garageId", validateFirebaseIdToken, async (req, res) => {
   // save timestamp and charging occupancy in the garageId collection at this timestamp
   try {
     const tenantId: string = getTenantId(req);
@@ -139,7 +140,7 @@ router.put("/charging/status/:garageId", async (req, res) => {
   }
 });
 
-router.get("/charging/status/:garageId/:timestamp", async (req, res) => {
+router.get("/charging/status/:garageId/:timestamp", validateFirebaseIdToken, async (req, res) => {
   // get charging status for the timestamp or the last saved timestamp
   try {
     const tenantId: string = getTenantId(req);
@@ -160,7 +161,7 @@ router.get("/charging/status/:garageId/:timestamp", async (req, res) => {
   }
 });
 
-router.get("/charging/status/:garageId/:start/:end", async (req, res) => {
+router.get("/charging/status/:garageId/:start/:end", validateFirebaseIdToken, async (req, res) => {
   // get charging status array in range
   try {
     const tenantId: string = getTenantId(req);
@@ -184,7 +185,7 @@ router.get("/charging/status/:garageId/:start/:end", async (req, res) => {
   }
 });
 
-router.put("/charging/powerConsumed/:garageId", async (req, res) => {
+router.put("/charging/powerConsumed/:garageId", validateFirebaseIdToken, async (req, res) => {
   // add new record for consumed power from charging session in garage
   try {
     const tenantId: string = getTenantId(req);
@@ -210,7 +211,7 @@ router.put("/charging/powerConsumed/:garageId", async (req, res) => {
 });
 
 router.get(
-  "/charging/powerConsumed/:garageId/:start/:end",
+  "/charging/powerConsumed/:garageId/:start/:end", validateFirebaseIdToken,
   async (req, res) => {
     // get records for consumed power for garage in range
     try {
@@ -236,7 +237,7 @@ router.get(
   }
 );
 
-router.put("/turnover/:garageId", async (req, res) => {
+router.put("/turnover/:garageId", validateFirebaseIdToken, async (req, res) => {
   // add new record for turnover
   try {
     const tenantId: string = getTenantId(req);
@@ -257,7 +258,7 @@ router.put("/turnover/:garageId", async (req, res) => {
   }
 });
 
-router.get("/turnover/:garageId/:start/:end", async (req, res) => {
+router.get("/turnover/:garageId/:start/:end", validateFirebaseIdToken, async (req, res) => {
   // get records for turnover for garage in range
   try {
     const tenantId: string = getTenantId(req);
@@ -280,7 +281,7 @@ router.get("/turnover/:garageId/:start/:end", async (req, res) => {
   }
 });
 
-router.put("/defects/status/:garageId", async (req, res) => {
+router.put("/defects/status/:garageId", validateFirebaseIdToken, async (req, res) => {
   // add new entry for change in defect status
   // ("x open, y in progress, z closed")
   try {
@@ -298,7 +299,7 @@ router.put("/defects/status/:garageId", async (req, res) => {
   }
 });
 
-router.get("/defects/status/:garageId/:timestamp", async (req, res) => {
+router.get("/defects/status/:garageId/:timestamp", validateFirebaseIdToken, async (req, res) => {
   // get defect status entry for timestamp or the last saved timestamp
   try {
     const tenantId: string = getTenantId(req);
@@ -320,7 +321,7 @@ router.get("/defects/status/:garageId/:timestamp", async (req, res) => {
   }
 });
 
-router.get("/defects/status/:garageId/:start/:end", async (req, res) => {
+router.get("/defects/status/:garageId/:start/:end", validateFirebaseIdToken, async (req, res) => {
   // get defect status entry in range
   try {
     const tenantId: string = getTenantId(req);
@@ -344,7 +345,7 @@ router.get("/defects/status/:garageId/:start/:end", async (req, res) => {
   }
 });
 
-router.put("/requests/:tenantId", async (req, res) => {
+router.put("/requests/:tenantId", validateFirebaseIdToken, async (req, res) => {
   // increase request count entry for that day or create new entry for a new day
   try {
     const tenantId: string = getTenantId(req);
@@ -376,7 +377,7 @@ router.put("/requests/:tenantId", async (req, res) => {
   }
 });
 
-router.get("/requests/:tenantId/:from/:to", async (req, res) => {
+router.get("/requests/:tenantId/:from/:to", validateFirebaseIdToken, async (req, res) => {
   // get request count array for the days in the range
   try {
     const tenantId: string = getTenantId(req);
