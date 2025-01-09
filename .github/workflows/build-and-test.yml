@@ -96,6 +96,7 @@ jobs:
         run: |
           python deploy.py \
           --action plan \
+          --is-github-actions \
           --create-cluster \
           --project-id ${{ vars.STAGING_PROJECT_ID }} \
           --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
