@@ -234,8 +234,7 @@ def run_terraform_plan(tfvars_file="tenants.tfvars.json"):
         cwd="./terraform/staging"
     )
     print(proc.stdout)
-    if proc.stderr:
-        print(proc.stderr)
+    print(proc.stderr)
 
     print("Running 'terraform plan'...")
     proc = subprocess.run(
@@ -246,8 +245,7 @@ def run_terraform_plan(tfvars_file="tenants.tfvars.json"):
         cwd="./terraform/staging"
     )
     print(proc.stdout)
-    if proc.stderr:
-        print(proc.stderr)
+    print(proc.stderr)
 
 
 # ------------------------------------------------------------------------------
