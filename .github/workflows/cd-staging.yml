@@ -49,7 +49,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Run deploy script
-        working-directory: ci-cd
+        working-directory: ./ci-cd
         run: |
           python deploy.py \
           --action apply \

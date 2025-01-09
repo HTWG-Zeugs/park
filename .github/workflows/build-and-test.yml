@@ -74,7 +74,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      TENANTS: '[{id = "free", domain = "free" }, {id = "premium", domain = "premium"}]'
 
     steps:
       - name: Checkout code
@@ -93,10 +92,10 @@ jobs:
           workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
 
       - name: Run Terraform plan
-        working-directory: ci-cd
+        working-directory: ./ci-cd
         run: |
           python deploy.py \
           --action plan \
           --create-cluster \
-          --project-id park-staging-444913 \
-          --gcs-bucket park-staging-444913-terraform-state \
+          --project-id ${{ vars.STAGING_PROJECT_ID }} \
+          --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
