@@ -11,6 +11,7 @@ identityPlatForm:
 
 gateway:
   name: "park-external-http"
+  ipName: park-gateway-ip
 
 domain: null
 

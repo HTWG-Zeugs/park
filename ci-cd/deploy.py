@@ -186,6 +186,8 @@ def run_terraform_plan(tfvars_file="tenants.tfvars.json"):
         cwd="./terraform/staging"
     )
     print(proc.stdout)
+    if proc.stderr:
+        print(proc.stderr)
 
     print("Running 'terraform plan'...")
     proc = subprocess.run(
@@ -240,36 +242,25 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
 
   if not cliArgs.create_cluster:
     return
-  
+
   # Deploy the infrastructure chart
+  create_and_annotate_namespace("infra-ns")
+
   print("Deploying infrastructure chart...")
   subprocess.run(
     [
       "helm", "upgrade", "--install" , "park-infra", "./helm/infrastructure",
       "-n", "infra-ns",
-      "--create-namespace",
       "--set", f"repository={cliArgs.repository}",
       "--set", f"gitTag={cliArgs.git_tag}",
       "--set", f"identityPlatForm.apiKey={cliArgs.identity_api_key}",
       "--set", f"identityPlatForm.authDomain={cliArgs.identity_auth_domain}",
       "--set", f"gc_project_id={cliArgs.gc_project_id}",
-      "--set", f"domain={cliArgs.domain_name}",
+      "--set", f"domain={cliArgs.domain_name}"
     ],
     check=True
   )
 
-  annotation_key = "shared-gateway-access"
-  annotation_value = "true"
-  subprocess.run(
-    [
-      "kubectl", "annotate",
-      "namespace", "infra-ns",
-      f"{annotation_key}='{annotation_value}'",
-      "--overwrite"
-    ],
-    check=True
-  )
-  
   # Convert the list of tenantIds for easy lookups
   tenant_ids = {t["tenantId"]  for t in tenants}
   tenant_namespaces = [ create_tenant_namespace_name(t["tenantId"]) for t in tenants]
@@ -292,9 +283,8 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
 
   # Uninstall releases that are no longer in the tenants list
   for release_ns in existing_release_namespaces:
-    if release_name not in tenant_ids:
-      print(f"Release '{release_name}' in namespace '{release_ns}' "
-            f"no longer has a matching tenant. Uninstalling...")
+    if release_ns not in tenant_namespaces:
+      print(f"Deleting releases in namespace '{release_ns}'...")
       subprocess.run(
         ["kubectl", "delete", "namespace", release_ns],
         check=True
@@ -304,13 +294,16 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
   for tenant in tenants:
     tenant_id = tenant["tenantId"]
     tenant_dns = tenant["dns"]
-    tenant_namespace = f"tenant-{tenant_id}-ns"
+    tenant_namespace = create_tenant_namespace_name(tenant_id)
+    release_name = create_tenant_release_name("backend", tenant_id)
+
+    create_and_annotate_namespace(tenant_namespace)
+
     print(f"Tenant '{tenant_id}' not deployed. Installing backend in namespace '{tenant_namespace}'...")
     subprocess.run(
       [
-        "helm", "upgrade", "--install", f"park-backend-{tenant_id}", "./helm/backend",
+        "helm", "upgrade", "--install", release_name, "./helm/backend",
         "-n", tenant_namespace,
-        "--create-namespace",
         "--set", f"repository={cliArgs.repository}",
         "--set", f"gitTag={cliArgs.git_tag}",
         "--set", f"identityPlatForm.apiKey={cliArgs.identity_api_key}",
@@ -322,23 +315,12 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
       check=True
     )
 
-    annotation_key = "shared-gateway-access"
-    annotation_value = "true"
-    subprocess.run(
-      [
-        "kubectl", "annotate",
-        "namespace", tenant_namespace,
-        f"{annotation_key}='{annotation_value}'",
-        "--overwrite"
-      ],
-      check=True
-    )
-
     print(f"Backend for tenant '{tenant_id}' deployed successfully.")
-    print(f"Deploying frontend in namespace '{tenant_namespace}'...")
+    print(f"Deploying frontend in namespace '{tenant_namespace}'...")#
+    release_name = create_tenant_release_name("frontend", tenant_id)
     subprocess.run(
       [
-        "helm", "upgrade", "--install", f"park-frontend-{tenant_id}", "./helm/frontend",
+        "helm", "upgrade", "--install", release_name, "./helm/frontend",
         "-n", tenant_namespace,
         "--set", f"repository={cliArgs.repository}",
         "--set", f"gitTag={cliArgs.git_tag}",
@@ -352,6 +334,35 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
       check=True
     )
   print("Kubernetes (Helm) sync complete.")
+
+def create_and_annotate_namespace(namespace: str):
+
+  # Check if the namespace already exists
+  result = subprocess.run(
+    ["kubectl", "get", "namespace", namespace],
+    capture_output=True,
+    text=True
+  )
+  if result.returncode == 0:
+    print(f"Namespace '{namespace}' already exists. Skipping creation.")
+  else:
+    print(f"Creating namespace '{namespace}'...")
+    subprocess.run(
+      ["kubectl", "create", "namespace", namespace],
+      check=True
+    )
+
+  annotation_key = "shared-gateway-access"
+  annotation_value = "true"
+  subprocess.run(
+    [
+      "kubectl", "annotate",
+      "namespace", namespace,
+      f"{annotation_key}={annotation_value}",
+      "--overwrite"
+    ],
+    check=True
+  )
 
 
 # ------------------------------------------------------------------------------
