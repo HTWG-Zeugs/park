@@ -10,7 +10,7 @@ spec:
       port: 80
       allowedRoutes:
         namespaces:
-          from: Selector
-          selector:
-            matchLabels:
-              shared-gateway-access: "true"
+          from: All
+  addresses:
+    - type: NamedAddress
+      value: {{ .Values.gateway.ipName }}

@@ -68,3 +68,7 @@ output "github_sa_email" {
 output "workload_identity_pool_provider_name" {
   value = module.ci_cd_infrastructure.workload_identity_pool_provider_name
 }
+
+output "gateway_ip" {
+  value = module.park_app_infrastructure.gateway_ip
+}
