@@ -241,28 +241,33 @@ def generate_tfvars_json(
 # 3. Run terraform plan
 # ------------------------------------------------------------------------------
 def run_terraform_plan(tfvars_file="tenants.tfvars.json"):
-    """
-    Runs `terraform plan -var-file=...` in the current working directory. Prints stdout/stderr.
-    """
-    print("Running terraform init...")
-    out = run_subprocess(["terraform", "init"], cwd="./terraform/staging")
-    print(out)
+  """
+  Runs `terraform plan -var-file=...` in the current working directory. Prints stdout/stderr.
+  """
+  print("Running terraform init...")
+  out = run_subprocess(["terraform", "init"], cwd="./terraform/staging")
+  print(out)
 
-    print("Running 'terraform plan'...")
-    out = run_subprocess(["terraform", "plan", f"-var-file={tfvars_file}"], cwd="./terraform/staging")
-    print(out)
+  print("Running 'terraform plan'...")
+  out = run_subprocess(["terraform", "plan", f"-var-file={tfvars_file}"], cwd="./terraform/staging")
+  print(out)
 
 # ------------------------------------------------------------------------------
 # 4. Run terraform apply
 # ------------------------------------------------------------------------------
 def run_terraform_apply(tfvars_file="tenants.tfvars.json"):
-    """
-    Runs `terraform apply -var-file=... -auto-approve` in the current directory.
-    Prints stdout/stderr.
-    """
-    print("Running 'terraform apply'...")
-    out = run_subprocess(["terraform", "apply", f"-var-file={tfvars_file}", "-auto-approve"], cwd="./terraform/staging")
-    print(out)
+  """
+  Runs `terraform apply -var-file=... -auto-approve` in the current directory.
+  Prints stdout/stderr.
+  """
+
+  print("Running terraform init...")
+  out = run_subprocess(["terraform", "init"], cwd="./terraform/staging")
+  print(out)
+
+  print("Running 'terraform apply'...")
+  out = run_subprocess(["terraform", "apply", f"-var-file={tfvars_file}", "-auto-approve"], cwd="./terraform/staging")
+  print(out)
 
 
 # ------------------------------------------------------------------------------
