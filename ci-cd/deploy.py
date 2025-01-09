@@ -111,6 +111,25 @@ def create_tenant_namespace_name(tenant_id: str):
 def create_tenant_release_name(service_name: str, tenant_id: str):
    return f"park-tenant-{tenant_id}-{service_name}"
 
+def run_subprocess(cmd: list, cwd: str = None):
+  """
+  Runs a subprocess command and returns the stdout/stderr.
+  """
+  try:
+    proc = subprocess.run(
+        cmd,
+        check=True,
+        capture_output=True,
+        text=True,
+        cwd=cwd
+    )
+    return proc.stdout
+  except subprocess.CalledProcessError as e:
+    print("Command failed!")
+    print("Return code:", e.returncode)
+    print(e.stderr)
+    exit(1)
+
 # ------------------------------------------------------------------------------
 # 1. Read tenants.json from GCS
 # ------------------------------------------------------------------------------
@@ -226,37 +245,10 @@ def run_terraform_plan(tfvars_file="tenants.tfvars.json"):
     Runs `terraform plan -var-file=...` in the current working directory. Prints stdout/stderr.
     """
     print("Running terraform init...")
-    try:
-      proc = subprocess.run(
-        ["terraform", "init"],
-        check=True,
-        capture_output=True,
-        text=True,
-        cwd="./terraform/staging"
-      )
-      print(proc.stdout)
-    except subprocess.CalledProcessError as e:
-      print("Terraform init failed!")
-      print("Return code:", e.returncode)
-      print(e.stderr)
-      return
+    run_subprocess(["terraform", "init"], cwd="./terraform/staging")
 
     print("Running 'terraform plan'...")
-    try:
-      proc = subprocess.run(
-        ["terraform", "plan", f"-var-file={tfvars_file}"],
-        check=True,
-        capture_output=True,
-        text=True,
-        cwd="./terraform/staging"
-      )
-      print(proc.stdout)
-    except subprocess.CalledProcessError as e:
-      print("Terraform plan failed!")
-      print("Return code:", e.returncode)
-      print(e.stderr)
-      return
-
+    run_subprocess(["terraform", "plan", f"-var-file={tfvars_file}"], cwd="./terraform/staging")
 
 # ------------------------------------------------------------------------------
 # 4. Run terraform apply
@@ -267,19 +259,7 @@ def run_terraform_apply(tfvars_file="tenants.tfvars.json"):
     Prints stdout/stderr.
     """
     print("Running 'terraform apply'...")
-    proc = subprocess.run(
-        ["terraform", "apply", f"-var-file={tfvars_file}", "-auto-approve"],
-        check=True,
-        capture_output=True,
-        text=True,
-        cwd="./terraform/staging"
-    )
-    if proc.returncode != 0:
-      print("Terraform apply failed!")
-      print("Return code:", proc.returncode)
-      print(proc.stderr)
-    else:
-      print(proc.stdout)
+    run_subprocess(["terraform", "apply", f"-var-file={tfvars_file}", "-auto-approve"], cwd="./terraform/staging")
 
 
 # ------------------------------------------------------------------------------
@@ -303,23 +283,21 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
     return
   
   # Get cluster credentials
-  subprocess.run(
-    [
+  cmd = [
       "gcloud", 
       "container", 
       "clusters", 
       "get-credentials", f"{cliArgs.gc_project_id}-gke", 
       "--region", cliArgs.region
-    ], 
-    check=True
-  )
+    ]
+  run_subprocess(cmd)
+  
 
   # Deploy the infrastructure chart
   create_and_annotate_namespace("infra-ns")
 
   print("Deploying infrastructure chart...")
-  subprocess.run(
-    [
+  cmd = [
       "helm", "upgrade", "--install" , "park-infra", "./helm/infrastructure",
       "-n", "infra-ns",
       "--set", f"repository={cliArgs.repository}",
@@ -328,21 +306,17 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
       "--set", f"identityPlatForm.authDomain={cliArgs.identity_auth_domain}",
       "--set", f"gc_project_id={cliArgs.gc_project_id}",
       "--set", f"domain={cliArgs.domain_name}"
-    ],
-    check=True
-  )
+    ]
+  run_subprocess(cmd)
 
   # Convert the list of tenantIds for easy lookups
   tenant_namespaces = [ create_tenant_namespace_name(t["tenantId"]) for t in tenants]
 
   print("Listing existing Helm releases in all namespaces...")
-  helm_list_proc = subprocess.run(
-    ["helm", "list", "--all-namespaces", "-o", "json"],
-    capture_output=True,
-    text=True,
-    check=True
-  )
-  existing_releases = json.loads(helm_list_proc.stdout)
+  cmd = ["helm", "list", "--all-namespaces", "-o", "json"],
+  stdout = run_subprocess(cmd)
+
+  existing_releases = json.loads(stdout)
 
   existing_release_namespaces = []
   for release_info in existing_releases:
@@ -355,10 +329,7 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
   for release_ns in existing_release_namespaces:
     if release_ns not in tenant_namespaces:
       print(f"Deleting namespace '{release_ns}' because it's not in the tenants list...")
-      subprocess.run(
-        ["kubectl", "delete", "namespace", release_ns],
-        check=True
-      )
+      run_subprocess(["kubectl", "delete", "namespace", release_ns])
 
   # Install new releases for newly-added tenants
   for tenant in tenants:
@@ -370,8 +341,7 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
     print(f"Installing/updating deployment for tenant '{tenant_id}'...")
 
     create_and_annotate_namespace(tenant_namespace)
-    subprocess.run(
-      [
+    cmd = [
         "helm", "upgrade", "--install", release_name, "./helm/backend",
         "-n", tenant_namespace,
         "--set", f"repository={cliArgs.repository}",
@@ -381,12 +351,11 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
         "--set", f"gc_project_id={cliArgs.gc_project_id}",
         "--set", f"domain={cliArgs.domain_name}",
         "--set", f"subdomain={tenant_dns}"
-      ],
-      check=True
-    )
+      ]
+    run_subprocess(cmd)
+    
     release_name = create_tenant_release_name("frontend", tenant_id)
-    subprocess.run(
-      [
+    cmd = [
         "helm", "upgrade", "--install", release_name, "./helm/frontend",
         "-n", tenant_namespace,
         "--set", f"repository={cliArgs.repository}",
@@ -397,9 +366,9 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
         "--set", f"backendUrl=http://{tenant_dns}.{cliArgs.domain_name}",
         "--set", f"domain={cliArgs.domain_name}",
         "--set", f"subdomain={tenant_dns}"
-      ],
-      check=True
-    )
+      ]
+    run_subprocess(cmd)
+    
   print("Deployment sync complete.")
 
 def create_and_annotate_namespace(namespace: str):
@@ -414,22 +383,19 @@ def create_and_annotate_namespace(namespace: str):
     print(f"Namespace '{namespace}' already exists. Skipping creation.")
   else:
     print(f"Creating namespace '{namespace}'...")
-    subprocess.run(
-      ["kubectl", "create", "namespace", namespace],
-      check=True
-    )
+    cmd = ["kubectl", "create", "namespace", namespace]
+    run_subprocess(cmd)
+    
 
   annotation_key = "shared-gateway-access"
   annotation_value = "true"
-  subprocess.run(
-    [
+  cmd = [
       "kubectl", "annotate",
       "namespace", namespace,
       f"{annotation_key}={annotation_value}",
       "--overwrite"
-    ],
-    check=True
-  )
+    ]
+  run_subprocess(cmd)
 
 
 # ------------------------------------------------------------------------------
