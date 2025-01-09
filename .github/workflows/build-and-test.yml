@@ -53,7 +53,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Node.js
       uses: actions/setup-node@v2
@@ -78,12 +78,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - uses: actions/setup-python@v5
         with:
-          terraform_version: 1.10.3
+          python-version: '3.x'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
 
       - name: Login to Google Cloud
         uses: 'google-github-actions/auth@v2'
@@ -91,30 +92,10 @@ jobs:
           service_account: '${{ secrets.STAGING_GITHUB_SA }}'
           workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
 
-      - name: Write Terraform Variables File
-        run: |
-          cd terraform/staging
-          cat <<EOF > terraform.auto.tfvars.json
-          {
-            "is_github_actions" : true,
-            "region"            : "europe-west1",
-            "project_id"        : "park-staging-444913",
-            "domain_name"       : "park-app.tech",
-            "create_cluster"    : true,
-            "tenants" : [
-              {
-                "id"     : "free",
-                "domain" : "free"
-              },
-              {
-                "id"     : "premium",
-                "domain" : "premium"
-              }
-            ]
-          }
-          EOF
-
-      - name: terraform plan
-        uses: dflook/terraform-plan@v1
-        with:
-          path: terraform/staging
+      - name: Run Terraform plan
+        working-directory: ci-cd
+        run: python deploy.py \
+          --action plan \
+          --create-cluster \
+          --project-id park-staging-444913 \
+          --gcs-bucket park-staging-444913-terraform-state \

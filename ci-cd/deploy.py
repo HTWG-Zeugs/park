@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
-import os
 import json
 import subprocess
 import argparse
 from google.cloud import storage
-from dataclasses import dataclass, field
+from dataclasses import dataclass, asdict
 
 @dataclass
 class CliArgs:
+  action: str = ""
   bucket_name: str = ""
   gc_project_id: str = ""
   is_github_actions: bool = False
@@ -21,8 +21,19 @@ class CliArgs:
   domain_name: str = "park-app.tech"
 
 
+@dataclass
+class DeploymentInfo:
+  git_tag: str = ""
+
+
 def parse_args() -> CliArgs:
   parser = argparse.ArgumentParser(description="Sync tenants with Terraform and Helm.")
+  parser.add_argument(
+     "--action",
+      required=True,
+      choices=["plan", "apply"],
+      help="Action to perform (plan or apply)."
+  )
   parser.add_argument(
       "--region",
       default="europe-west1",
@@ -75,7 +86,12 @@ def parse_args() -> CliArgs:
 
   args = parser.parse_args()
 
+  if args.action == "apply":
+    if not args.repository:
+      parser.error("--repository is required when action is 'apply'.")
+
   return CliArgs(
+    action=args.action,
     bucket_name=args.gcs_bucket,
     gc_project_id=args.project_id,
     is_github_actions=args.is_github_actions,
@@ -124,6 +140,38 @@ def read_tenants_from_gcs(bucket_name: str, file_name: str = "tenants.json"):
     tenants = json.loads(data)
     return tenants
 
+def read_deployment_info_from_gcs(bucket_name: str, file_name: str = "deployment.json") -> DeploymentInfo:
+  """
+  Reads deployment information from a Google Cloud Storage bucket.
+  Returns a dictionary with the following keys:
+  {
+    "gitTag": "...",
+  } 
+  """
+  client = storage.Client()
+  bucket = client.bucket(bucket_name)
+  blob = bucket.blob(file_name)
+
+  # Check if the file exists in the bucket
+  if not blob.exists():
+    return {}
+
+  data = blob.download_as_text(encoding="utf-8")
+  deployment_info = json.loads(data)
+  return DeploymentInfo(**deployment_info)
+
+def write_deployment_info_to_gcs(bucket_name: str, deployment_info: DeploymentInfo, file_name: str = "deployment.json"):
+  """
+  Writes deployment information to a Google Cloud Storage bucket.
+  """
+  client = storage.Client()
+  bucket = client.bucket(bucket_name)
+  blob = bucket.blob(file_name)
+
+  data = json.dumps(asdict(deployment_info))
+  blob.upload_from_string(data, content_type="application/json")
+
+  print(f"Deployment information written to GCS bucket '{bucket_name}'.")
 
 # ------------------------------------------------------------------------------
 # 2. Generate a .tfvars.json file from the tenant list
@@ -242,6 +290,18 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
 
   if not cliArgs.create_cluster:
     return
+  
+  # Get cluster credentials
+  subprocess.run(
+    [
+      "gcloud", 
+      "container", 
+      "clusters", 
+      "get-credentials", f"{cliArgs.gc_project_id}-gke", 
+      "--region", cliArgs.region
+    ], 
+    check=True
+  )
 
   # Deploy the infrastructure chart
   create_and_annotate_namespace("infra-ns")
@@ -262,7 +322,6 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
   )
 
   # Convert the list of tenantIds for easy lookups
-  tenant_ids = {t["tenantId"]  for t in tenants}
   tenant_namespaces = [ create_tenant_namespace_name(t["tenantId"]) for t in tenants]
 
   print("Listing existing Helm releases in all namespaces...")
@@ -284,7 +343,7 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
   # Uninstall releases that are no longer in the tenants list
   for release_ns in existing_release_namespaces:
     if release_ns not in tenant_namespaces:
-      print(f"Deleting releases in namespace '{release_ns}'...")
+      print(f"Deleting namespace '{release_ns}' because it's not in the tenants list...")
       subprocess.run(
         ["kubectl", "delete", "namespace", release_ns],
         check=True
@@ -297,9 +356,9 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
     tenant_namespace = create_tenant_namespace_name(tenant_id)
     release_name = create_tenant_release_name("backend", tenant_id)
 
-    create_and_annotate_namespace(tenant_namespace)
+    print(f"Installing/updating deployment for tenant '{tenant_id}'...")
 
-    print(f"Tenant '{tenant_id}' not deployed. Installing backend in namespace '{tenant_namespace}'...")
+    create_and_annotate_namespace(tenant_namespace)
     subprocess.run(
       [
         "helm", "upgrade", "--install", release_name, "./helm/backend",
@@ -314,9 +373,6 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
       ],
       check=True
     )
-
-    print(f"Backend for tenant '{tenant_id}' deployed successfully.")
-    print(f"Deploying frontend in namespace '{tenant_namespace}'...")#
     release_name = create_tenant_release_name("frontend", tenant_id)
     subprocess.run(
       [
@@ -333,7 +389,7 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
       ],
       check=True
     )
-  print("Kubernetes (Helm) sync complete.")
+  print("Deployment sync complete.")
 
 def create_and_annotate_namespace(namespace: str):
 
@@ -375,7 +431,7 @@ def main():
   tenants = read_tenants_from_gcs(bucket_name=bucket_name, file_name="tenants.json")
   print(f"Retrieved {len(tenants)} tenants from GCS bucket '{bucket_name}'.")
 
-  # 2. Generate a tfvars JSON file (with additional fields)
+  # 2. Generate a .tfvars.json file from the tenant list
   tfvars_file = "terraform/staging/tenants.tfvars.json"
   generate_tfvars_json(
     tenants=tenants,
@@ -383,19 +439,25 @@ def main():
     cliArgs=args
   )
 
-  # 3. terraform plan
-  run_terraform_plan(tfvars_file="tenants.tfvars.json")
-
-  # 4. terraform apply
-  # Prompt user to confirm changes
-  confirm = input("Do you want to apply the changes with 'terraform apply'? (yes/no): ").strip().lower()
-  if confirm != 'yes':
-    print("Aborting 'terraform apply'.")
+  # 3. If action is "plan", run terraform plan and return
+  if args.action == "plan":
+    run_terraform_plan(tfvars_file="tenants.tfvars.json")
     return
 
+  # 4. If action is "apply", run terraform apply
   run_terraform_apply(tfvars_file="tenants.tfvars.json")
 
-  # 5. Sync Kubernetes deployments (Helm releases)
+  if args.git_tag:
+    # Update the deployment info in GCS
+    deployment_info = DeploymentInfo(git_tag=args.git_tag)
+    write_deployment_info_to_gcs(bucket_name, deployment_info, file_name="deployment.json")
+
+  else:
+    # Read the deployment info from GCS
+    deployment_info = read_deployment_info_from_gcs(bucket_name, file_name="deployment.json")
+    args.git_tag = deployment_info.git_tag
+
+  # 4. Sync Kubernetes deployments (Helm releases)
   sync_k8s_deployments_with_tenants(
       tenants=tenants,
       cliArgs=args
