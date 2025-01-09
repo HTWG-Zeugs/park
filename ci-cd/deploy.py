@@ -226,34 +226,36 @@ def run_terraform_plan(tfvars_file="tenants.tfvars.json"):
     Runs `terraform plan -var-file=...` in the current working directory. Prints stdout/stderr.
     """
     print("Running terraform init...")
-    proc = subprocess.run(
+    try:
+      proc = subprocess.run(
         ["terraform", "init"],
         check=True,
         capture_output=True,
         text=True,
         cwd="./terraform/staging"
-    )
-    if proc.returncode != 0:
-      print("Terraform init failed!")
-      print("Return code:", proc.returncode)
-      print(proc.stderr)
-    else:
+      )
       print(proc.stdout)
+    except subprocess.CalledProcessError as e:
+      print("Terraform init failed!")
+      print("Return code:", e.returncode)
+      print(e.stderr)
+      return
 
     print("Running 'terraform plan'...")
-    proc = subprocess.run(
+    try:
+      proc = subprocess.run(
         ["terraform", "plan", f"-var-file={tfvars_file}"],
         check=True,
         capture_output=True,
         text=True,
         cwd="./terraform/staging"
-    )
-    if proc.returncode != 0:
-      print("Terraform plan failed!")
-      print("Return code:", proc.returncode)
-      print(proc.stderr)
-    else:
+      )
       print(proc.stdout)
+    except subprocess.CalledProcessError as e:
+      print("Terraform plan failed!")
+      print("Return code:", e.returncode)
+      print(e.stderr)
+      return
 
 
 # ------------------------------------------------------------------------------
