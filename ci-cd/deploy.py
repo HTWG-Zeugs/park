@@ -290,15 +290,16 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
   if not cliArgs.create_cluster:
     return
   
-  # Get cluster credentials
-  cmd = [
-      "gcloud", 
-      "container", 
-      "clusters", 
-      "get-credentials", f"{cliArgs.gc_project_id}-gke", 
-      "--region", cliArgs.region
-    ]
-  run_subprocess(cmd)
+  if not cliArgs.is_github_actions:
+    # Get cluster credentials
+    cmd = [
+        "gcloud", 
+        "container", 
+        "clusters", 
+        "get-credentials", f"{cliArgs.gc_project_id}-gke", 
+        "--region", cliArgs.region
+      ]
+    run_subprocess(cmd)
   
 
   # Deploy the infrastructure chart

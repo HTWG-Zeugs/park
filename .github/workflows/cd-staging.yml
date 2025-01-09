@@ -17,8 +17,8 @@ permissions:
   
 env:
   GCR_REPO: "${{ vars.REGION }}-docker.pkg.dev/${{ vars.STAGING_PROJECT_ID }}/${{ vars.STAGING_ARTIFACT_REPO }}"
+  CLUSTER: "${{ vars.STAGING_PROJECT_ID }}-gke"
   DOMAIN: "park-app.tech"
-
 
 jobs:
   deploy:
@@ -47,6 +47,12 @@ jobs:
 
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
+
+      - name: Get GKE credentials
+        uses: 'google-github-actions/get-gke-credentials@v2'
+        with:
+          cluster_name: ${{ env.CLUSTER }}
+          location: ${{ vars.REGION }}
 
       - name: Run deploy script
         working-directory: ./ci-cd
