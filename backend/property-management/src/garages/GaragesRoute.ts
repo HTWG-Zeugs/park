@@ -30,9 +30,11 @@ router.get("/", validateFirebaseIdToken, (req, res) => {
 router.post("/", validateFirebaseIdToken, (req, res) => {
   const createGarageRequest = req.body as GarageRequestObject;
   const garage = toGarage(createGarageRequest);
+  const token = req.headers.authorization?.split(" ")[1];
+
   repository.addGarage(garage)
     .then(() => {
-      notifier.notifyGarageCreated(garage);
+      notifier.notifyGarageCreated(garage, token);
       res.status(201).send(
         {
           Id: garage.Id
@@ -66,13 +68,14 @@ router.put("/:id", validateFirebaseIdToken, async (req, res) => {
   const id = req.params.id;
   const createGarageRequest = req.body as GarageRequestObject;
   const garage = toGarage(createGarageRequest);
+  const token = req.headers.authorization?.split(" ")[1];
 
   const existingGarage = await repository.getGarage(id);
   existingGarage.update(garage);
 
   repository.updateGarage(existingGarage)
     .then(() => {
-      notifier.notifyGarageUpdated(existingGarage);
+      notifier.notifyGarageUpdated(existingGarage, token);
       res.status(200).send("updated");
     })
     .catch((error) => {
@@ -83,9 +86,11 @@ router.put("/:id", validateFirebaseIdToken, async (req, res) => {
 
 router.delete("/:id", validateFirebaseIdToken, (req, res) => {
   const id = req.params.id;
+  const token = req.headers.authorization?.split(" ")[1];
+
   repository.deleteGarage(id)
     .then(() => {
-      notifier.notifyGarageDeleted(id);
+      notifier.notifyGarageDeleted(id, token);
       res.status(200).send("deleted");
     })
     .catch((error) => {
