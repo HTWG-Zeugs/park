@@ -245,10 +245,12 @@ def run_terraform_plan(tfvars_file="tenants.tfvars.json"):
     Runs `terraform plan -var-file=...` in the current working directory. Prints stdout/stderr.
     """
     print("Running terraform init...")
-    run_subprocess(["terraform", "init"], cwd="./terraform/staging")
+    out = run_subprocess(["terraform", "init"], cwd="./terraform/staging")
+    print(out)
 
     print("Running 'terraform plan'...")
-    run_subprocess(["terraform", "plan", f"-var-file={tfvars_file}"], cwd="./terraform/staging")
+    out = run_subprocess(["terraform", "plan", f"-var-file={tfvars_file}"], cwd="./terraform/staging")
+    print(out)
 
 # ------------------------------------------------------------------------------
 # 4. Run terraform apply
@@ -259,7 +261,8 @@ def run_terraform_apply(tfvars_file="tenants.tfvars.json"):
     Prints stdout/stderr.
     """
     print("Running 'terraform apply'...")
-    run_subprocess(["terraform", "apply", f"-var-file={tfvars_file}", "-auto-approve"], cwd="./terraform/staging")
+    out = run_subprocess(["terraform", "apply", f"-var-file={tfvars_file}", "-auto-approve"], cwd="./terraform/staging")
+    print(out)
 
 
 # ------------------------------------------------------------------------------
