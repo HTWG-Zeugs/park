@@ -409,7 +409,7 @@ def main():
   print(f"Retrieved {len(tenants)} tenants from GCS bucket '{bucket_name}'.")
 
   # 2. Generate a .tfvars.json file from the tenant list
-  tfvars_file = "terraform/staging/tenants.tfvars.json"
+  tfvars_file = "./terraform/staging/tenants.tfvars.json"
   generate_tfvars_json(
     tenants=tenants,
     output_file=tfvars_file,
