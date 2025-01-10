@@ -348,7 +348,7 @@ router.get("/defects/status/:garageId/:start/:end", async (req, res) => {
 router.put("/requests/:tenantId", verifyAuthToken, async (req, res) => {
   // increase request count entry for that day or create new entry for a new day
   try {
-    const tenantId: string = getTenantId(req);
+    const tenantId = req.params.tenantId;
     const timestamp: Date = new Date();
 
     const requestsRecord = await repository.getRequest(
@@ -380,7 +380,7 @@ router.put("/requests/:tenantId", verifyAuthToken, async (req, res) => {
 router.get("/requests/:tenantId/:from/:to", async (req, res) => {
   // get request count array for the days in the range
   try {
-    const tenantId: string = getTenantId(req);
+    const tenantId = req.params.tenantId;
     const start: string = req.params.from;
     const end: string = req.params.to;
     const tenantRequestEntries: NumberRecord[] = await repository.getRequests(
