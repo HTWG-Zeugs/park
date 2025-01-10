@@ -8,15 +8,12 @@ import { DefectStatusRecord } from "../../../shared/DefectStatusRecord";
 export class AnalyticsRepo {
   firestore: Firestore;
 
-  private parkingStatusPrefix = "parking-status-";
-  private parkingDurationPrefix = "parking-duration-";
+  private parkingStatusPrefix = "parking-status";
+  private parkingDurationPrefix = "parking-duration";
   private chargingStatusPrefix = "charging-status-";
-  private powerConsumptionPrefix = "power-consumption-";
-  private turnoverPrefix = "turnover-";
-  private defectStatusPrefix = "defect-status-";
-
-  //request information should be stored in a separate database in an environment for the solution admins.
-  //private requestsPrefix = 'requests-'
+  private powerConsumptionPrefix = "power-consumption";
+  private turnoverPrefix = "turnover";
+  private defectStatusPrefix = "defect-status";
 
   constructor() {
     initializeApp({
