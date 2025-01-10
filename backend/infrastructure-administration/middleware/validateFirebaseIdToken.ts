@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { auth } from "firebase-admin";
-import { UserObject } from "../../../../shared/UserObject";
+import { UserObject } from "../../../shared/UserObject";
 import axios from "axios";
 
 const AUTHENTICATION_SERVICE_URL = process.env.AUTHENTICATION_SERVICE_URL;

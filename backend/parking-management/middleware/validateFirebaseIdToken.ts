@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { auth } from "firebase-admin";
-import { UserObject } from "../../../../shared/UserObject";
+import { UserObject } from "../../../shared/UserObject";
 import axios from "axios";
 
 const AUTHENTICATION_SERVICE_URL = process.env.AUTHENTICATION_SERVICE_URL;
@@ -29,19 +29,9 @@ const validateFirebaseIdToken = async (req, res, next) => {
     }
     const tenantAwareAuth = auth().tenantManager().authForTenant(tenantId);
     const verifiedToken = await tenantAwareAuth.verifyIdToken(token);
-
-    // Create a User object from the verified token.
-    let signedInUser: UserObject;
-    const userId = verifiedToken.uid;
-    const response = await axios.get(`${AUTHENTICATION_SERVICE_URL}/user/${userId}`, {
-      headers: {
-      Authorization: `Bearer ${token}`
-      }
-    });
-    signedInUser = response.data;
-
-    res.user = signedInUser;
-    next();
+    if (verifiedToken) {
+      next();
+    }
   } catch (error) {
     console.error("Error verifying Firebase ID token:", error);
     res.status(403).send("Unauthorized");
