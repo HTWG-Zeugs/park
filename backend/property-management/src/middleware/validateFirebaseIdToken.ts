@@ -1,6 +1,6 @@
 import axios from "axios";
 import admin from "firebase-admin";
-import { increaseRequestCounter } from "./ServiceCommunication";
+import { increaseRequestCounter } from "./serviceCommunication";
 
 const AUTHENTICATION_SERVICE_URL = process.env.AUTHENTICATION_SERVICE_URL;
 const validateFirebaseIdToken = async (req, res, next) => {
