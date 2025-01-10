@@ -7,12 +7,20 @@ import { LineChart } from "@mui/x-charts"
 import axiosAuthenticated from "src/services/Axios";
 import React from "react";
 import { GarageResponseObject } from "shared/GarageResponseObject";
+import { NumberRecord } from "shared/NumberRecord";
 import { GarageListItem, toGarageListItem } from "src/models/GarageListItem";
 
 export default function Analytics() {
   const { t } = useTranslation();
   const [garages, setGarages] = React.useState<GarageListItem[]>([]);
   const [selectedGarage, setSelectedGarage] = React.useState<string>();
+
+  const [meanTurnover, setMeanTurnover] = React.useState<number>();
+  const [meanParkingDuration, setMeanParkingDuration] = React.useState<number>();
+  const [kwhCharged, setKwhCharged] = React.useState<number>();
+  const [parkingOccupancyHist, setParkingOccupancyHist] = React.useState<any[][]>()
+  const [chargingOccupancyHist, setChargingOccupancyHist] = React.useState<any[][]>()
+  const [defectStatusHist, setDefectStatusHist] = React.useState<Map<Date, number[]>>()
 
   const PROPERTY_MANAGEMENT_URL = import.meta.env.VITE_PROPERTY_MANAGEMENT_SERVICE_URL;
 
@@ -35,6 +43,7 @@ export default function Analytics() {
           setGarages(listItems);
           setSelectedGarage(listItems[0].Name)
           //fetch garage analytics here
+          fetchGarageAnalytics(listItems[0].Id);
         }
       })
       .catch((error) => {
@@ -49,9 +58,86 @@ export default function Analytics() {
     const garageId = garages.find(garage => garage.Name === event.target.value)?.Id;
     if (garageId) {
       //fetch garage analytics here
+      fetchGarageAnalytics(garageId);
       setSelectedGarage(event.target.value as string);
     }
   }
+
+  const fetchGarageAnalytics = (garageId: string) => {
+    setMeanTurnover(19000);
+    setMeanParkingDuration(91);
+    setKwhCharged(1001);
+
+    let parkingRecords: NumberRecord[] = [
+      { timestamp: new Date('2024-01-10T12:00:00Z'), value: 2 },
+      { timestamp: new Date('2025-01-01T12:00:00Z'), value: 5 },
+      { timestamp: new Date('2025-01-03T12:00:00Z'), value: 4 },
+      { timestamp: new Date('2025-01-08T12:00:00Z'), value: 3 },
+      { timestamp: new Date('2025-01-10T12:00:00Z'), value: 1 },
+      { timestamp: new Date('2025-01-10T12:00:00Z'), value: 3 },
+    ];
+
+    let chargingRecords: NumberRecord[] = [
+      { timestamp: new Date('2024-01-10T12:00:00Z'), value: 2 },
+      { timestamp: new Date('2025-01-01T12:00:00Z'), value: 15 },
+      { timestamp: new Date('2025-01-08T12:00:00Z'), value: 13 },
+      { timestamp: new Date('2025-01-10T12:00:00Z'), value: 2 },
+      { timestamp: new Date('2025-01-10T12:00:00Z'), value: 3 },
+    ];
+
+    setParkingOccupancyHist(create30DaysHistogram(parkingRecords));
+    setChargingOccupancyHist(create30DaysHistogram(chargingRecords));
+  }
+
+  const create30DaysHistogram = (records: NumberRecord[]) => {
+    const resultMap = new Map();
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    let last30Days: Date[] = []
+
+    for (const i of Array(30).keys()) {
+      const date = new Date(currentDate);
+      date.setDate(currentDate.getDate() - i);
+      last30Days.push(date);
+    }
+
+    last30Days.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+    records.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    
+    const dayValueMap = new Map();
+    for (const record of records) {
+      const recordDate = new Date(record.timestamp);
+      recordDate.setHours(0, 0, 0, 0);
+      
+      if (!dayValueMap.has(recordDate.getTime()) || dayValueMap.get(recordDate.getTime()) < record.value) {
+        dayValueMap.set(recordDate.getTime(), record.value);
+      }
+    }
+
+    let lastValue: any = records[0].value;
+
+    last30Days.forEach(date => {
+        const timestamp = date.getTime();
+
+        if (dayValueMap.has(timestamp)) {
+            lastValue = dayValueMap.get(timestamp);
+        } 
+        if (lastValue !== null) {
+            resultMap.set(new Date(timestamp), lastValue);
+        }
+    })
+
+    const dates = [];
+    const values = [];
+    
+    for (const [date, value] of resultMap) {
+        dates.push(date);
+        values.push(value);
+    }
+    return [dates, values];
+  }    
+
 
   // ### garage specific analytics ###
   //parking status for the garage during the last 30 days (histogram chart)
@@ -104,7 +190,7 @@ export default function Analytics() {
         <Card>
           <CardContent>
             <Typography variant="h6"> {t('route_analytics.mean_daily_turnover')}<br /> ({t('route_analytics.last_30_days')})</Typography>
-            <Typography variant="h5">$18,000</Typography>
+            <Typography variant="h5">${meanTurnover}</Typography>
           </CardContent>
         </Card>
       </Grid>
@@ -114,7 +200,7 @@ export default function Analytics() {
         <Card>
           <CardContent>
             <Typography variant="h6">{t('route_analytics.mean_parking_duration')} <br /> ({t('route_analytics.last_30_days')})</Typography>
-            <Typography variant="h5">90 min </Typography>
+            <Typography variant="h5">{meanParkingDuration} min </Typography>
           </CardContent>
         </Card>
       </Grid>
@@ -124,7 +210,7 @@ export default function Analytics() {
         <Card>
           <CardContent>
             <Typography variant="h6">{t('route_analytics.total_kwh_charged')} <br /> ({t('route_analytics.last_30_days')})</Typography>
-            <Typography variant="h5">1000 KWh</Typography>
+            <Typography variant="h5">{kwhCharged} KWh</Typography>
           </CardContent>
         </Card>
       </Grid>
@@ -137,8 +223,17 @@ export default function Analytics() {
           <CardContent>
             <Typography variant="h6">{t('route_analytics.parking_occupancy')} ({t('route_analytics.last_30_days')})</Typography>
             <LineChart 
-                xAxis={[{ data: [1,2,3,4] }]}
-                series={[{ data: [3,4,2,3], color: '#f28e2c', area: true }]}
+                xAxis={[{
+                  data: parkingOccupancyHist![0],
+                  valueFormatter: (value) => `${new Date(value).getDate()}.${new Date(value).getMonth()+1}`,
+                  min: new Date().setDate(new Date().getDate() - 30)
+                }]}
+                series={[{ 
+                  data: parkingOccupancyHist![1],
+                  color: '#f28e2c', 
+                  area: true, 
+                  showMark: false
+                }]}
                 width={450}
                 height={320}>
               </LineChart>
@@ -151,9 +246,18 @@ export default function Analytics() {
         <Card>
           <CardContent>
             <Typography variant="h6">{t('route_analytics.charging_occupancy')} ({t('route_analytics.last_30_days')})</Typography>
-              <LineChart 
-                xAxis={[{ data: [1,2,3,4,5,6] }]}
-                series={[{ data: [4,2,4,3,1,3], color: '#f28e2c', area: true }]}
+            <LineChart 
+                xAxis={[{
+                  data: chargingOccupancyHist![0],
+                  valueFormatter: (value) => `${new Date(value).getDate()}.${new Date(value).getMonth()+1}`,
+                  min: new Date().setDate(new Date().getDate() - 30)
+                }]}
+                series={[{ 
+                  data: chargingOccupancyHist![1],
+                  color: '#f28e2c', 
+                  area: true, 
+                  showMark: false
+                }]}
                 width={450}
                 height={320}>
               </LineChart>

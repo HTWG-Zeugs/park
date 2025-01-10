@@ -1,8 +1,8 @@
 import { Firestore, getFirestore } from "firebase-admin/firestore";
 import "dotenv/config";
 import { initializeApp, applicationDefault } from "firebase-admin/app";
-import { OccupancyRecord } from "./models/occupancyRecord";
-import { NumberRecord } from "./models/numberRecord";
+import { OccupancyRecord } from "../../../shared/OccupancyRecord";
+import { NumberRecord } from "../../../shared/NumberRecord";
 import { DefectStatusRecord } from "../../../shared/DefectStatusRecord";
 
 export class AnalyticsRepo {

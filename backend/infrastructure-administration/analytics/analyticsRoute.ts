@@ -2,8 +2,8 @@ import { Router } from "express";
 import { AnalyticsRepo } from "./analyticsRepo";
 import { OccupancyStatus } from "../../../shared/OccupancyStatus";
 import { DefectStatusRecord } from "../../../shared/DefectStatusRecord";
-import { OccupancyRecord } from "./models/occupancyRecord";
-import { NumberRecord } from "./models/numberRecord";
+import { OccupancyRecord } from "../../../shared/OccupancyRecord";
+import { NumberRecord } from "../../../shared/NumberRecord";
 import jwt from "jsonwebtoken";
 
 const router = Router();
