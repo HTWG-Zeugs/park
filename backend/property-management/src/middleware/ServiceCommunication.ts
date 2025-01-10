@@ -3,7 +3,7 @@ import axios from 'axios';
 import "dotenv/config";
 
 export async function getIdToken() {
-  const targetAudience = 'http://localhost:8083'; // TODO: später aus .env auslesen
+  const targetAudience = process.env.INFRASTRUCTURE_MANAGEMENT_SERVICE_AUDIENCE;
   const auth = new GoogleAuth();
   const client = await auth.getIdTokenClient(targetAudience);
   const idToken = await client.getRequestHeaders();
