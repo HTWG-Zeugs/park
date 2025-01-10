@@ -2,9 +2,10 @@ import { Router } from "express";
 import { AnalyticsRepo } from "./analyticsRepo";
 import { OccupancyStatus } from "../../../shared/OccupancyStatus";
 import { DefectStatusRecord } from "../../../shared/DefectStatusRecord";
-import { OccupancyRecord } from "./models/occupancyRecord";
-import { NumberRecord } from "./models/numberRecord";
+import { OccupancyRecord } from "../../../shared/OccupancyRecord";
+import { NumberRecord } from "../../../shared/NumberRecord";
 import validateFirebaseIdToken from "../middleware/validateFirebaseIdToken";
+import verifyAuthToken from "../middleware/validateOAuth";
 import jwt from "jsonwebtoken";
 
 const router = Router();
@@ -345,10 +346,10 @@ router.get("/defects/status/:garageId/:start/:end", validateFirebaseIdToken, asy
   }
 });
 
-router.put("/requests/:tenantId", validateFirebaseIdToken, async (req, res) => {
+router.put("/requests/:tenantId", verifyAuthToken, async (req, res) => {
   // increase request count entry for that day or create new entry for a new day
   try {
-    const tenantId: string = getTenantId(req);
+    const tenantId = req.params.tenantId;
     const timestamp: Date = new Date();
 
     const requestsRecord = await repository.getRequest(
@@ -356,7 +357,7 @@ router.put("/requests/:tenantId", validateFirebaseIdToken, async (req, res) => {
       new Date(timestamp)
     );
 
-    if (requestsRecord.timestamp.getDate() == timestamp.getDate()) {
+    if (new Date(requestsRecord.timestamp).getDate() == timestamp.getDate()) {
       requestsRecord.value++;
       await repository.updateRequestRecord(tenantId, requestsRecord);
     } else {
@@ -372,7 +373,7 @@ router.put("/requests/:tenantId", validateFirebaseIdToken, async (req, res) => {
     res
       .status(500)
       .send(
-        `Failed updating request count for tenant ${req.params.tenantId}: ${e}`
+        `Failed updating request count for tenant ${req.params.tenantId}: ${e}, ${e.stack}`
       );
   }
 });
@@ -380,7 +381,7 @@ router.put("/requests/:tenantId", validateFirebaseIdToken, async (req, res) => {
 router.get("/requests/:tenantId/:from/:to", validateFirebaseIdToken, async (req, res) => {
   // get request count array for the days in the range
   try {
-    const tenantId: string = getTenantId(req);
+    const tenantId = req.params.tenantId;
     const start: string = req.params.from;
     const end: string = req.params.to;
     const tenantRequestEntries: NumberRecord[] = await repository.getRequests(

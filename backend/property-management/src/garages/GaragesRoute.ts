@@ -27,24 +27,22 @@ router.get("/", validateFirebaseIdToken, (req, res) => {
     });
 });
 
-router.post("/", validateFirebaseIdToken, (req, res) => {
+router.post("/", validateFirebaseIdToken, async (req, res) => {
   const createGarageRequest = req.body as GarageRequestObject;
   const garage = toGarage(createGarageRequest);
-  const token = req.headers.authorization?.split(" ")[1];
 
-  repository.addGarage(garage)
-    .then(() => {
-      notifier.notifyGarageCreated(garage, token);
-      res.status(201).send(
-        {
-          Id: garage.Id
-        } as CreateGarageResponseObject
-      );
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).json(error);
-    });
+  try {
+    await repository.addGarage(garage);
+    await notifier.notifyGarageCreated(garage);
+    res.status(201).send(
+      {
+        Id: garage.Id
+      } as CreateGarageResponseObject
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(error);
+  }
 });
 
 router.get("/:id", validateFirebaseIdToken, (req, res) => {
@@ -68,14 +66,13 @@ router.put("/:id", validateFirebaseIdToken, async (req, res) => {
   const id = req.params.id;
   const createGarageRequest = req.body as GarageRequestObject;
   const garage = toGarage(createGarageRequest);
-  const token = req.headers.authorization?.split(" ")[1];
 
   const existingGarage = await repository.getGarage(id);
   existingGarage.update(garage);
 
   repository.updateGarage(existingGarage)
-    .then(() => {
-      notifier.notifyGarageUpdated(existingGarage, token);
+    .then(async () => {
+      await notifier.notifyGarageUpdated(existingGarage);
       res.status(200).send("updated");
     })
     .catch((error) => {
@@ -84,19 +81,17 @@ router.put("/:id", validateFirebaseIdToken, async (req, res) => {
     });
 });
 
-router.delete("/:id", validateFirebaseIdToken, (req, res) => {
+router.delete("/:id", validateFirebaseIdToken, async (req, res) => {
   const id = req.params.id;
-  const token = req.headers.authorization?.split(" ")[1];
 
-  repository.deleteGarage(id)
-    .then(() => {
-      notifier.notifyGarageDeleted(id, token);
-      res.status(200).send("deleted");
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).json(error);
-    });
+  try {
+    await repository.deleteGarage(id);
+    await notifier.notifyGarageDeleted(id);
+    res.status(200).send("deleted");
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(error);
+  }
 });
 
 

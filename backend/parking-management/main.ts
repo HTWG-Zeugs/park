@@ -4,6 +4,7 @@ import { Repository } from "./repositories/repository";
 import { GarageService } from "./services/garageService";
 import { GarageInfoObject } from '../../shared/GarageInfoObject';
 import validateFirebaseIdToken from "./middleware/validateFirebaseIdToken"
+import verifyAuthToken from "./middleware/validateOAuth"
 import cors from "cors";
 import "dotenv/config";
 
@@ -27,7 +28,7 @@ app.get("/garage/:garageId", async (req, res) => {
   }
 });
 
-app.post("/garage/create", validateFirebaseIdToken, async (req, res) => {
+app.post("/garage/create", verifyAuthToken, async (req, res) => {
   try {
     const garageDto: GarageDto = req.body;
     await garageService.createGarage(garageDto);
@@ -37,7 +38,7 @@ app.post("/garage/create", validateFirebaseIdToken, async (req, res) => {
   }
 });
 
-app.put("/garage/update", validateFirebaseIdToken, async (req, res) => {
+app.put("/garage/update", verifyAuthToken, async (req, res) => {
   try {
     const garageDto: GarageDto = req.body;
     await garageService.updateGarage(garageDto);
@@ -47,7 +48,7 @@ app.put("/garage/update", validateFirebaseIdToken, async (req, res) => {
   }
 });
 
-app.delete("/garage/delete/:garageId", validateFirebaseIdToken, async (req, res) => {
+app.delete("/garage/delete/:garageId", verifyAuthToken, async (req, res) => {
   try {
     const garageId: string = req.params.garageId;
     await garageService.deleteGarage(garageId);
@@ -57,7 +58,7 @@ app.delete("/garage/delete/:garageId", validateFirebaseIdToken, async (req, res)
   }
 });
 
-app.get("/garage/parking/occupancy/:garageId", validateFirebaseIdToken, async (req, res) => {
+app.get("/garage/parking/occupancy/:garageId", async (req, res) => {
   try {
     const garageId: string = req.params.garageId;
     const occupancy = await garageService.getParkingOccupancy(garageId);
@@ -67,7 +68,7 @@ app.get("/garage/parking/occupancy/:garageId", validateFirebaseIdToken, async (r
   }
 });
 
-app.post("/garage/enter/:garageId", validateFirebaseIdToken, async (req, res) => {
+app.post("/garage/enter/:garageId", async (req, res) => {
   try {
     const garageId: string = req.params.garageId;
     const ticketId = await garageService.handleCarEntry(garageId);
@@ -77,7 +78,7 @@ app.post("/garage/enter/:garageId", validateFirebaseIdToken, async (req, res) =>
   }
 });
 
-app.post("/garage/exit/:garageId", validateFirebaseIdToken, async (req, res) => {
+app.post("/garage/exit/:garageId", async (req, res) => {
   try {
     const garageId: string = req.params.garageId;
     await garageService.handleCarExit(garageId);
@@ -87,7 +88,7 @@ app.post("/garage/exit/:garageId", validateFirebaseIdToken, async (req, res) => 
   }
 });
 
-app.post("/garage/handlePayment/:ticketId", validateFirebaseIdToken, async (req, res) => {
+app.post("/garage/handlePayment/:ticketId", async (req, res) => {
   try {
     const ticketId: string = req.params.ticketId;
     await garageService.handleTicketPayment(ticketId);
@@ -97,7 +98,7 @@ app.post("/garage/handlePayment/:ticketId", validateFirebaseIdToken, async (req,
   }
 });
 
-app.get("/garage/mayExit/:ticketId", validateFirebaseIdToken, async (req, res) => {
+app.get("/garage/mayExit/:ticketId", async (req, res) => {
   try {
     const ticketId: string = req.params.ticketId;
     const mayExit = await garageService.mayExit(ticketId);
@@ -107,7 +108,7 @@ app.get("/garage/mayExit/:ticketId", validateFirebaseIdToken, async (req, res) =
   }
 });
 
-app.get("/garage/charging/occupancy/:garageId", validateFirebaseIdToken, async (req, res) => {
+app.get("/garage/charging/occupancy/:garageId", async (req, res) => {
   try {
     const garageId: string = req.params.garageId;
     const occupancy = await garageService.getChargingOccupancy(garageId);
@@ -118,7 +119,7 @@ app.get("/garage/charging/occupancy/:garageId", validateFirebaseIdToken, async (
 });
 
 app.post(
-  "/garage/charging/startSession/:garageId/:stationId/:userId", validateFirebaseIdToken,
+  "/garage/charging/startSession/:garageId/:stationId/:userId",
   async (req, res) => {
     try {
       const garageId: string = req.params.garageId;
@@ -137,7 +138,7 @@ app.post(
 );
 
 app.post(
-  "/garage/charging/endSession/:garageId/:sessionId", validateFirebaseIdToken,
+  "/garage/charging/endSession/:garageId/:sessionId",
   async (req, res) => {
     try {
       const garageId = req.params.garageId;
@@ -150,6 +151,7 @@ app.post(
   }
 );
 
+// TODO: evtl frontend seite um sich session anzusehen; nur wenn zeit übrig
 app.get("/garage/charging/session/:sessionId", validateFirebaseIdToken, async (req, res) => {
   try {
     const sessionId = req.params.sessionId;

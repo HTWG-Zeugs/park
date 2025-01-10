@@ -70,7 +70,6 @@ export default function Occupancy() {
     const garageId = garages.find(garage => garage.Name === event.target.value)?.Id;
     if (garageId) {
       fetchGarageInfos(garageId)
-      //setSelectedGarage(event.target.value as GarageInfoObject);
     }
   }
 
