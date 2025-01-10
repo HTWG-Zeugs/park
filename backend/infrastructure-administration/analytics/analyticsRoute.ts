@@ -4,6 +4,7 @@ import { OccupancyStatus } from "../../../shared/OccupancyStatus";
 import { DefectStatusRecord } from "../../../shared/DefectStatusRecord";
 import { OccupancyRecord } from "./models/occupancyRecord";
 import { NumberRecord } from "./models/numberRecord";
+import verifyAuthToken from "../middleware/validateOAuth";
 import jwt from "jsonwebtoken";
 
 const router = Router();
@@ -344,7 +345,7 @@ router.get("/defects/status/:garageId/:start/:end", async (req, res) => {
   }
 });
 
-router.put("/requests/:tenantId", async (req, res) => {
+router.put("/requests/:tenantId", verifyAuthToken, async (req, res) => {
   // increase request count entry for that day or create new entry for a new day
   try {
     const tenantId: string = getTenantId(req);

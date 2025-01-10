@@ -1,4 +1,6 @@
+import axios from "axios";
 import admin from "firebase-admin";
+import { increaseRequestCounter } from "./ServiceCommunication";
 
 const validateFirebaseIdToken = async (req, res, next) => {
   const authorizationHeader = req.headers["authorization"];
@@ -12,6 +14,8 @@ const validateFirebaseIdToken = async (req, res, next) => {
   try {
     const decodedToken = await admin.auth().verifyIdToken(token);
     req.user = decodedToken;
+    const tenantId = req.user.firebase.tenant;
+    await increaseRequestCounter(tenantId);
     next();
   } catch (error) {
     console.error("Error verifying Firebase ID token:", error);
