@@ -53,7 +53,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Node.js
       uses: actions/setup-node@v2
@@ -74,16 +74,16 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      TENANTS: '[{id = "free", domain = "free" }, {id = "premium", domain = "premium"}]'
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - uses: actions/setup-python@v5
         with:
-          terraform_version: 1.10.3
+          python-version: '3.x'
+          cache: 'pip'
+      - run: pip install -r ci-cd/requirements.txt
 
       - name: Login to Google Cloud
         uses: 'google-github-actions/auth@v2'
@@ -91,30 +91,12 @@ jobs:
           service_account: '${{ secrets.STAGING_GITHUB_SA }}'
           workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
 
-      - name: Write Terraform Variables File
+      - name: Run Terraform plan
+        working-directory: ./ci-cd
         run: |
-          cd terraform/staging
-          cat <<EOF > terraform.auto.tfvars.json
-          {
-            "is_github_actions" : true,
-            "region"            : "europe-west1",
-            "project_id"        : "park-staging-444913",
-            "domain_name"       : "park-app.tech",
-            "create_cluster"    : true,
-            "tenants" : [
-              {
-                "id"     : "free",
-                "domain" : "free"
-              },
-              {
-                "id"     : "premium",
-                "domain" : "premium"
-              }
-            ]
-          }
-          EOF
-
-      - name: terraform plan
-        uses: dflook/terraform-plan@v1
-        with:
-          path: terraform/staging
+          python deploy.py \
+          --action plan \
+          --is-github-actions \
+          --create-cluster \
+          --project-id ${{ vars.STAGING_PROJECT_ID }} \
+          --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
