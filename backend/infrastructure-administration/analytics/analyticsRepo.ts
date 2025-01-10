@@ -292,7 +292,7 @@ export class AnalyticsRepo {
     if (!querySnapshot.empty) {
       return querySnapshot.docs[0].data() as NumberRecord;
     } else {
-      throw new Error("Unable to find occupancy record");
+      return { timestamp: new Date(), value: 0 } as NumberRecord;
     }
   }
 
