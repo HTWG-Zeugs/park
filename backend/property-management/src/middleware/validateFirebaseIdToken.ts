@@ -1,8 +1,7 @@
 import axios from "axios";
 import admin from "firebase-admin";
-import { increaseRequestCounter } from "./serviceCommunication";
+import { increaseRequestCounter } from "./ServiceCommunication";
 
-const AUTHENTICATION_SERVICE_URL = process.env.AUTHENTICATION_SERVICE_URL;
 const validateFirebaseIdToken = async (req, res, next) => {
   // Check if the request has an Authorization header. If not, return a 403 error.
   const authorizationHeader = req.headers["authorization"];

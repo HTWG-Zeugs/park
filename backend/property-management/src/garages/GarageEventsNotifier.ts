@@ -1,7 +1,7 @@
 import { Garage } from "./models/Garage";
 import { GarageDto } from "./../../../shared/garageDto";
 import axios from "axios";
-import {getIdToken} from "./../middleware/serviceCommunication";
+import {getIdToken} from "./../middleware/ServiceCommunication";
 
 export class GarageEventsNotifier {
   constructor(private readonly parkingManagementEndpoint: string) {}
