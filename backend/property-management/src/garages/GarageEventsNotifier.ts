@@ -1,12 +1,14 @@
 import { Garage } from "./models/Garage";
 import { GarageDto } from "./../../../shared/garageDto";
 import axios from "axios";
+import {getIdToken} from "../middleware/serviceCommunication";
 
 export class GarageEventsNotifier {
   constructor(private readonly parkingManagementEndpoint: string) {}
 
-  notifyGarageCreated(garage: Garage, token: string): void {
+  async notifyGarageCreated(garage: Garage): Promise<void> {
     const dto: GarageDto = this.convertGarageToDto(garage);
+    const token = await getIdToken();
 
     axios
       .post(`${this.parkingManagementEndpoint}/garage/create`, dto, {
@@ -22,8 +24,9 @@ export class GarageEventsNotifier {
       });
   }
 
-  notifyGarageUpdated(garage: Garage, token: string): void {
+  async notifyGarageUpdated(garage: Garage): Promise<void> {
     const dto: GarageDto = this.convertGarageToDto(garage);
+    const token = await getIdToken();
 
     axios
       .put(`${this.parkingManagementEndpoint}/garage/update`, dto, {
@@ -39,7 +42,9 @@ export class GarageEventsNotifier {
       });
   }
 
-  notifyGarageDeleted(garageId: string, token: string): void {
+  async notifyGarageDeleted(garageId: string): Promise<void> {
+    const token = await getIdToken();
+
     axios
       .delete(`${this.parkingManagementEndpoint}/garage/delete/${garageId}`, {
         headers: {
