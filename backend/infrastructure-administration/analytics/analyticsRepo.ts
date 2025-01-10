@@ -273,12 +273,19 @@ export class AnalyticsRepo {
     tenantId: string,
     requestsRecord: NumberRecord
   ): Promise<void> {
-    await this.firestore
+    const querySnapshot = await this.firestore
       .collection(`${tenantId}/requests/count`)
-      .where("timestamp", "<=", requestsRecord.timestamp.toISOString())
+      .where("timestamp", "<=", new Date(requestsRecord.timestamp).toISOString())
       .orderBy("timestamp", "desc")
-      .limit(1)[0]
-      .ref.update(JSON.parse(JSON.stringify(requestsRecord)));
+      .limit(1)
+      .get();
+
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
+      await doc.ref.update(JSON.parse(JSON.stringify(requestsRecord)));
+    } else {
+      throw new Error("No matching document found");
+    }
   }
 
   async getRequest(tenantId: string, timestamp: Date): Promise<NumberRecord> {

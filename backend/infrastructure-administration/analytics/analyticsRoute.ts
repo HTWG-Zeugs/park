@@ -356,7 +356,7 @@ router.put("/requests/:tenantId", verifyAuthToken, async (req, res) => {
       new Date(timestamp)
     );
 
-    if (requestsRecord.timestamp.getDate() == timestamp.getDate()) {
+    if (new Date(requestsRecord.timestamp).getDate() == timestamp.getDate()) {
       requestsRecord.value++;
       await repository.updateRequestRecord(tenantId, requestsRecord);
     } else {
@@ -372,7 +372,7 @@ router.put("/requests/:tenantId", verifyAuthToken, async (req, res) => {
     res
       .status(500)
       .send(
-        `Failed updating request count for tenant ${req.params.tenantId}: ${e}`
+        `Failed updating request count for tenant ${req.params.tenantId}: ${e}, ${e.stack}`
       );
   }
 });
