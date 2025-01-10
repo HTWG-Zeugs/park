@@ -65,6 +65,7 @@ export default function Analytics() {
   }
 
   const fetchGarageAnalytics = (garageId: string) => {
+    console.log(`Fetching analytics for garage ${garageId}`);
     setMeanTurnover(19000);
     setMeanParkingDuration(91);
     setKwhCharged(1001);

@@ -1,5 +1,4 @@
-
-export class NumberRecord {
-  timestamp: Date
-  value: number
-}
+export type NumberRecord = {
+  timestamp: Date;
+  value: number;
+};
