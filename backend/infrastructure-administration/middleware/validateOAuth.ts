@@ -28,8 +28,6 @@ async function verifyAuthToken(req, res, next) {
     // Add the payload (user info) to the request object
     req.user = payload;
 
-    console.log('Verified user:', payload);
-
     // Continue to the next middleware or route handler
     next();
   } catch (error) {

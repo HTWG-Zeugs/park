@@ -7,11 +7,7 @@ export async function getIdToken() {
   const auth = new GoogleAuth();
   const client = await auth.getIdTokenClient(targetAudience);
   const idToken = await client.getRequestHeaders();
-
-  const token = idToken['Authorization'].split(' ')[1];
-  console.log('ID Token:', token);
-
-  return token;
+  return idToken['Authorization'].split(' ')[1];
 }
 
 export async function increaseRequestCounter(tenantId: string) {
@@ -33,9 +29,6 @@ export async function increaseRequestCounter(tenantId: string) {
     if (response.status !== 200) {
       throw new Error(`API request failed with status ${response.status}`);
     }
-
-    const data = response.data;
-    console.log('API Response:', data);
   } catch (error) {
     console.error('Error calling API:', error);
   }
