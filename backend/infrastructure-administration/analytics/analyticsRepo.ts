@@ -292,7 +292,8 @@ export class AnalyticsRepo {
     if (!querySnapshot.empty) {
       return querySnapshot.docs[0].data() as NumberRecord;
     } else {
-      return { timestamp: new Date(), value: 0 } as NumberRecord;
+      const outDatedTimestamp = new Date().setDate(new Date().getDate()-1);
+      return { timestamp: new Date(outDatedTimestamp), value: 0 } as NumberRecord;
     }
   }
 
