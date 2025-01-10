@@ -292,8 +292,9 @@ export class AnalyticsRepo {
     if (!querySnapshot.empty) {
       return querySnapshot.docs[0].data() as NumberRecord;
     } else {
-      const outDatedTimestamp = new Date().setDate(new Date().getDate()-1);
-      return { timestamp: new Date(outDatedTimestamp), value: 0 } as NumberRecord;
+      const outDatedTimestamp = new Date(timestamp);
+      outDatedTimestamp.setFullYear(outDatedTimestamp.getFullYear() - 1);
+      return { timestamp: outDatedTimestamp, value: 0 } as NumberRecord;
     }
   }
 
