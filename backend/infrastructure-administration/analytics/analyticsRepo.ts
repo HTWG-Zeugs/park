@@ -10,7 +10,7 @@ export class AnalyticsRepo {
 
   private parkingStatusPrefix = "parking-status";
   private parkingDurationPrefix = "parking-duration";
-  private chargingStatusPrefix = "charging-status-";
+  private chargingStatusPrefix = "charging-status";
   private powerConsumptionPrefix = "power-consumption";
   private turnoverPrefix = "turnover";
   private defectStatusPrefix = "defect-status";
