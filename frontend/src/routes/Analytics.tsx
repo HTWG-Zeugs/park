@@ -7,6 +7,7 @@ import { LineChart } from "@mui/x-charts"
 import axiosAuthenticated from "src/services/Axios";
 import React from "react";
 import { GarageResponseObject } from "shared/GarageResponseObject";
+import { DefectStatusRecord } from "shared/DefectStatusRecord";
 import { NumberRecord } from "shared/NumberRecord";
 import { GarageListItem, toGarageListItem } from "src/models/GarageListItem";
 
@@ -20,7 +21,7 @@ export default function Analytics() {
   const [kwhCharged, setKwhCharged] = React.useState<number>();
   const [parkingOccupancyHist, setParkingOccupancyHist] = React.useState<any[][]>()
   const [chargingOccupancyHist, setChargingOccupancyHist] = React.useState<any[][]>()
-  const [defectStatusHist, setDefectStatusHist] = React.useState<Map<Date, number[]>>()
+  const [defectStatusHist, setDefectStatusHist] = React.useState<any[][]>()
 
   const PROPERTY_MANAGEMENT_URL = import.meta.env.VITE_PROPERTY_MANAGEMENT_SERVICE_URL;
 
@@ -69,28 +70,88 @@ export default function Analytics() {
     setKwhCharged(1001);
 
     let parkingRecords: NumberRecord[] = [
-      { timestamp: new Date('2024-01-10T12:00:00Z'), value: 2 },
-      { timestamp: new Date('2025-01-01T12:00:00Z'), value: 5 },
-      { timestamp: new Date('2025-01-03T12:00:00Z'), value: 4 },
+      { timestamp: new Date('2024-12-16T12:00:00Z'), value: 4 },
+      { timestamp: new Date('2024-12-22T12:00:00Z'), value: 2 },
+      { timestamp: new Date('2025-01-03T12:00:00Z'), value: 5 },
       { timestamp: new Date('2025-01-08T12:00:00Z'), value: 3 },
       { timestamp: new Date('2025-01-10T12:00:00Z'), value: 1 },
       { timestamp: new Date('2025-01-10T12:00:00Z'), value: 3 },
     ];
 
     let chargingRecords: NumberRecord[] = [
-      { timestamp: new Date('2024-01-10T12:00:00Z'), value: 2 },
-      { timestamp: new Date('2025-01-01T12:00:00Z'), value: 15 },
-      { timestamp: new Date('2025-01-08T12:00:00Z'), value: 13 },
-      { timestamp: new Date('2025-01-10T12:00:00Z'), value: 2 },
-      { timestamp: new Date('2025-01-10T12:00:00Z'), value: 3 },
+      { timestamp: new Date('2024-12-18T12:00:00Z'), value: 3 },
+      { timestamp: new Date('2024-12-26T12:00:00Z'), value: 13 },
+      { timestamp: new Date('2024-12-30T12:00:00Z'), value: 9 },
+      { timestamp: new Date('2025-01-3T12:00:00Z'), value: 2 },
+      { timestamp: new Date('2025-01-08T12:00:00Z'), value: 14 },
     ];
 
-    setParkingOccupancyHist(create30DaysHistogram(parkingRecords));
-    setChargingOccupancyHist(create30DaysHistogram(chargingRecords));
+    let defectStatusRecords: DefectStatusRecord[] = [
+      {
+          timestamp: new Date('2024-12-18T12:00:00Z'),
+          open: 5,
+          inWork: 3,
+          closed: 2,
+          rejected: 0
+      },
+      {
+          timestamp: new Date('2024-12-22T12:00:00Z'),
+          open: 8,
+          inWork: 2,
+          closed: 4,
+          rejected: 1
+      },
+      {
+          timestamp: new Date('2024-12-30T12:00:00Z'),
+          open: 6,
+          inWork: 4,
+          closed: 3,
+          rejected: 2
+      },
+      {
+          timestamp: new Date('2025-01-04T08:00:00Z'),
+          open: 7,
+          inWork: 5,
+          closed: 6,
+          rejected: 1
+      },
+      {
+          timestamp: new Date('2025-01-05T08:00:00Z'),
+          open: 4,
+          inWork: 6,
+          closed: 7,
+          rejected: 0
+      },
+      {
+          timestamp: new Date('2025-01-06T08:00:00Z'),
+          open: 3,
+          inWork: 7,
+          closed: 5,
+          rejected: 2
+      },
+      {
+          timestamp: new Date('2025-01-07T08:00:00Z'),
+          open: 2,
+          inWork: 8,
+          closed: 9,
+          rejected: 3
+      },
+      {
+          timestamp: new Date('2025-01-08T08:00:00Z'),
+          open: 5,
+          inWork: 5,
+          closed: 5,
+          rejected: 1
+      }
+    ]
+  
+
+    setParkingOccupancyHist(create30DaysNumberRecordHistogram(parkingRecords));
+    setChargingOccupancyHist(create30DaysNumberRecordHistogram(chargingRecords));
+    setDefectStatusHist(create30DaysDefectRecordHistogram(defectStatusRecords));
   }
 
-  const create30DaysHistogram = (records: NumberRecord[]) => {
-    const resultMap = new Map();
+  const create30DaysNumberRecordHistogram = (records: NumberRecord[]) => {
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
 
@@ -116,6 +177,9 @@ export default function Analytics() {
     }
 
     let lastValue: any = records[0].value;
+    
+    const dates: Date[] = [];
+    const values: number[] = [];
 
     last30Days.forEach(date => {
         const timestamp = date.getTime();
@@ -123,33 +187,63 @@ export default function Analytics() {
         if (dayValueMap.has(timestamp)) {
             lastValue = dayValueMap.get(timestamp);
         } 
-        if (lastValue !== null) {
-            resultMap.set(new Date(timestamp), lastValue);
-        }
+        
+        dates.push(new Date(timestamp));
+        values.push(lastValue);
     })
 
-    const dates = [];
-    const values = [];
-    
-    for (const [date, value] of resultMap) {
-        dates.push(date);
-        values.push(value);
-    }
     return [dates, values];
-  }    
+  }
+  
+  const create30DaysDefectRecordHistogram = (records: DefectStatusRecord[]) => {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
 
+    let last30Days = [];
 
-  // ### garage specific analytics ###
-  //parking status for the garage during the last 30 days (histogram chart)
-  //charging status for the garage during the last 30 days (histogram chart)
-  //defect status evolution for the garage in the last 30 days (histogram chart with three lines and legend)
-  //mean parking duration in the garage in the last month (numeric value)
-  //power consumed in the garage for charging in the last month (numeric value)
-  //turnover for the garage in the last month (numeric value)
+    for (const i of Array(30).keys()) {
+        const date = new Date(currentDate);
+        date.setDate(currentDate.getDate() - i);
+        last30Days.push(date);
+    }
 
-  // ### general tenant analytics ###
-  //request count for tenant 
+    last30Days.sort((a, b) => a.getTime() - b.getTime());
+    records.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
+    const dayValueMap = new Map();
+    for (const record of records) {
+        const recordDate = new Date(record.timestamp);
+        recordDate.setHours(0, 0, 0, 0);
+
+        if (!dayValueMap.has(recordDate.getTime()) || record.timestamp > dayValueMap.get(recordDate.getTime()).timestamp) {
+            dayValueMap.set(recordDate.getTime(), record);
+        }
+    }
+
+    let lastValue = { open: 0, inWork: 0, closed: 0, rejected: 0 };
+
+    let dates: Date[] = []
+    let openValues: number[] = []
+    let inWorkValues: number[] = []
+    let closedValues: number[] = []
+    let rejectedValues: number[] = []
+
+    last30Days.forEach(date => {
+        const timestamp = date.getTime();
+
+        if (dayValueMap.has(timestamp)) {
+            lastValue = dayValueMap.get(timestamp);
+        }
+
+        dates.push(new Date(timestamp))
+        openValues.push(lastValue.open);
+        inWorkValues.push(lastValue.inWork);
+        closedValues.push(lastValue.closed);
+        rejectedValues.push(lastValue.rejected);
+    });
+
+    return [dates, openValues, inWorkValues, closedValues, rejectedValues];
+};
 
   return (
     (selectedGarage?.length ?? 0) > 0 && <Paper
@@ -232,7 +326,6 @@ export default function Analytics() {
                   data: parkingOccupancyHist![1],
                   color: '#f28e2c', 
                   area: true, 
-                  showMark: false
                 }]}
                 width={450}
                 height={320}>
@@ -256,7 +349,6 @@ export default function Analytics() {
                   data: chargingOccupancyHist![1],
                   color: '#f28e2c', 
                   area: true, 
-                  showMark: false
                 }]}
                 width={450}
                 height={320}>
@@ -271,12 +363,16 @@ export default function Analytics() {
           <CardContent>
             <Typography variant="h6">{t('route_analytics.defect_status')} ({t('route_analytics.last_30_days')})</Typography>
               <LineChart 
-                xAxis={[{ data: [1,2,3,4] }]}
+                xAxis={[{
+                  data: chargingOccupancyHist![0],
+                  valueFormatter: (value) => `${new Date(value).getDate()}.${new Date(value).getMonth()+1}`,
+                  min: new Date().setDate(new Date().getDate() - 30)
+                }]}
                 series={[
-                  { data: [1,4,2,3], label: t('route_analytics.open') },
-                  { data: [2,2,3,2], label: t('route_analytics.in_work') },
-                  { data: [1,0,2,4], label: t('route_analytics.closed') },
-                  { data: [0,0,1,0], label: t('route_analytics.rejected') },
+                  { data: defectStatusHist![1], label: t('route_analytics.open') },
+                  { data: defectStatusHist![2], label: t('route_analytics.in_work') },
+                  { data: defectStatusHist![3], label: t('route_analytics.closed') },
+                  { data: defectStatusHist![4], label: t('route_analytics.rejected') },
                 ]}
                 width={450}
                 height={320}
@@ -286,8 +382,6 @@ export default function Analytics() {
         </Card>
       </Grid>
       </Grid>
-
-
 
       </Paper>
   );
