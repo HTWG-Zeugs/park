@@ -20,15 +20,6 @@ import { UserRoleObject } from "shared/UserRoleObject";
 
 export default function Header() {
   const { t, i18n } = useTranslation();
-  const pages = [
-    { text: <HomeIcon/>, href: "/home" },
-    { text: t("component_header.occupancy"), href: "/occupancy"},
-    { text: t("component_header.garages"), href: "/garages" },
-    { text: t("component_header.defects"), href: "/defects" },
-    { text: t("component_header.users"), href: "/users" },
-    { text: t("component_header.analytics"), href: "/analytics" },
-    { text: t("component_header.contact"), href: "/contact" },
-  ];
   const navigate = useNavigate();
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
@@ -39,6 +30,7 @@ export default function Header() {
   const { isAuthenticated, logout } = useAuth();
   const pages = [
     { text: <HomeIcon />, href: "/home" },
+    { text: t("component_header.analytics"), href: "/analytics" },
     { text: t("component_header.occupancy"), href: "/occupancy" },
     { text: t("component_header.contact"), href: "/contact" },
   ];
