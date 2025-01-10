@@ -37,7 +37,8 @@ export class AnalyticsRepo {
   ): Promise<void> {
     await this.createRecord(
       tenantId,
-      this.parkingStatusPrefix + garageId,
+      this.parkingStatusPrefix,
+      garageId,
       status
     );
   }
@@ -49,7 +50,8 @@ export class AnalyticsRepo {
   ): Promise<OccupancyRecord> {
     const querySnapshot = await this.queryDocForTimestamp(
       tenantId,
-      this.parkingStatusPrefix + garageId,
+      this.parkingStatusPrefix,
+      garageId,
       timestamp
     );
 
@@ -68,7 +70,8 @@ export class AnalyticsRepo {
   ): Promise<OccupancyRecord[]> {
     const querySnapshot = await this.queryDocInRange(
       tenantId,
-      this.parkingStatusPrefix + garageId,
+      this.parkingStatusPrefix,
+      garageId,
       from,
       to
     );
@@ -83,7 +86,8 @@ export class AnalyticsRepo {
   ): Promise<void> {
     await this.createRecord(
       tenantId,
-      this.parkingDurationPrefix + garageId,
+      this.parkingDurationPrefix,
+      garageId,
       record
     );
   }
@@ -96,7 +100,8 @@ export class AnalyticsRepo {
   ): Promise<NumberRecord[]> {
     const querySnapshot = await this.queryDocInRange(
       tenantId,
-      this.parkingDurationPrefix + garageId,
+      this.parkingDurationPrefix,
+      garageId,
       from,
       to
     );
@@ -111,7 +116,8 @@ export class AnalyticsRepo {
   ): Promise<void> {
     await this.createRecord(
       tenantId,
-      this.chargingStatusPrefix + garageId,
+      this.chargingStatusPrefix,
+      garageId,
       status
     );
   }
@@ -123,7 +129,8 @@ export class AnalyticsRepo {
   ): Promise<OccupancyRecord> {
     const querySnapshot = await this.queryDocForTimestamp(
       tenantId,
-      this.chargingStatusPrefix + garageId,
+      this.chargingStatusPrefix,
+      garageId,
       timestamp
     );
 
@@ -142,7 +149,8 @@ export class AnalyticsRepo {
   ): Promise<OccupancyRecord[]> {
     const querySnapshot = await this.queryDocInRange(
       tenantId,
-      this.chargingStatusPrefix + garageId,
+      this.chargingStatusPrefix,
+      garageId,
       from,
       to
     );
@@ -157,7 +165,8 @@ export class AnalyticsRepo {
   ): Promise<void> {
     await this.createRecord(
       tenantId,
-      this.powerConsumptionPrefix + garageId,
+      this.powerConsumptionPrefix,
+      garageId,
       record
     );
   }
@@ -170,7 +179,8 @@ export class AnalyticsRepo {
   ): Promise<NumberRecord[]> {
     const querySnapshot = await this.queryDocInRange(
       tenantId,
-      this.powerConsumptionPrefix + garageId,
+      this.powerConsumptionPrefix,
+      garageId,
       from,
       to
     );
@@ -183,7 +193,7 @@ export class AnalyticsRepo {
     garageId: string,
     record: NumberRecord
   ): Promise<void> {
-    await this.createRecord(tenantId, this.turnoverPrefix + garageId, record);
+    await this.createRecord(tenantId, this.turnoverPrefix, garageId, record);
   }
 
   async getTurnoverRecords(
@@ -194,7 +204,8 @@ export class AnalyticsRepo {
   ): Promise<NumberRecord[]> {
     const querySnapshot = await this.queryDocInRange(
       tenantId,
-      this.turnoverPrefix + garageId,
+      this.turnoverPrefix,
+      garageId,
       from,
       to
     );
@@ -209,7 +220,8 @@ export class AnalyticsRepo {
   ): Promise<void> {
     await this.createRecord(
       tenantId,
-      this.defectStatusPrefix + garageId,
+      this.defectStatusPrefix,
+      garageId,
       record
     );
   }
@@ -221,7 +233,8 @@ export class AnalyticsRepo {
   ): Promise<DefectStatusRecord> {
     const querySnapshot = await this.queryDocForTimestamp(
       tenantId,
-      this.defectStatusPrefix + garageId,
+      this.defectStatusPrefix,
+      garageId,
       timestamp
     );
 
@@ -240,7 +253,8 @@ export class AnalyticsRepo {
   ): Promise<DefectStatusRecord[]> {
     const querySnapshot = await this.queryDocInRange(
       tenantId,
-      this.defectStatusPrefix + garageId,
+      this.defectStatusPrefix,
+      garageId,
       from,
       to
     );
@@ -253,9 +267,7 @@ export class AnalyticsRepo {
     requestsRecord: NumberRecord
   ): Promise<void> {
     await this.firestore
-      .collection(tenantId)
-      .doc()
-      .collection("requests")
+      .collection(`${tenantId}/requests/count`)
       .doc()
       .set(JSON.parse(JSON.stringify(requestsRecord)));
   }
@@ -265,9 +277,7 @@ export class AnalyticsRepo {
     requestsRecord: NumberRecord
   ): Promise<void> {
     await this.firestore
-      .collection(tenantId)
-      .doc()
-      .collection("requests")
+      .collection(`${tenantId}/requests/count`)
       .where("timestamp", "<=", requestsRecord.timestamp.toISOString())
       .orderBy("timestamp", "desc")
       .limit(1)[0]
@@ -278,6 +288,7 @@ export class AnalyticsRepo {
     const querySnapshot = await this.queryDocForTimestamp(
       tenantId,
       "requests",
+      "count",
       timestamp
     );
 
@@ -296,6 +307,7 @@ export class AnalyticsRepo {
     const querySnapshot = await this.queryDocInRange(
       tenantId,
       "requests",
+      "count",
       from,
       to
     );
@@ -304,27 +316,25 @@ export class AnalyticsRepo {
   }
 
   private async createRecord(
-    collection: string,
-    subCollection: string,
+    tenantId: string,
+    stat: string,
+    garageId: string,
     obj: any
   ): Promise<void> {
     await this.firestore
-      .collection(collection)
-      .doc()
-      .collection(subCollection)
+      .collection(`${tenantId}/${stat}/${garageId}`)
       .doc()
       .set(JSON.parse(JSON.stringify(obj)));
   }
 
   private async queryDocForTimestamp(
-    collection: string,
-    subCollection: string,
+    tenantId: string,
+    stat: string,
+    garageId: string,
     timestamp: Date
   ): Promise<FirebaseFirestore.QuerySnapshot<any>> {
     return await this.firestore
-      .collection(collection)
-      .doc()
-      .collection(subCollection)
+      .collection(`${tenantId}/${stat}/${garageId}`)
       .where("timestamp", "<=", timestamp.toISOString())
       .orderBy("timestamp", "desc")
       .limit(1)
@@ -332,15 +342,14 @@ export class AnalyticsRepo {
   }
 
   private async queryDocInRange(
-    collection: string,
-    subCollection: string,
+    tenantId: string,
+    stat: string,
+    garageId: string,
     from: Date,
     to: Date
   ): Promise<FirebaseFirestore.QuerySnapshot<any>> {
     const startQuerySnapshot = await this.firestore
-      .collection(collection)
-      .doc()
-      .collection(subCollection)
+      .collection(`${tenantId}/${stat}/${garageId}`)
       .where("timestamp", "<=", from.toISOString())
       .orderBy("timestamp", "desc")
       .limit(1)
@@ -354,9 +363,7 @@ export class AnalyticsRepo {
     }
 
     return await this.firestore
-      .collection(collection)
-      .doc()
-      .collection(subCollection)
+      .collection(`${tenantId}/${stat}/${garageId}`)
       .where("timestamp", ">=", new Date(latestTimestamp).toISOString())
       .where("timestamp", "<=", to.toISOString())
       .orderBy("timestamp", "asc")
