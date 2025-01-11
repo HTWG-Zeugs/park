@@ -16,7 +16,7 @@ export default function Analytics() {
   const [garages, setGarages] = React.useState<GarageListItem[]>([]);
   const [selectedGarage, setSelectedGarage] = React.useState<string>();
 
-  const [meanTurnover, setMeanTurnover] = React.useState<number>();
+  const [turnover, setTurnover] = React.useState<number>();
   const [meanParkingDuration, setMeanParkingDuration] = React.useState<number>();
   const [kwhCharged, setKwhCharged] = React.useState<number>();
   const [parkingOccupancyHist, setParkingOccupancyHist] = React.useState<any[][]>()
@@ -24,6 +24,7 @@ export default function Analytics() {
   const [defectStatusHist, setDefectStatusHist] = React.useState<any[][]>()
 
   const PROPERTY_MANAGEMENT_URL = import.meta.env.VITE_PROPERTY_MANAGEMENT_SERVICE_URL;
+  const INFRASTRUCTURE_MANAGEMENT_URL = import.meta.env.VITE_INFRASTRUCTURE_MANAGEMENT_URL;
 
   useEffect(() => {
     fetchGarages();
@@ -66,7 +67,7 @@ export default function Analytics() {
 
   const fetchGarageAnalytics = (garageId: string) => {
     console.log(`Fetching analytics for garage ${garageId}`);
-    setMeanTurnover(19000);
+    setTurnover(19000);
     setMeanParkingDuration(91);
     setKwhCharged(1001);
 
@@ -284,8 +285,8 @@ export default function Analytics() {
       <Grid size={{ xs: 1, sm: 1, md: 1, lg: 2 }}>
         <Card>
           <CardContent>
-            <Typography variant="h6"> {t('route_analytics.mean_daily_turnover')}<br /> ({t('route_analytics.last_30_days')})</Typography>
-            <Typography variant="h5">${meanTurnover}</Typography>
+            <Typography variant="h6"> {t('route_analytics.turnover')}<br /> ({t('route_analytics.last_30_days')})</Typography>
+            <Typography variant="h5">${turnover}</Typography>
           </CardContent>
         </Card>
       </Grid>
