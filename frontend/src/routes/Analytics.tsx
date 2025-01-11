@@ -65,92 +65,123 @@ export default function Analytics() {
     }
   }
 
+  const fetchTurnover = (garageId: string, start: Date, end: Date) => {
+    axiosAuthenticated
+      .get(`${INFRASTRUCTURE_MANAGEMENT_URL}/analytics/turnover/${garageId}/${start.toISOString()}/${end.toISOString()}`)
+      .then(turnoverResponse => {
+        if (!turnoverResponse.data) {
+          console.log("No turnover entries could be fetched")
+          return;
+        }
+        const turnoverEntries: NumberRecord[] = turnoverResponse.data;
+        const totalTurnover = turnoverEntries.reduce((accumulator, currentValue) => accumulator + currentValue.value, 0);
+        setTurnover(totalTurnover);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch turnover entries:", error);
+      })
+  }
+
+  const fetchMeanParkingDuration = (garageId: string, start: Date, end: Date) => {
+    axiosAuthenticated
+      .get(`${INFRASTRUCTURE_MANAGEMENT_URL}/analytics/parking/duration/${garageId}/${start.toISOString()}/${end.toISOString()}`)
+      .then(durationResponse => {
+        if (!durationResponse.data) {
+          console.log("No parking duration entries could be fetched")
+          return;
+        }
+        const durationEntries: NumberRecord[] = durationResponse.data;
+        const meanDuration = durationEntries.reduce((accumulator, currentValue) => accumulator + currentValue.value, 0);
+        setMeanParkingDuration(meanDuration/durationEntries.length);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch parking duration entries:", error);
+      })
+  }
+
+  const fetchTotalKwhConsumed = (garageId: string, start: Date, end: Date) => {
+    axiosAuthenticated
+      .get(`${INFRASTRUCTURE_MANAGEMENT_URL}/analytics/charging/powerConsumed/${garageId}/${start.toISOString()}/${end.toISOString()}`)
+      .then(powerConsumptionResponse => {
+        if (!powerConsumptionResponse.data) {
+          console.log("No power consumption entries could be fetched")
+          return;
+        }
+        const powerConsumptionEntries: NumberRecord[] = powerConsumptionResponse.data;
+        const totalConsumedPower = powerConsumptionEntries.reduce((accumulator, currentValue) => accumulator + currentValue.value, 0);
+        setKwhCharged(totalConsumedPower);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch power consumption entries:", error);
+      })
+  }
+
+  const fetchParkingStatus = (garageId: string, start: Date, end: Date) => {
+    axiosAuthenticated
+      .get(`${INFRASTRUCTURE_MANAGEMENT_URL}/analytics/parking/status/${garageId}/${start.toISOString()}/${end.toISOString()}`)
+      .then(parkingStatusResponse => {
+        if (!parkingStatusResponse.data) {
+          console.log("No parking status entries could be fetched")
+          return;
+        }
+        const parkingStatusEntries: NumberRecord[] = parkingStatusResponse.data;
+        setParkingOccupancyHist(
+          create30DaysNumberRecordHistogram(parkingStatusEntries)
+        );
+      })
+      .catch((error) => {
+        console.error("Failed to fetch parking occupancy entries:", error);
+      })
+  }
+
+  const fetchChargingStatus = (garageId: string, start: Date, end: Date) => {
+    axiosAuthenticated
+      .get(`${INFRASTRUCTURE_MANAGEMENT_URL}/analytics/charging/status/${garageId}/${start.toISOString()}/${end.toISOString()}`)
+      .then(chargingStatusResponse => {
+        if (!chargingStatusResponse.data) {
+          console.log("No charging status entries could be fetched")
+          return;
+        }
+        const chargingStatusEntries: NumberRecord[] = chargingStatusResponse.data;
+        setChargingOccupancyHist(
+          create30DaysNumberRecordHistogram(chargingStatusEntries)
+        );
+      })
+      .catch((error) => {
+        console.error("Failed to fetch charging occupancy entries:", error);
+      })
+  }
+
+  const fetchDefectStatus = (garageId: string, start: Date, end: Date) => {
+    axiosAuthenticated
+      .get(`${INFRASTRUCTURE_MANAGEMENT_URL}/analytics/defects/status/${garageId}/${start.toISOString()}/${end.toISOString()}`)
+      .then(defectStatusResponse => {
+        if (!defectStatusResponse.data) {
+          console.log("No defect status entries could be fetched")
+          return;
+        }
+        const defectStatusEntries: DefectStatusRecord[] = defectStatusResponse.data;
+        setDefectStatusHist(
+          create30DaysDefectRecordHistogram(defectStatusEntries)
+        );
+      })
+      .catch((error) => {
+        console.error("Failed to fetch defect status entries:", error);
+      })
+  }
+
   const fetchGarageAnalytics = (garageId: string) => {
     console.log(`Fetching analytics for garage ${garageId}`);
-    setTurnover(19000);
-    setMeanParkingDuration(91);
-    setKwhCharged(1001);
+    const now = new Date();
+    const aMonthAgo = new Date(new Date().setDate(now.getDate()-30))
 
-    let parkingRecords: NumberRecord[] = [
-      { timestamp: new Date('2024-12-16T12:00:00Z'), value: 4 },
-      { timestamp: new Date('2024-12-22T12:00:00Z'), value: 2 },
-      { timestamp: new Date('2025-01-03T12:00:00Z'), value: 5 },
-      { timestamp: new Date('2025-01-08T12:00:00Z'), value: 3 },
-      { timestamp: new Date('2025-01-10T12:00:00Z'), value: 1 },
-      { timestamp: new Date('2025-01-10T12:00:00Z'), value: 3 },
-    ];
+    fetchTurnover(garageId, aMonthAgo, now);
+    fetchMeanParkingDuration(garageId, aMonthAgo, now);
+    fetchTotalKwhConsumed(garageId, aMonthAgo, now);
 
-    let chargingRecords: NumberRecord[] = [
-      { timestamp: new Date('2024-12-18T12:00:00Z'), value: 3 },
-      { timestamp: new Date('2024-12-26T12:00:00Z'), value: 13 },
-      { timestamp: new Date('2024-12-30T12:00:00Z'), value: 9 },
-      { timestamp: new Date('2025-01-3T12:00:00Z'), value: 2 },
-      { timestamp: new Date('2025-01-08T12:00:00Z'), value: 14 },
-    ];
-
-    let defectStatusRecords: DefectStatusRecord[] = [
-      {
-          timestamp: new Date('2024-12-18T12:00:00Z'),
-          open: 5,
-          inWork: 3,
-          closed: 2,
-          rejected: 0
-      },
-      {
-          timestamp: new Date('2024-12-22T12:00:00Z'),
-          open: 8,
-          inWork: 2,
-          closed: 4,
-          rejected: 1
-      },
-      {
-          timestamp: new Date('2024-12-30T12:00:00Z'),
-          open: 6,
-          inWork: 4,
-          closed: 3,
-          rejected: 2
-      },
-      {
-          timestamp: new Date('2025-01-04T08:00:00Z'),
-          open: 7,
-          inWork: 5,
-          closed: 6,
-          rejected: 1
-      },
-      {
-          timestamp: new Date('2025-01-05T08:00:00Z'),
-          open: 4,
-          inWork: 6,
-          closed: 7,
-          rejected: 0
-      },
-      {
-          timestamp: new Date('2025-01-06T08:00:00Z'),
-          open: 3,
-          inWork: 7,
-          closed: 5,
-          rejected: 2
-      },
-      {
-          timestamp: new Date('2025-01-07T08:00:00Z'),
-          open: 2,
-          inWork: 8,
-          closed: 9,
-          rejected: 3
-      },
-      {
-          timestamp: new Date('2025-01-08T08:00:00Z'),
-          open: 5,
-          inWork: 5,
-          closed: 5,
-          rejected: 1
-      }
-    ]
-  
-
-    setParkingOccupancyHist(create30DaysNumberRecordHistogram(parkingRecords));
-    setChargingOccupancyHist(create30DaysNumberRecordHistogram(chargingRecords));
-    setDefectStatusHist(create30DaysDefectRecordHistogram(defectStatusRecords));
+    fetchParkingStatus(garageId, aMonthAgo, now);
+    fetchChargingStatus(garageId, aMonthAgo, now);
+    fetchDefectStatus(garageId, aMonthAgo, now);
   }
 
   const create30DaysNumberRecordHistogram = (records: NumberRecord[]) => {
