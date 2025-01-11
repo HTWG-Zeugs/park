@@ -16,15 +16,15 @@ export default function Analytics() {
   const [garages, setGarages] = React.useState<GarageListItem[]>([]);
   const [selectedGarage, setSelectedGarage] = React.useState<string>();
 
-  const [turnover, setTurnover] = React.useState<number>();
-  const [meanParkingDuration, setMeanParkingDuration] = React.useState<number>();
-  const [kwhCharged, setKwhCharged] = React.useState<number>();
-  const [parkingOccupancyHist, setParkingOccupancyHist] = React.useState<any[][]>()
-  const [chargingOccupancyHist, setChargingOccupancyHist] = React.useState<any[][]>()
-  const [defectStatusHist, setDefectStatusHist] = React.useState<any[][]>()
+  const [turnover, setTurnover] = React.useState<number>(0);
+  const [meanParkingDuration, setMeanParkingDuration] = React.useState<number>(0);
+  const [kwhCharged, setKwhCharged] = React.useState<number>(0);
+  const [parkingOccupancyHist, setParkingOccupancyHist] = React.useState<any[][]>([])
+  const [chargingOccupancyHist, setChargingOccupancyHist] = React.useState<any[][]>([])
+  const [defectStatusHist, setDefectStatusHist] = React.useState<any[][]>([])
 
   const PROPERTY_MANAGEMENT_URL = import.meta.env.VITE_PROPERTY_MANAGEMENT_SERVICE_URL;
-  const INFRASTRUCTURE_MANAGEMENT_URL = import.meta.env.VITE_INFRASTRUCTURE_MANAGEMENT_URL;
+  const INFRASTRUCTURE_MANAGEMENT_URL = import.meta.env.VITE_INFRASTRUCTURE_MANAGEMENT_SERVICE_URL;
 
   useEffect(() => {
     fetchGarages();
@@ -74,6 +74,10 @@ export default function Analytics() {
           return;
         }
         const turnoverEntries: NumberRecord[] = turnoverResponse.data;
+        if (turnoverEntries.length == 0) {
+          setTurnover(0);
+          return;
+        }
         const totalTurnover = turnoverEntries.reduce((accumulator, currentValue) => accumulator + currentValue.value, 0);
         setTurnover(totalTurnover);
       })
@@ -91,6 +95,10 @@ export default function Analytics() {
           return;
         }
         const durationEntries: NumberRecord[] = durationResponse.data;
+        if (durationEntries.length == 0) {
+          setMeanParkingDuration(0);
+          return;
+        }
         const meanDuration = durationEntries.reduce((accumulator, currentValue) => accumulator + currentValue.value, 0);
         setMeanParkingDuration(meanDuration/durationEntries.length);
       })
@@ -108,6 +116,10 @@ export default function Analytics() {
           return;
         }
         const powerConsumptionEntries: NumberRecord[] = powerConsumptionResponse.data;
+        if (powerConsumptionEntries.length == 0) {
+          setKwhCharged(0);
+          return;
+        }
         const totalConsumedPower = powerConsumptionEntries.reduce((accumulator, currentValue) => accumulator + currentValue.value, 0);
         setKwhCharged(totalConsumedPower);
       })
@@ -125,6 +137,10 @@ export default function Analytics() {
           return;
         }
         const parkingStatusEntries: NumberRecord[] = parkingStatusResponse.data;
+        if (parkingStatusEntries.length == 0) {
+          setParkingOccupancyHist([]);
+          return;
+        }
         setParkingOccupancyHist(
           create30DaysNumberRecordHistogram(parkingStatusEntries)
         );
@@ -143,6 +159,10 @@ export default function Analytics() {
           return;
         }
         const chargingStatusEntries: NumberRecord[] = chargingStatusResponse.data;
+        if (chargingStatusEntries.length == 0) {
+          setChargingOccupancyHist([]);
+          return;
+        }
         setChargingOccupancyHist(
           create30DaysNumberRecordHistogram(chargingStatusEntries)
         );
@@ -161,6 +181,10 @@ export default function Analytics() {
           return;
         }
         const defectStatusEntries: DefectStatusRecord[] = defectStatusResponse.data;
+        if (defectStatusEntries.length == 0) {
+          setDefectStatusHist([]);
+          return;
+        }
         setDefectStatusHist(
           create30DaysDefectRecordHistogram(defectStatusEntries)
         );
@@ -350,13 +374,13 @@ export default function Analytics() {
           <CardContent>
             <Typography variant="h6">{t('route_analytics.parking_occupancy')} ({t('route_analytics.last_30_days')})</Typography>
             <LineChart 
-                xAxis={[{
-                  data: parkingOccupancyHist![0],
+                xAxis={parkingOccupancyHist.length === 0 ? [] : [{
+                  data: parkingOccupancyHist[0],
                   valueFormatter: (value) => `${new Date(value).getDate()}.${new Date(value).getMonth()+1}`,
                   min: new Date().setDate(new Date().getDate() - 30)
                 }]}
-                series={[{ 
-                  data: parkingOccupancyHist![1],
+                series={parkingOccupancyHist.length === 0 ? [] : [{ 
+                  data: parkingOccupancyHist[1],
                   color: '#f28e2c', 
                   area: true, 
                 }]}
@@ -373,13 +397,13 @@ export default function Analytics() {
           <CardContent>
             <Typography variant="h6">{t('route_analytics.charging_occupancy')} ({t('route_analytics.last_30_days')})</Typography>
             <LineChart 
-                xAxis={[{
-                  data: chargingOccupancyHist![0],
+                xAxis={chargingOccupancyHist.length === 0 ? [] : [{
+                  data: chargingOccupancyHist[0],
                   valueFormatter: (value) => `${new Date(value).getDate()}.${new Date(value).getMonth()+1}`,
                   min: new Date().setDate(new Date().getDate() - 30)
                 }]}
-                series={[{ 
-                  data: chargingOccupancyHist![1],
+                series={chargingOccupancyHist.length === 0 ? [] : [{ 
+                  data: chargingOccupancyHist[1],
                   color: '#f28e2c', 
                   area: true, 
                 }]}
@@ -395,17 +419,17 @@ export default function Analytics() {
         <Card>
           <CardContent>
             <Typography variant="h6">{t('route_analytics.defect_status')} ({t('route_analytics.last_30_days')})</Typography>
-              <LineChart 
-                xAxis={[{
-                  data: chargingOccupancyHist![0],
+            <LineChart 
+                xAxis={defectStatusHist.length === 0 ? [] : [{
+                  data: defectStatusHist[0],
                   valueFormatter: (value) => `${new Date(value).getDate()}.${new Date(value).getMonth()+1}`,
                   min: new Date().setDate(new Date().getDate() - 30)
                 }]}
-                series={[
-                  { data: defectStatusHist![1], label: t('route_analytics.open') },
-                  { data: defectStatusHist![2], label: t('route_analytics.in_work') },
-                  { data: defectStatusHist![3], label: t('route_analytics.closed') },
-                  { data: defectStatusHist![4], label: t('route_analytics.rejected') },
+                series={defectStatusHist.length === 0 ? [] : [
+                  { data: defectStatusHist[1], label: t('route_analytics.open') },
+                  { data: defectStatusHist[2], label: t('route_analytics.in_work') },
+                  { data: defectStatusHist[3], label: t('route_analytics.closed') },
+                  { data: defectStatusHist[4], label: t('route_analytics.rejected') },
                 ]}
                 width={450}
                 height={320}
