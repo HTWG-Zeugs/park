@@ -9,6 +9,7 @@ import React from "react";
 import { GarageResponseObject } from "shared/GarageResponseObject";
 import { DefectStatusRecord } from "shared/DefectStatusRecord";
 import { NumberRecord } from "shared/NumberRecord";
+import { OccupancyRecord } from "shared/OccupancyRecord";
 import { GarageListItem, toGarageListItem } from "src/models/GarageListItem";
 
 export default function Analytics() {
@@ -136,13 +137,13 @@ export default function Analytics() {
           console.log("No parking status entries could be fetched")
           return;
         }
-        const parkingStatusEntries: NumberRecord[] = parkingStatusResponse.data;
+        const parkingStatusEntries: OccupancyRecord[] = parkingStatusResponse.data;
         if (parkingStatusEntries.length == 0) {
           setParkingOccupancyHist([]);
           return;
         }
         setParkingOccupancyHist(
-          create30DaysNumberRecordHistogram(parkingStatusEntries)
+          create30DaysNumberOccupancyHistogram(parkingStatusEntries)
         );
       })
       .catch((error) => {
@@ -158,13 +159,13 @@ export default function Analytics() {
           console.log("No charging status entries could be fetched")
           return;
         }
-        const chargingStatusEntries: NumberRecord[] = chargingStatusResponse.data;
+        const chargingStatusEntries: OccupancyRecord[] = chargingStatusResponse.data;
         if (chargingStatusEntries.length == 0) {
           setChargingOccupancyHist([]);
           return;
         }
         setChargingOccupancyHist(
-          create30DaysNumberRecordHistogram(chargingStatusEntries)
+          create30DaysNumberOccupancyHistogram(chargingStatusEntries)
         );
       })
       .catch((error) => {
@@ -208,7 +209,7 @@ export default function Analytics() {
     fetchDefectStatus(garageId, aMonthAgo, now);
   }
 
-  const create30DaysNumberRecordHistogram = (records: NumberRecord[]) => {
+  const create30DaysNumberOccupancyHistogram = (records: OccupancyRecord[]) => {
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
 
@@ -228,12 +229,14 @@ export default function Analytics() {
       const recordDate = new Date(record.timestamp);
       recordDate.setHours(0, 0, 0, 0);
       
-      if (!dayValueMap.has(recordDate.getTime()) || dayValueMap.get(recordDate.getTime()) < record.value) {
-        dayValueMap.set(recordDate.getTime(), record.value);
+      if (!dayValueMap.has(recordDate.getTime()) || dayValueMap.get(recordDate.getTime()) < record.occupiedSpaces) {
+        dayValueMap.set(recordDate.getTime(), record.occupiedSpaces);
       }
     }
 
-    let lastValue: any = records[0].value;
+    console.log(dayValueMap)
+
+    let lastValue: any = records[0].occupiedSpaces;
     
     const dates: Date[] = [];
     const values: number[] = [];
