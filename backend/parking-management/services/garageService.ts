@@ -172,8 +172,8 @@ export class GarageService {
       const token = await getIdToken();
   
       const response = await axios.put(
-        `${process.env.INFRASTRUCTURE_MANAGEMENT_SERVICE_URL}/analytics/requests/${tenantId}`,
-        {},
+        `${process.env.INFRASTRUCTURE_MANAGEMENT_SERVICE_URL}/${endpoint}/${garageId}`,
+        record,
         {
         headers: {
           Authorization: `Bearer ${token}`,
