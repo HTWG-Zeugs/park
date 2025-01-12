@@ -17,12 +17,12 @@ import AddUsers from "./routes/AddUser";
 import EditUser from "./routes/EditUser";
 import "firebase/auth";
 import "src/common/i18n/i18n.ts";
-
 import ProtectedRoute from "src/routes/ProtectedRoutes";
 import PrivateRoute from "src/routes/PrivateRoute";
 import { AuthProvider } from "src/services/AuthContext";
 import EditGarage from "./routes/EditGarage";
 import Occupancy from "src/routes/Occupancy";
+import Analytics from "./routes/Analytics";
 
 const router = createBrowserRouter([
   {
@@ -32,7 +32,8 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: "home", element: <Home /> },
-      { path: "occupancy", element: <Occupancy />},
+      { path: "occupancy", element: <Occupancy />}, //TODO: Add protected route
+      { path: "analytics", element: <Analytics />},
       { path: "sign-in", element: <SignIn /> },
       { path: "sign-up", element: <SignUp /> },
       { 

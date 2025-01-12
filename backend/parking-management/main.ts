@@ -3,6 +3,8 @@ import { FirestoreRepository } from "./repositories/firestoreRepository";
 import { Repository } from "./repositories/repository";
 import { GarageService } from "./services/garageService";
 import { GarageInfoObject } from '../../shared/GarageInfoObject';
+import validateFirebaseIdToken from "./middleware/validateFirebaseIdToken"
+import verifyAuthToken from "./middleware/validateOAuth"
 import cors from "cors";
 import "dotenv/config";
 
@@ -26,7 +28,7 @@ app.get("/garage/:garageId", async (req, res) => {
   }
 });
 
-app.post("/garage/create", async (req, res) => {
+app.post("/garage/create", verifyAuthToken, async (req, res) => {
   try {
     const garageDto: GarageDto = req.body;
     await garageService.createGarage(garageDto);
@@ -36,7 +38,7 @@ app.post("/garage/create", async (req, res) => {
   }
 });
 
-app.put("/garage/update", async (req, res) => {
+app.put("/garage/update", verifyAuthToken, async (req, res) => {
   try {
     const garageDto: GarageDto = req.body;
     await garageService.updateGarage(garageDto);
@@ -46,7 +48,7 @@ app.put("/garage/update", async (req, res) => {
   }
 });
 
-app.delete("/garage/delete/:garageId", async (req, res) => {
+app.delete("/garage/delete/:garageId", verifyAuthToken, async (req, res) => {
   try {
     const garageId: string = req.params.garageId;
     await garageService.deleteGarage(garageId);
@@ -149,7 +151,8 @@ app.post(
   }
 );
 
-app.get("/garage/charging/session/:sessionId", async (req, res) => {
+// TODO: evtl frontend seite um sich session anzusehen; nur wenn zeit übrig
+app.get("/garage/charging/session/:sessionId", validateFirebaseIdToken, async (req, res) => {
   try {
     const sessionId = req.params.sessionId;
     const session = await garageService.getChargingSession(sessionId);
@@ -159,7 +162,7 @@ app.get("/garage/charging/session/:sessionId", async (req, res) => {
   }
 });
 
-app.get("/garage/charging/invoice/:sessionId", async (req, res) => {
+app.get("/garage/charging/invoice/:sessionId", validateFirebaseIdToken, async (req, res) => {
   try {
     const sessionId: string = req.params.sessionId;
     const invoice = await garageService.getChargingInvoice(sessionId);
