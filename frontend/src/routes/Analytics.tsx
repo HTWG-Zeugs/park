@@ -80,7 +80,7 @@ export default function Analytics() {
           return;
         }
         const totalTurnover = turnoverEntries.reduce((accumulator, currentValue) => accumulator + currentValue.value, 0);
-        setTurnover(totalTurnover);
+        setTurnover(Number(totalTurnover.toFixed(2)));
       })
       .catch((error) => {
         console.error("Failed to fetch turnover entries:", error);

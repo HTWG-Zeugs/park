@@ -74,12 +74,12 @@ router.get("/parking/status/:garageId/:start/:end", validateFirebaseIdToken, asy
   }
 });
 
-router.put("/parking/duration/:tenantId/:garageId", verifyAuthToken, async (req, res) => {
+router.put("/parking/duration/:tenantId/:garageId/:duration", verifyAuthToken, async (req, res) => {
   // add new parking duration record from parking session
   try {
     const tenantId: string = req.params.tenantId;
     const garageId: string = req.params.garageId;
-    const parkingDuration: number = req.body;
+    const parkingDuration: number = Number(req.params.duration);
     const durationRecord: NumberRecord = {
       timestamp: new Date(),
       value: parkingDuration,
@@ -186,12 +186,12 @@ router.get("/charging/status/:garageId/:start/:end", validateFirebaseIdToken, as
   }
 });
 
-router.put("/charging/powerConsumed/:tenantId/:garageId", verifyAuthToken, async (req, res) => {
+router.put("/charging/powerConsumed/:tenantId/:garageId/:consumption", verifyAuthToken, async (req, res) => {
   // add new record for consumed power from charging session in garage
   try {
     const tenantId: string = req.params.tenantId;
     const garageId: string = req.params.garageId;
-    const powerConsumed: number = req.body;
+    const powerConsumed: number = Number(req.params.consumption);
     const consumptionRecord: NumberRecord = {
       timestamp: new Date(),
       value: powerConsumed,
@@ -238,12 +238,12 @@ router.get(
   }
 );
 
-router.put("/turnover/:tenantId/:garageId", verifyAuthToken, async (req, res) => {
+router.put("/turnover/:tenantId/:garageId/:turnover", verifyAuthToken, async (req, res) => {
   // add new record for turnover
   try {
     const tenantId: string = req.params.tenantId;
     const garageId: string = req.params.garageId;
-    const turnover: number = req.body;
+    const turnover: number = Number(req.params.turnover);
     const turnoverRecord: NumberRecord = {
       timestamp: new Date(),
       value: turnover,

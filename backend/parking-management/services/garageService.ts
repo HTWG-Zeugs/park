@@ -9,7 +9,7 @@ import { Ticket } from "../models/ticket";
 import { Repository } from "../repositories/repository";
 import { getIdToken } from "../middleware/serviceCommunication";
 import { OccupancyRecord } from "../../../shared/OccupancyRecord";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 
 export class GarageService {
   private repo: Repository;
@@ -85,12 +85,31 @@ export class GarageService {
     const garage = await this.repo.getGarage(garageId);
     garage.parkingPlacesOccupied--;
     this.repo.updateGarage(garage);
+    this.notifyAnalytics(
+      garage.tenantId, 
+      garageId, 
+      'parking/status', 
+      { 
+        timestamp: new Date(), 
+        totalSpaces: garage.parkingPlacesTotal, 
+        occupiedSpaces: garage.parkingPlacesOccupied
+      } as OccupancyRecord
+    );
   }
 
   async handleTicketPayment(ticketId: string): Promise<void> {
-    const ticket = await this.repo.getTicket(ticketId);
+    const ticket: Ticket = await this.repo.getTicket(ticketId);
     ticket.paymentTimestamp = new Date();
     await this.repo.updateTicket(ticket);
+    const garage = await this.repo.getGarage(ticket.garageId);
+    const diffInMilliseconds = ticket.paymentTimestamp.getMilliseconds() - ticket.entryTimestamp.getMilliseconds()
+    const diffInMinutes = diffInMilliseconds / (1000 * 60)
+    this.notifyAnalytics(
+      garage.tenantId,
+      garage.id,
+      'parking/duration',
+      diffInMinutes
+    );
   }
 
   async mayExit(ticketId: string): Promise<boolean> {
@@ -136,7 +155,16 @@ export class GarageService {
         await this.repo.updateGarage(garageRollback);
         throw Error("Unable to create the charging session in the database");
       });
-
+      this.notifyAnalytics(
+        garage.tenantId, 
+        garageId, 
+        'charging/status', 
+        { 
+          timestamp: new Date(), 
+          totalSpaces: garage.chargingPlacesTotal, 
+          occupiedSpaces: garage.chargingPlacesOccupied
+        } as OccupancyRecord
+      );
       return session.id;
     } else {
       throw Error("Cannot start charging session because garage is closed.");
@@ -167,6 +195,29 @@ export class GarageService {
         await this.repo.updateGarage(garageRollback);
         throw Error("Unable to create the charging session in the database");
       });
+      this.notifyAnalytics(
+        garage.tenantId, 
+        garageId, 
+        'charging/status', 
+        { 
+          timestamp: new Date(), 
+          totalSpaces: garage.chargingPlacesTotal, 
+          occupiedSpaces: garage.chargingPlacesOccupied
+        } as OccupancyRecord
+      );
+      this.notifyAnalytics(
+        garage.tenantId,
+        garageId, 
+        'charging/powerConsumed', 
+        session.kWhConsumed
+      );
+      const turnover = this.getPricePerKwhForStation(garage, session.chargingStationId) * session.kWhConsumed;
+      this.notifyAnalytics(
+        garage.tenantId, 
+        garageId, 
+        'turnover',
+        turnover
+      );
     }
   }
 
@@ -181,16 +232,19 @@ export class GarageService {
   private async notifyAnalytics(tenantId: string, garageId: string, endpoint: string, record: any) {
     try {
       const token = await getIdToken();
-  
-      const response = await axios.put(
-        `${process.env.INFRASTRUCTURE_MANAGEMENT_SERVICE_URL}/analytics/${endpoint}/${tenantId}/${garageId}`,
-        record,
-        {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        }
-      );
+      let response: AxiosResponse;
+      let route: string;
+      let body: any;
+
+      if (typeof record === "number") {
+        route = `${process.env.INFRASTRUCTURE_MANAGEMENT_SERVICE_URL}/analytics/${endpoint}/${tenantId}/${garageId}/${record}`;
+        body = {}
+      } else {
+        route = `${process.env.INFRASTRUCTURE_MANAGEMENT_SERVICE_URL}/analytics/${endpoint}/${tenantId}/${garageId}`;
+        body = record;
+      }
+      
+      response = await axios.put(route, body, { headers: { Authorization: `Bearer ${token}` } });
   
       if (response.status !== 200) {
         throw new Error(`API request failed with status ${response.status}`);
@@ -224,6 +278,20 @@ export class GarageService {
         garage.chargingStations[stationIndex].isOccupied = occupied;
         return garage;
       }
+    } else {
+      throw new Error(
+        `Charging station with ID ${stationId} does not exist for garage with ID ${garage.id}`
+      );
+    }
+  }
+
+  private getPricePerKwhForStation(garage: Garage, stationId: string) {
+    let stationIndex = garage.chargingStations.findIndex(
+      (station) => station.id == stationId
+    );
+
+    if (stationIndex !== -1) {
+      return garage.chargingStations[stationIndex].pricePerKwh;
     } else {
       throw new Error(
         `Charging station with ID ${stationId} does not exist for garage with ID ${garage.id}`
