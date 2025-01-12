@@ -322,7 +322,7 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
   tenant_namespaces = [ create_tenant_namespace_name(t["tenantId"]) for t in tenants]
 
   print("Listing existing Helm releases in all namespaces...")
-  cmd = ["helm", "list", "--all-namespaces", "-o", "json"],
+  cmd = ["helm", "list", "--all-namespaces", "-o", "json"]
   stdout = run_subprocess(cmd)
 
   existing_releases = json.loads(stdout)
