@@ -99,4 +99,4 @@ jobs:
           --is-github-actions \
           --create-cluster \
           --project-id ${{ vars.STAGING_PROJECT_ID }} \
-          --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
+          --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }}

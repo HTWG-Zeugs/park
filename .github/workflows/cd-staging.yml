@@ -65,6 +65,6 @@ jobs:
           --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
           --repository ${{ env.GCR_REPO }} \
           --identity-api-key ${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }}  \
-          --identity-auth-domain ${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }}
-          --domain ${{ env.DOMAIN }}
+          --identity-auth-domain ${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
+          --domain ${{ env.DOMAIN }} \
           --git-tag ${{ inputs.image_tag }}
