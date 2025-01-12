@@ -3,6 +3,7 @@ import { GarageState } from "./GarageState";
 
 export class Garage {
   Id: string;
+  TenantId: string;
   Name: string;
   IsOpen: boolean;
   CreatedAt: Date;
@@ -14,9 +15,10 @@ export class Garage {
   ChargingStations: ChargingStation[];
   
 
-  constructor(name: string) {
+  constructor(tenantId: string, name: string) {
       const date = new Date();
       this.Id = crypto.randomUUID();
+      this.TenantId = tenantId;
       this.Name = name;
       this.IsOpen = true;
       this.CreatedAt = date;
@@ -26,6 +28,7 @@ export class Garage {
   public State(): GarageState {
     return {
       id: this.Id,
+      tenantId: this.TenantId,
       name: this.Name,
       isOpen: this.IsOpen,
       numberParkingSpots: this.NumberParkingSpots,
@@ -39,8 +42,9 @@ export class Garage {
   }
 
   public static fromState(state: GarageState): Garage {
-    const garage = new Garage(state.name);
+    const garage = new Garage(state.tenantId, state.name);
     garage.Id = state.id;
+    garage.TenantId = state.tenantId;
     garage.CreatedAt = new Date(state.createdAt);
     garage.LastModifiedAt = new Date(state.lastModifiedAt);
     garage.IsOpen = state.isOpen;

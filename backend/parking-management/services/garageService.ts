@@ -7,6 +7,8 @@ import { Garage } from "../models/garage";
 import { OccupancyStatus } from "../../../shared/OccupancyStatus";
 import { Ticket } from "../models/ticket";
 import { Repository } from "../repositories/repository";
+import { getIdToken } from "../middleware/serviceCommunication";
+import axios from "axios";
 
 export class GarageService {
   private repo: Repository;
@@ -165,6 +167,28 @@ export class GarageService {
     return await this.repo.getChargingInvoice(sessionId);
   }
 
+  private async notifyAnalytics(tenantId: string, garageId: string, endpoint: string, record: any) {
+    try {
+      const token = await getIdToken();
+  
+      const response = await axios.put(
+        `${process.env.INFRASTRUCTURE_MANAGEMENT_SERVICE_URL}/analytics/requests/${tenantId}`,
+        {},
+        {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        }
+      );
+  
+      if (response.status !== 200) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error calling API:', error);
+    }
+  }
+
   private setChargingOccupancy(garage: Garage, newValue: number): Garage {
     garage.chargingPlacesOccupied = newValue;
 
@@ -212,6 +236,7 @@ export class GarageService {
   private getGarageFromDto(garageDto: GarageDto): Garage {
     return new Garage(
       garageDto.id,
+      garageDto.tenantId,
       garageDto.name,
       garageDto.isOpen,
       garageDto.totalParkingSpaces,
@@ -235,6 +260,7 @@ export class GarageService {
   private getGarageInfoObjectFromGarage(garage: Garage): GarageInfoObject {
     return {
       Id: garage.id,
+      TenantId: garage.tenantId,
       Name: garage.name,
       IsOpen: garage.isOpen,
       ParkingPlacesTotal: garage.parkingPlacesTotal,

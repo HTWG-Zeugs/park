@@ -234,8 +234,6 @@ export default function Analytics() {
       }
     }
 
-    console.log(dayValueMap)
-
     let lastValue: any = records[0].occupiedSpaces;
     
     const dates: Date[] = [];
@@ -303,7 +301,7 @@ export default function Analytics() {
     });
 
     return [dates, openValues, inWorkValues, closedValues, rejectedValues];
-};
+  };
 
   return (
     (selectedGarage?.length ?? 0) > 0 && <Paper
