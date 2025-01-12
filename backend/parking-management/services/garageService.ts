@@ -8,6 +8,7 @@ import { OccupancyStatus } from "../../../shared/OccupancyStatus";
 import { Ticket } from "../models/ticket";
 import { Repository } from "../repositories/repository";
 import { getIdToken } from "../middleware/serviceCommunication";
+import { OccupancyRecord } from "../../../shared/OccupancyRecord";
 import axios from "axios";
 
 export class GarageService {
@@ -64,6 +65,16 @@ export class GarageService {
       this.repo.createTicket(ticket);
       garage.parkingPlacesOccupied++;
       this.repo.updateGarage(garage);
+      this.notifyAnalytics(
+        garage.tenantId, 
+        garageId, 
+        'parking/status', 
+        { 
+          timestamp: new Date(), 
+          totalSpaces: garage.parkingPlacesTotal, 
+          occupiedSpaces: garage.parkingPlacesOccupied
+        } as OccupancyRecord
+      );
       return ticket.id;
     } else {
       throw Error("Cannot enter because garage is closed.");
@@ -172,7 +183,7 @@ export class GarageService {
       const token = await getIdToken();
   
       const response = await axios.put(
-        `${process.env.INFRASTRUCTURE_MANAGEMENT_SERVICE_URL}/${endpoint}/${garageId}`,
+        `${process.env.INFRASTRUCTURE_MANAGEMENT_SERVICE_URL}/analytics/${endpoint}/${tenantId}/${garageId}`,
         record,
         {
         headers: {
