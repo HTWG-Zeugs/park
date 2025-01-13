@@ -28,57 +28,57 @@ class DeploymentInfo:
 def parse_args() -> CliArgs:
   parser = argparse.ArgumentParser(description="Sync tenants with Terraform and Helm.")
   parser.add_argument(
-      "--region",
-      default="europe-west1",
-      help="Region for the cluster (default: europe-west1)."
+    "--region",
+    default="europe-west1",
+    help="Region for the cluster (default: europe-west1)."
   )
   parser.add_argument(
-      "--project-id",
-      required=True,
-      help="Project ID to use in Terraform."
+    "--project-id",
+    required=True,
+    help="Project ID to use in Terraform."
   )
   parser.add_argument(
-      "--gcs-bucket",
-      required=True,
-      help="Name of the GCS bucket containing tenants.json"
+    "--gcs-bucket",
+    required=True,
+    help="Name of the GCS bucket containing tenants.json"
   )
   parser.add_argument(
-      "--is-github-actions",
-      action="store_true",
-      default=False,
-      help="If set, is_github_actions is passed as true. Defaults to false."
+    "--is-github-actions",
+    action="store_true",
+    default=False,
+    help="If set, is_github_actions is passed as true. Defaults to false."
   )
   parser.add_argument(
-      "--repository",
-      help="Repository URL for the frontend and backend."
+    "--repository",
+    required=True,
+    help="Repository URL for the frontend and backend."
   )
   parser.add_argument(
-      "--git-tag",
-      help="Git tag for the frontend and backend."
+    "--git-tag",
+    help="Git tag for the frontend and backend."
   )
   parser.add_argument(
-      "--identity-api-key",
-      help="API key for the identity platform."
+    "--identity-api-key",
+    required=True,
+    help="API key for the identity platform."
   )
   parser.add_argument(
-      "--identity-auth-domain",
-      help="Auth domain for the identity platform."
+    "--identity-auth-domain",
+    required=True,
+    help="Auth domain for the identity platform."
   )
   parser.add_argument(
-      "--domain-name",
-      default="park-app.tech",
-      help="Domain name used by Terraform (default: park-app.tech)."
+    "--domain-name",
+    default="park-app.tech",
+    help="Domain name used by Terraform (default: park-app.tech)."
   )
   parser.add_argument(
     "--infra-url",
+    required=True,
     help="URL for the infrastructure management service."
   )
 
   args = parser.parse_args()
-
-  if args.action == "apply":
-    if not args.repository:
-      parser.error("--repository is required when action is 'apply'.")
 
   return CliArgs(
     bucket_name=args.gcs_bucket,
@@ -221,13 +221,7 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
   - New releases are installed into the namespace: "<tenantId>-ns"
   - The --create-namespace flag is used to create these namespaces automatically
   - If a release doesn't match a tenant, we uninstall it.
-
-  Aborts if the `create_cluster` flag is not set.
   """
-
-  if not cliArgs.create_cluster:
-    # Cluster credentials are fetched by the GitHub Action
-    return
   
   if not cliArgs.is_github_actions:
     # Get cluster credentials
@@ -301,7 +295,7 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
         "--set", f"tenant_id={tenant_id}",
         "--set", f"subdomain={tenant_dns}",
         "--set", f"authenticationService.url=http://{cliArgs.domain_name}/auth",
-        "--set", f"infrastructureManagement.url=${cliArgs.infra_url}"
+        "--set", f"infrastructureManagement.url={cliArgs.infra_url}"
       ]
     run_subprocess(cmd)
     
@@ -315,7 +309,7 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
         "--set", f"identityPlatForm.authDomain={cliArgs.identity_auth_domain}",
         "--set", f"gc_project_id={cliArgs.gc_project_id}",
         "--set", f"frontend.env.authUrl=http://{cliArgs.domain_name}/auth",
-        "--set", f"frontend.env.infrastructureUrl=${cliArgs.infra_url}",
+        "--set", f"frontend.env.infrastructureUrl={cliArgs.infra_url}",
         "--set", f"frontend.env.propertyUrl=http://{tenant_dns}.{cliArgs.domain_name}/property",
         "--set", f"frontend.env.parkingUrl=http://{tenant_dns}.{cliArgs.domain_name}/parking",
         "--set", f"domain={cliArgs.domain_name}",
