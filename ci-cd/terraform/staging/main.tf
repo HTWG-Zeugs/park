@@ -36,7 +36,6 @@ module "park_app_infrastructure" {
   project_number = data.google_project.project.number
 
   infra_namespace = "infra-ns"
-  authentication_service_sa = "authentication-service-sa"
   domain_name = var.domain_name
   domain_zone_name = "park-app-tech"
 }
