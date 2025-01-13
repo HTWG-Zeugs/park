@@ -8,10 +8,10 @@ gc_project_id: "PROJECT_ID"
 identityPlatForm:
   apiKey: "API_KEY"
   authDomain: "AUTH_DOMAIN"
-  tenantId: "DEFECT_ID"
 
 gateway:
   name: "park-external-http"
+  ipName: park-gateway-ip
 
 domain: null
 

@@ -30,6 +30,7 @@ export default function Header() {
   const { isAuthenticated, logout } = useAuth();
   const pages = [
     { text: <HomeIcon />, href: "/home" },
+    { text: t("component_header.analytics"), href: "/analytics" },
     { text: t("component_header.occupancy"), href: "/occupancy" },
     { text: t("component_header.contact"), href: "/contact" },
   ];

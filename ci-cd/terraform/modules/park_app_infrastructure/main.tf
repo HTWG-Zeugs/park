@@ -30,7 +30,8 @@ output "identity_platform" {
 
 ### Public IP and DNS zone for the park app
 
-resource "google_compute_address" "public_ip_address" {
+resource "google_compute_global_address" "public_ip_address" {
+  project  = var.project_id
   name = "park-gateway-ip"
 }
 
@@ -40,7 +41,7 @@ resource "google_dns_managed_zone" "park_domain" {
 }
 
 output "gateway_ip" {
-  value = google_compute_address.public_ip_address.address
+  value = google_compute_global_address.public_ip_address.address
 }
 
 output "dns_zone_name" {
@@ -55,7 +56,7 @@ resource "google_dns_record_set" "root_dns_record" {
   managed_zone = google_dns_managed_zone.park_domain.name
   name    = google_dns_managed_zone.park_domain.dns_name
   type    = "A"
-  rrdatas = [google_compute_address.public_ip_address.address]
+  rrdatas = [google_compute_global_address.public_ip_address.address]
   ttl     = 300
 }
 
