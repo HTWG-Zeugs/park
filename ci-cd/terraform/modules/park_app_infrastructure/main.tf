@@ -72,14 +72,23 @@ resource "google_firestore_database" "authentication-service-db" {
   deletion_policy = "DELETE"
 }
 
-resource "google_project_iam_member" "authentication_service_management_firestore_access" {
-  project = var.project_id
-  role    = "roles/datastore.user"
-  member  = "principal://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/${var.project_id}.svc.id.goog/subject/ns/${var.infra_namespace}/sa/${var.authentication_service_sa}"
+resource "google_service_account" "authentication_service_sa" {
+  account_id   = "${var.infra_namespace}-${var.authentication_service_sa}"
+  project      = var.project_id
+  display_name = "Authentication Service Account"
 }
 
-resource "google_project_iam_member" "authentication_service_management_token_creator" {
+variable "authentication_service_sa_roles" {
+  type = list(string)
+  default = [
+    "roles/datastore.user",
+    "roles/iam.serviceAccountTokenCreator"
+  ]
+}
+
+resource "google_project_iam_member" "authentication_service_sa_iam_member" {	
+  for_each = { for value in var.authentication_service_sa_roles : value => value }
   project = var.project_id
-  role    = "roles/iam.serviceAccountTokenCreator"
-  member  = "principal://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/${var.project_id}.svc.id.goog/subject/ns/${var.infra_namespace}/sa/${var.authentication_service_sa}"
+  role    = each.value
+  member = "serviceAccount:${google_service_account.authentication_service_sa.email}"
 }
