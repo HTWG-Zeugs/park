@@ -26,10 +26,10 @@ frontend:
   route:
     prefix: "/"
   env:
-    BackendUrl: ""
-    authUrl: "/auth"
-    propertyUrl: "/property"
-    parkingUrl: "/parking"
+    authUrl: ""
+    propertyUrl: ""
+    parkingUrl: ""
+    infrastructureUrl: ""
   healthCheck:
     endpoint: "/livez"
     initialDelaySeconds: 3
