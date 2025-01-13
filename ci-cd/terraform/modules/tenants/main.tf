@@ -13,8 +13,9 @@ output "tenant_id" {
 ### Application resources for the tenant
 
 resource "google_storage_bucket" "property_management_bucket" {
-  name     = "${var.project_id}-prop-ma-${var.app_namespace}"
+  name     = "${var.project_id}-prop-ma-${var.tenant_id}"
   location = var.region
+  force_destroy = true
   public_access_prevention = "enforced"
   cors {
     origin          = ["*"]
@@ -27,7 +28,7 @@ resource "google_storage_bucket" "property_management_bucket" {
 
 resource "google_firestore_database" "property_management_db" {
   project  = var.project_id
-  name     = "${var.project_id}-prop-ma-${var.app_namespace}"
+  name     = "${var.project_id}-prop-ma-${var.tenant_id}"
   location_id = var.region
   type     = "FIRESTORE_NATIVE"
   delete_protection_state = "DELETE_PROTECTION_DISABLED"
@@ -36,7 +37,7 @@ resource "google_firestore_database" "property_management_db" {
 
 resource "google_firestore_database" "parking_management_db" {
   project  = var.project_id
-  name     = "${var.project_id}-park-ma-${var.app_namespace}"
+  name     = "${var.project_id}-park-ma-${var.tenant_id}"
   location_id = var.region
   type     = "FIRESTORE_NATIVE"
   delete_protection_state = "DELETE_PROTECTION_DISABLED"
