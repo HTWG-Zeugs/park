@@ -88,7 +88,8 @@ jobs:
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Run deploy script
+      - uses: hashicorp/setup-terraform@v3
+      - name: Run terraform apply
         working-directory: ./ci-cd
         run: |
           python deploy-terraform.py \
@@ -153,7 +154,7 @@ jobs:
         run: |
           echo "INFRASTRUCTURE_SERVICE_URL=$(gcloud run services describe infrastructure-administration --platform=managed --region=${{ vars.REGION }} --format 'value(status.url)')" >> $GITHUB_ENV
       
-      - name: Run deploy script
+      - name: Install Helm charts
         working-directory: ./ci-cd
         run: |
           python deploy-kubernetes.py \

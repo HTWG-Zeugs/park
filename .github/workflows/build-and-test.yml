@@ -89,7 +89,8 @@ jobs:
         with:
           service_account: '${{ secrets.STAGING_GITHUB_SA }}'
           workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
-
+      
+      - uses: hashicorp/setup-terraform@v3
       - name: Run Terraform plan
         working-directory: ./ci-cd
         run: |
