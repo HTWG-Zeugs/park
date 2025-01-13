@@ -78,6 +78,12 @@ resource "google_service_account" "authentication_service_sa" {
   display_name = "Authentication Service Account"
 }
 
+resource "google_service_account_iam_member" "authentication_service_sa_iam" {
+  service_account_id = google_service_account.authentication_service_sa.id
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[${var.infra_namespace}/${var.authentication_service_sa}]"
+}
+
 variable "authentication_service_sa_roles" {
   type = list(string)
   default = [

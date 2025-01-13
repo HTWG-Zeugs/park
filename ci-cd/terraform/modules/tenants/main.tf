@@ -50,6 +50,12 @@ resource "google_service_account" "property_management_sa" {
   display_name = "Property Management Service Account"
 }
 
+resource "google_service_account_iam_member" "authentication_service_sa_iam" {
+  service_account_id = google_service_account.property_management_sa.id
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[${var.app_namespace}/${var.property_management_sa}]"
+}
+
 variable "property_management_sa_roles" {
   type = list(string)
   default = [
@@ -73,6 +79,12 @@ resource "google_service_account" "parking_management_sa" {
   display_name = "Parking Management Service Account"
 }
 
+resource "google_service_account_iam_member" "parking_management_sa_iam" {
+  service_account_id = google_service_account.parking_management_sa.id
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[${var.app_namespace}/${var.parking_management_sa}]"
+}
+
 variable "parking_management_sa_roles" {
   type = list(string)
   default = [
@@ -93,6 +105,12 @@ resource "google_service_account" "frontend_sa" {
   account_id   = "${var.tenant_id}-${var.frontend_sa}"
   project      = var.project_id
   display_name = "Frontend Service Account"
+}
+
+resource "google_service_account_iam_member" "frontend_sa_iam" {
+  service_account_id = google_service_account.frontend_sa.id
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[${var.app_namespace}/${var.frontend_sa}]"
 }
 
 variable "frontend_sa_roles" {
