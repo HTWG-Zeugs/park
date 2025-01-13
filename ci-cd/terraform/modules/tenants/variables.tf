@@ -40,17 +40,17 @@ variable app_namespace {
 variable property_management_sa {
   description = "The service account to use for the property management service"
   type        = string
-  default     = "prop"
+  default     = "prop-sa"
 }
 
 variable parking_management_sa {
   description = "The service account to use for the parking management service"
   type        = string
-  default     = "park"
+  default     = "park-sa"
 }
 
 variable frontend_sa {
   description = "The service account to use for the frontend service"
   type        = string
-  default     = "front"
+  default     = "front-sa"
 }

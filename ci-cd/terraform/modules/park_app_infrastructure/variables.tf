@@ -20,7 +20,7 @@ variable infra_namespace {
 variable authentication_service_sa {
   description = "The service account to use for the authentication service"
   type        = string
-  default     = "auth"
+  default     = "auth-sa"
 }
 
 variable domain_zone_name {
