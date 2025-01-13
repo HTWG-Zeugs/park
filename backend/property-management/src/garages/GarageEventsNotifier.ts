@@ -62,6 +62,7 @@ export class GarageEventsNotifier {
   private convertGarageToDto(garage: Garage): GarageDto {
     return {
       id: garage.Id,
+      tenantId: garage.TenantId,
       name: garage.Name,
       isOpen: garage.IsOpen,
       totalParkingSpaces: garage.NumberParkingSpots,

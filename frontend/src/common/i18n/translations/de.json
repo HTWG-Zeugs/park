@@ -255,7 +255,7 @@
   },
   "route_analytics": {
     "title": "Analysen",
-    "mean_daily_turnover": "Durchschnittlicher Tagesumsatz",
+    "turnover": "Umsatz",
     "mean_parking_duration": "Durchschnittliche Parkdauer",
     "total_kwh_charged": "Gesamt geladene KWh",
     "parking_occupancy": "Belegung Parkplätze",
