@@ -15,6 +15,7 @@ gateway:
 
 domain: null
 subdomain: null
+tenant_id: null
 
 authenticationService:
   url: ""

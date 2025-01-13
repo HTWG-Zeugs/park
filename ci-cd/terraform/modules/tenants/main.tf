@@ -45,7 +45,7 @@ resource "google_firestore_database" "parking_management_db" {
 }
 
 resource "google_service_account" "property_management_sa" {
-  account_id   = "${var.app_namespace}-${var.property_management_sa}"
+  account_id   = "${var.tenant_id}-${var.property_management_sa}"
   project      = var.project_id
   display_name = "Property Management Service Account"
 }
@@ -68,7 +68,7 @@ resource "google_project_iam_member" "property_management_sa_iam_member" {
 
 
 resource "google_service_account" "parking_management_sa" {
-  account_id   = "${var.app_namespace}-${var.parking_management_sa}"
+  account_id   = "${var.tenant_id}-${var.parking_management_sa}"
   project      = var.project_id
   display_name = "Parking Management Service Account"
 }
@@ -90,7 +90,7 @@ resource "google_project_iam_member" "parking_management_sa_iam_member" {
 
 
 resource "google_service_account" "frontend_sa" {
-  account_id   = "${var.app_namespace}-${var.frontend_sa}"
+  account_id   = "${var.tenant_id}-${var.frontend_sa}"
   project      = var.project_id
   display_name = "Frontend Service Account"
 }
