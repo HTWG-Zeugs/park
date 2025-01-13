@@ -22,10 +22,10 @@ const SignIn: React.FC = () => {
 
     try {
       const tenantId = import.meta.env.VITE_TENANT_ID;
-      if (!auth.tenantId) {
-        const response = await axios.get(`${AUTHENTICATION_BACKEND}/tenant-id/${email}`);
+      const response = await axios.get(`${AUTHENTICATION_BACKEND}/tenant-id/${email}`);
+      if (response.data)
         auth.tenantId = response.data;
-      } else {
+      else {
         auth.tenantId = tenantId;
       }
       const userCredential = await auth.signInWithEmailAndPassword(
@@ -64,10 +64,10 @@ const SignIn: React.FC = () => {
 
     try {
       const tenantId = import.meta.env.VITE_TENANT_ID;
-      if (!auth.tenantId) {
-        const response = await axios.get(`${AUTHENTICATION_BACKEND}/tenant-id/${email}`);
-        auth.tenantId = response.data.tenant_id;
-      } else {
+      const response = await axios.get(`${AUTHENTICATION_BACKEND}/tenant-id/${email}`);
+      if (response.data)
+        auth.tenantId = response.data;
+      else {
         auth.tenantId = tenantId;
       }
       await auth.sendPasswordResetEmail(email);
