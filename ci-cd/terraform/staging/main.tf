@@ -49,9 +49,6 @@ module "per_tenant" {
   project_id = var.project_id
   project_number = data.google_project.project.number
 
-  property_management_sa = "property-management-sa"
-  parking_management_sa = "parking-management-sa"
-  frontend_sa = "frontend-sa"
   gateway_ip = module.park_app_infrastructure.gateway_ip
   dns_zone_name = module.park_app_infrastructure.dns_zone_name
   dns_zone_domain_name = module.park_app_infrastructure.dns_zone_domain_name
