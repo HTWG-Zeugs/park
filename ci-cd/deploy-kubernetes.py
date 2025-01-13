@@ -17,6 +17,7 @@ class CliArgs:
   identity_api_key: str = ""
   identity_auth_domain: str = ""
   domain_name: str = "park-app.tech"
+  infra_url: str = ""
 
 
 @dataclass
@@ -68,6 +69,10 @@ def parse_args() -> CliArgs:
       default="park-app.tech",
       help="Domain name used by Terraform (default: park-app.tech)."
   )
+  parser.add_argument(
+    "--infra-url",
+    help="URL for the infrastructure management service."
+  )
 
   args = parser.parse_args()
 
@@ -85,6 +90,7 @@ def parse_args() -> CliArgs:
     identity_api_key=args.identity_api_key,
     identity_auth_domain=args.identity_auth_domain,
     domain_name=args.domain_name
+    infra_url=args.infra_url
   )
     
 
@@ -295,7 +301,7 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
         "--set", f"tenant_id={tenant_id}",
         "--set", f"subdomain={tenant_dns}",
         "--set", f"authenticationService.url=http://{cliArgs.domain_name}/auth",
-        "--set", f"infrastructureManagement.url=http://{cliArgs.domain_name}/infra", #TODO: Change this to the actual URL
+        "--set", f"infrastructureManagement.url=${cliArgs.infra_url}"
       ]
     run_subprocess(cmd)
     
@@ -309,7 +315,7 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
         "--set", f"identityPlatForm.authDomain={cliArgs.identity_auth_domain}",
         "--set", f"gc_project_id={cliArgs.gc_project_id}",
         "--set", f"frontend.env.authUrl=http://{cliArgs.domain_name}/auth",
-        "--set", f"frontend.env.infrastructureUrl=http://{cliArgs.domain_name}/infra", #TODO: Change this to the actual URL
+        "--set", f"frontend.env.infrastructureUrl=${cliArgs.infra_url}",
         "--set", f"frontend.env.propertyUrl=http://{tenant_dns}.{cliArgs.domain_name}/property",
         "--set", f"frontend.env.parkingUrl=http://{tenant_dns}.{cliArgs.domain_name}/parking",
         "--set", f"domain={cliArgs.domain_name}",
