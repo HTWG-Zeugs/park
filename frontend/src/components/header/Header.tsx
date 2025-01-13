@@ -41,13 +41,8 @@ export default function Header() {
     );
   }
   
-  pages.push(
-    { text: t("component_header.contact"), href: "/contact" },
-    { text: t("component_header.demo_client"), href: "/demo-client" }
-  );
-
   const [userRole, setUserRole] = useState<number>(0);
-
+  
   if (
     isAuthenticated && // signed-in
     (userRole == UserRoleObject.tenant_admin || // has required role permission
@@ -55,6 +50,12 @@ export default function Header() {
   ) {
     pages.push({ text: t("component_header.users"), href: "/users" });
   }
+
+  pages.push(
+    { text: t("component_header.contact"), href: "/contact" },
+    { text: t("component_header.demo_client"), href: "/demo-client" }
+  );
+
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [language, setLanguage] = useState<string>("GB");
 
