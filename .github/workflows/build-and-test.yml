@@ -93,9 +93,11 @@ jobs:
       - name: Run Terraform plan
         working-directory: ./ci-cd
         run: |
-          python deploy.py \
+          python deploy-terraform.py \
           --action plan \
           --is-github-actions \
           --create-cluster \
           --project-id ${{ vars.STAGING_PROJECT_ID }} \
-          --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }}
+          --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
+          --domain-name ${{ env.DOMAIN }} \
+          --region ${{ vars.REGION }}

@@ -63,46 +63,10 @@ jobs:
         run: |
           docker push ${{ env.GCR_REPO }}/${{ matrix.service.name }}:${{ env.TAG_ID }}
 
-  deploy-cloud-run-services:
+  deploy-terraform:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      SERVICE_ACCOUNT: infra-ns-infra-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com
-      DB_ID: "${{ vars.STAGING_PROJECT_ID }}-infra-management"
-      SERVICE_AUDIENCE: "infrastructure-administration-service"
-    needs: build-and-push-images
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Login to Google Cloud
-        uses: 'google-github-actions/auth@v2'
-        with:
-          service_account: '${{ secrets.STAGING_GITHUB_SA }}'
-          workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
-
-      - name: Set up Google Cloud SDK
-        uses: 'google-github-actions/setup-gcloud@v2'
-
-      - name: Deploy infrastructure-administration service to Cloud run
-        run: |
-          gcloud run deploy infrastructure-administration \
-            --image=${{ env.GCR_REPO }}/infrastructure-administration:${{env.TAG_ID}} \
-            --platform=managed \
-            --region=${{ vars.REGION }} \
-            --allow-unauthenticated \
-            --port=8083 \
-            --service-account=${{ env.SERVICE_ACCOUNT }} \
-            --set-env-vars "AUTHENTICATION_SERVICE_URL=http://${{ env.DOMAIN }}/auth" \
-            --set-env-vars "ANALYTICS_DB_ID=${{ env.DB_ID }}" \
-            --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
-
-  deploy-kubernetes-services:
-    runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    needs: build-and-push-images
     
     steps:
       - name: Checkout code
@@ -133,14 +97,94 @@ jobs:
       - name: Run deploy script
         working-directory: ./ci-cd
         run: |
-          python deploy.py \
+          python deploy-terraform.py \
           --action apply \
           --is-github-actions \
           --create-cluster \
+          --project-id ${{ vars.STAGING_PROJECT_ID }} \
+          --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
+          --domain-name ${{ env.DOMAIN }} \
+          --region ${{ vars.REGION }}
+
+  deploy-cloud-run-services:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      SERVICE_ACCOUNT: infra-ns-infra-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com
+      DB_ID: "${{ vars.STAGING_PROJECT_ID }}-infra-management"
+      SERVICE_AUDIENCE: "infrastructure-administration-service"
+    needs: 
+      - build-and-push-images
+      - deploy-terraform
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Google Cloud
+        uses: 'google-github-actions/auth@v2'
+        with:
+          service_account: '${{ secrets.STAGING_GITHUB_SA }}'
+          workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
+
+      - name: Set up Google Cloud SDK
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: Deploy infrastructure-administration service to Cloud run
+        run: |
+          gcloud run deploy infrastructure-administration \
+            --image=${{ env.GCR_REPO }}/infrastructure-administration:${{env.TAG_ID}} \
+            --platform=managed \
+            --region=${{ vars.REGION }} \
+            --allow-unauthenticated \
+            --port=8083 \
+            --service-account=${{ env.SERVICE_ACCOUNT }} \
+            --set-env-vars "AUTHENTICATION_SERVICE_URL=http://${{ env.DOMAIN }}/auth" \
+            --set-env-vars "ANALYTICS_DB_ID=${{ env.DB_ID }}" \
+            --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
+
+  deploy-kubernetes-services:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    needs: 
+      - build-and-push-images
+      - deploy-terraform
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Google Cloud
+        uses: 'google-github-actions/auth@v2'
+        with:
+          service_account: '${{ secrets.STAGING_GITHUB_SA }}'
+          workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
+
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+          cache: 'pip'
+      - run: pip install -r ci-cd/requirements.txt
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Get GKE credentials
+        uses: 'google-github-actions/get-gke-credentials@v2'
+        with:
+          cluster_name: ${{ env.CLUSTER }}
+          location: ${{ vars.REGION }}
+
+      - name: Run deploy script
+        working-directory: ./ci-cd
+        run: |
+          python deploy-kubernetes.py \
+          --is-github-actions \
           --project-id ${{ vars.STAGING_PROJECT_ID }} \
           --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
           --repository ${{ env.GCR_REPO }} \
           --identity-api-key ${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }}  \
           --identity-auth-domain ${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
           --domain ${{ env.DOMAIN }} \
-          --git-tag ${{ env.TAG_ID}}
+          --git-tag ${{ env.TAG_ID}} \
+          --region ${{ vars.REGION }}

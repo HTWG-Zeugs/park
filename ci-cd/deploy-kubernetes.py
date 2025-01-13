@@ -8,12 +8,10 @@ from dataclasses import dataclass, asdict
 
 @dataclass
 class CliArgs:
-  action: str = ""
   bucket_name: str = ""
   gc_project_id: str = ""
   is_github_actions: bool = False
   region: str = "europe-west1"
-  create_cluster: bool = False
   repository: str = ""
   git_tag: str = ""
   identity_api_key: str = ""
@@ -29,12 +27,6 @@ class DeploymentInfo:
 def parse_args() -> CliArgs:
   parser = argparse.ArgumentParser(description="Sync tenants with Terraform and Helm.")
   parser.add_argument(
-     "--action",
-      required=True,
-      choices=["plan", "apply"],
-      help="Action to perform (plan or apply)."
-  )
-  parser.add_argument(
       "--region",
       default="europe-west1",
       help="Region for the cluster (default: europe-west1)."
@@ -49,18 +41,11 @@ def parse_args() -> CliArgs:
       required=True,
       help="Name of the GCS bucket containing tenants.json"
   )
-  # New arguments for extra Terraform variables
   parser.add_argument(
       "--is-github-actions",
       action="store_true",
       default=False,
       help="If set, is_github_actions is passed as true. Defaults to false."
-  )
-  parser.add_argument(
-      "--create-cluster",
-      action="store_true",
-      default=False,
-      help="If set, create_cluster is passed as true. Defaults to false."
   )
   parser.add_argument(
       "--repository",
@@ -91,12 +76,10 @@ def parse_args() -> CliArgs:
       parser.error("--repository is required when action is 'apply'.")
 
   return CliArgs(
-    action=args.action,
     bucket_name=args.gcs_bucket,
     gc_project_id=args.project_id,
     is_github_actions=args.is_github_actions,
     region=args.region,
-    create_cluster=args.create_cluster,
     repository=args.repository,
     git_tag=args.git_tag,
     identity_api_key=args.identity_api_key,
@@ -110,6 +93,32 @@ def create_tenant_namespace_name(tenant_id: str):
 
 def create_tenant_release_name(service_name: str, tenant_id: str):
    return f"park-tenant-{tenant_id}-{service_name}"
+
+def create_and_annotate_namespace(namespace: str):
+
+  # Check if the namespace already exists
+  result = subprocess.run(
+    ["kubectl", "get", "namespace", namespace],
+    capture_output=True,
+    text=True
+  )
+  if result.returncode == 0:
+    print(f"Namespace '{namespace}' already exists. Skipping creation.")
+  else:
+    print(f"Creating namespace '{namespace}'...")
+    cmd = ["kubectl", "create", "namespace", namespace]
+    run_subprocess(cmd)
+    
+
+  annotation_key = "shared-gateway-access"
+  annotation_value = "true"
+  cmd = [
+      "kubectl", "annotate",
+      "namespace", namespace,
+      f"{annotation_key}={annotation_value}",
+      "--overwrite"
+    ]
+  run_subprocess(cmd)
 
 def run_subprocess(cmd: list, cwd: str = None):
   """
@@ -192,86 +201,9 @@ def write_deployment_info_to_gcs(bucket_name: str, deployment_info: DeploymentIn
 
   print(f"Deployment information written to GCS bucket '{bucket_name}'.")
 
-# ------------------------------------------------------------------------------
-# 2. Generate a .tfvars.json file from the tenant list
-# ------------------------------------------------------------------------------
-def generate_tfvars_json(
-    tenants,
-    output_file: str,
-    cliArgs: CliArgs
-):
-    """
-    Creates a JSON file that Terraform can use for variables, e.g.:
-      {
-        "tenants": [
-          { "id": "free", "domain": "free" },
-          { "id": "premium", "domain": "premium" }
-        ],
-        "is_github_actions": true,
-        "region": "europe-west1",
-        "project_id": "my-project-id",
-        "domain_name": "my-domain.com",
-        "create_cluster": true
-      }
-    """
-    variable_entries = []
-    for t in tenants:
-        variable_entries.append({
-            "id": t["tenantId"],
-            "domain": t["dns"]
-        })
-
-    # Build the data we'll write to tenants.tfvars.json
-    tfvars_data = {
-        "tenants": variable_entries,
-        "is_github_actions": cliArgs.is_github_actions,
-        "region": cliArgs.region,
-        "project_id": cliArgs.gc_project_id,
-        "domain_name": cliArgs.domain_name,
-        "create_cluster": cliArgs.create_cluster
-    }
-
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(tfvars_data, f, indent=2)
-
-    print(f"Terraform tfvars JSON file written to: {output_file}")
-
 
 # ------------------------------------------------------------------------------
-# 3. Run terraform plan
-# ------------------------------------------------------------------------------
-def run_terraform_plan(tfvars_file="tenants.tfvars.json"):
-  """
-  Runs `terraform plan -var-file=...` in the current working directory. Prints stdout/stderr.
-  """
-  print("Running terraform init...")
-  out = run_subprocess(["terraform", "init"], cwd="./terraform/staging")
-  print(out)
-
-  print("Running 'terraform plan'...")
-  out = run_subprocess(["terraform", "plan", f"-var-file={tfvars_file}"], cwd="./terraform/staging")
-  print(out)
-
-# ------------------------------------------------------------------------------
-# 4. Run terraform apply
-# ------------------------------------------------------------------------------
-def run_terraform_apply(tfvars_file="tenants.tfvars.json"):
-  """
-  Runs `terraform apply -var-file=... -auto-approve` in the current directory.
-  Prints stdout/stderr.
-  """
-
-  print("Running terraform init...")
-  out = run_subprocess(["terraform", "init"], cwd="./terraform/staging")
-  print(out)
-
-  print("Running 'terraform apply'...")
-  out = run_subprocess(["terraform", "apply", f"-var-file={tfvars_file}", "-auto-approve"], cwd="./terraform/staging")
-  print(out)
-
-
-# ------------------------------------------------------------------------------
-# 5. Sync Kubernetes deployments (Helm releases) with tenants list
+# Sync Kubernetes deployments (Helm releases) with tenants list
 # ------------------------------------------------------------------------------
 def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
   """
@@ -288,6 +220,7 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
   """
 
   if not cliArgs.create_cluster:
+    # Cluster credentials are fetched by the GitHub Action
     return
   
   if not cliArgs.is_github_actions:
@@ -387,58 +320,16 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
     
   print("Deployment sync complete.")
 
-def create_and_annotate_namespace(namespace: str):
-
-  # Check if the namespace already exists
-  result = subprocess.run(
-    ["kubectl", "get", "namespace", namespace],
-    capture_output=True,
-    text=True
-  )
-  if result.returncode == 0:
-    print(f"Namespace '{namespace}' already exists. Skipping creation.")
-  else:
-    print(f"Creating namespace '{namespace}'...")
-    cmd = ["kubectl", "create", "namespace", namespace]
-    run_subprocess(cmd)
-    
-
-  annotation_key = "shared-gateway-access"
-  annotation_value = "true"
-  cmd = [
-      "kubectl", "annotate",
-      "namespace", namespace,
-      f"{annotation_key}={annotation_value}",
-      "--overwrite"
-    ]
-  run_subprocess(cmd)
-
 
 # ------------------------------------------------------------------------------
 # Main script workflow
 # ------------------------------------------------------------------------------
 def main():
   args = parse_args()
-  # 1. Read tenants from GCS
+  # Read tenants from GCS
   bucket_name = args.bucket_name
   tenants = read_tenants_from_gcs(bucket_name=bucket_name, file_name="tenants.json")
   print(f"Retrieved {len(tenants)} tenants from GCS bucket '{bucket_name}'.")
-
-  # 2. Generate a .tfvars.json file from the tenant list
-  tfvars_file = "./terraform/staging/tenants.tfvars.json"
-  generate_tfvars_json(
-    tenants=tenants,
-    output_file=tfvars_file,
-    cliArgs=args
-  )
-
-  # 3. If action is "plan", run terraform plan and return
-  if args.action == "plan":
-    run_terraform_plan(tfvars_file="tenants.tfvars.json")
-    return
-
-  # 4. If action is "apply", run terraform apply
-  run_terraform_apply(tfvars_file="tenants.tfvars.json")
 
   if args.git_tag:
     # Update the deployment info in GCS
@@ -450,7 +341,7 @@ def main():
     deployment_info = read_deployment_info_from_gcs(bucket_name, file_name="deployment.json")
     args.git_tag = deployment_info.git_tag
 
-  # 4. Sync Kubernetes deployments (Helm releases)
+  # Sync Kubernetes deployments (Helm releases)
   sync_k8s_deployments_with_tenants(
       tenants=tenants,
       cliArgs=args
