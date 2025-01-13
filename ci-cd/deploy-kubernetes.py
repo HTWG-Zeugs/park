@@ -89,7 +89,7 @@ def parse_args() -> CliArgs:
     git_tag=args.git_tag,
     identity_api_key=args.identity_api_key,
     identity_auth_domain=args.identity_auth_domain,
-    domain_name=args.domain_name
+    domain_name=args.domain_name,
     infra_url=args.infra_url
   )
     

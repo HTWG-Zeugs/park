@@ -88,12 +88,6 @@ jobs:
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Get GKE credentials
-        uses: 'google-github-actions/get-gke-credentials@v2'
-        with:
-          cluster_name: ${{ env.CLUSTER }}
-          location: ${{ vars.REGION }}
-
       - name: Run deploy script
         working-directory: ./ci-cd
         run: |
@@ -129,6 +123,19 @@ jobs:
       - name: Set up Google Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v2'
 
+      - name: Get GKE credentials
+        uses: 'google-github-actions/get-gke-credentials@v2'
+        with:
+          cluster_name: ${{ env.CLUSTER }}
+          location: ${{ vars.REGION }}
+      
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+          cache: 'pip'
+      - run: pip install -r ci-cd/requirements.txt
+
       - name: Deploy infrastructure-administration service to Cloud run
         run: |
           gcloud run deploy infrastructure-administration \
@@ -145,19 +152,6 @@ jobs:
       - name: Retrieve Backend URL
         run: |
           echo "INFRASTRUCTURE_SERVICE_URL=$(gcloud run services describe infrastructure-administration --platform=managed --region=${{ vars.REGION }} --format 'value(status.url)')" >> $GITHUB_ENV
-
-      - name: Setup python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-          cache: 'pip'
-      - run: pip install -r ci-cd/requirements.txt
-
-      - name: Get GKE credentials
-        uses: 'google-github-actions/get-gke-credentials@v2'
-        with:
-          cluster_name: ${{ env.CLUSTER }}
-          location: ${{ vars.REGION }}
       
       - name: Run deploy script
         working-directory: ./ci-cd
