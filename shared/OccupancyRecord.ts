@@ -1,6 +1,6 @@
 
-export class OccupancyRecord {
-  timestamp: Date
-  totalSpaces: number
-  occupiedSpaces: number
+export type OccupancyRecord = {
+  timestamp: Date;
+  totalSpaces: number;
+  occupiedSpaces: number;
 }
