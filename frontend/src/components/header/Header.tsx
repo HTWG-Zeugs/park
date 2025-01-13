@@ -30,17 +30,21 @@ export default function Header() {
   const { isAuthenticated, logout } = useAuth();
   const pages = [
     { text: <HomeIcon />, href: "/home" },
-    { text: t("component_header.analytics"), href: "/analytics" },
     { text: t("component_header.occupancy"), href: "/occupancy" },
-    { text: t("component_header.contact"), href: "/contact" },
   ];
-
+  
   if (isAuthenticated) {
     pages.push(
+      { text: t("component_header.analytics"), href: "/analytics" },
       { text: t("component_header.garages"), href: "/garages" },
       { text: t("component_header.defects"), href: "/defects" }
     );
   }
+  
+  pages.push(
+    { text: t("component_header.contact"), href: "/contact" },
+    { text: t("component_header.demo_client"), href: "/demo-client" }
+  );
 
   const [userRole, setUserRole] = useState<number>(0);
 

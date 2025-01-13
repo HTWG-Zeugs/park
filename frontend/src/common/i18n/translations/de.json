@@ -92,7 +92,8 @@
     "sign_out": "Abmelden",
     "sign_in": "Anmelden",
     "users": "Benutzer",
-    "analytics": "Analysen"
+    "analytics": "Analysen",
+    "demo_client": "Demo"
   },
   "component_sign_in": {
     "title": "Anmelden",
