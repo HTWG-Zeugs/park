@@ -8,7 +8,6 @@ gc_project_id: "PROJECT_ID"
 identityPlatForm:
   apiKey: "API_KEY"
   authDomain: "AUTH_DOMAIN"
-  tenantId: "TENANT_ID"
 
 gateway:
   name: "park-external-http"
@@ -16,6 +15,7 @@ gateway:
 
 domain: null
 subdomain: null
+tenant_id: null
 
 frontend:
   image:

@@ -13,8 +13,9 @@ output "tenant_id" {
 ### Application resources for the tenant
 
 resource "google_storage_bucket" "property_management_bucket" {
-  name     = "${var.project_id}-prop-ma-${var.app_namespace}"
+  name     = "${var.project_id}-prop-ma-${var.tenant_id}"
   location = var.region
+  force_destroy = true
   public_access_prevention = "enforced"
   cors {
     origin          = ["*"]
@@ -27,7 +28,7 @@ resource "google_storage_bucket" "property_management_bucket" {
 
 resource "google_firestore_database" "property_management_db" {
   project  = var.project_id
-  name     = "${var.project_id}-prop-ma-${var.app_namespace}"
+  name     = "${var.project_id}-prop-ma-${var.tenant_id}"
   location_id = var.region
   type     = "FIRESTORE_NATIVE"
   delete_protection_state = "DELETE_PROTECTION_DISABLED"
@@ -36,37 +37,95 @@ resource "google_firestore_database" "property_management_db" {
 
 resource "google_firestore_database" "parking_management_db" {
   project  = var.project_id
-  name     = "${var.project_id}-park-ma-${var.app_namespace}"
+  name     = "${var.project_id}-park-ma-${var.tenant_id}"
   location_id = var.region
   type     = "FIRESTORE_NATIVE"
   delete_protection_state = "DELETE_PROTECTION_DISABLED"
   deletion_policy = "DELETE"
 }
 
-resource "google_project_iam_member" "property_management_firestore_access" {
-  project = var.project_id
-  role    = "roles/datastore.user"
-  member  = "principal://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/${var.project_id}.svc.id.goog/subject/ns/${var.app_namespace}/sa/${var.property_management_sa}"
+resource "google_service_account" "property_management_sa" {
+  account_id   = "${var.tenant_id}-${var.property_management_sa}"
+  project      = var.project_id
+  display_name = "Property Management Service Account"
 }
 
-resource "google_project_iam_member" "property_management_storage_access" {
-  project = var.project_id
-  role    = "roles/storage.objectCreator"
-  member  = "principal://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/${var.project_id}.svc.id.goog/subject/ns/${var.app_namespace}/sa/${var.property_management_sa}"
+resource "google_service_account_iam_member" "authentication_service_sa_iam" {
+  service_account_id = google_service_account.property_management_sa.id
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[${var.app_namespace}/${var.property_management_sa}]"
 }
 
-resource "google_project_iam_member" "parking_management_firestore_access" {
-  project = var.project_id
-  role    = "roles/datastore.user"
-  member  = "principal://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/${var.project_id}.svc.id.goog/subject/ns/${var.app_namespace}/sa/${var.parking_management_sa}"
+variable "property_management_sa_roles" {
+  type = list(string)
+  default = [
+    "roles/datastore.user",
+    "roles/iam.serviceAccountTokenCreator",
+    "roles/storage.objectCreator"
+  ]
 }
 
-resource "google_project_iam_member" "frontend_token_creator" {
+resource "google_project_iam_member" "property_management_sa_iam_member" {	
+  for_each = { for value in var.property_management_sa_roles : value => value }
   project = var.project_id
-  role    = "roles/iam.serviceAccountTokenCreator"
-  member  = "principal://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/${var.project_id}.svc.id.goog/subject/ns/${var.app_namespace}/sa/${var.frontend_sa}"
+  role    = each.value
+  member = "serviceAccount:${google_service_account.property_management_sa.email}"
 }
 
+
+resource "google_service_account" "parking_management_sa" {
+  account_id   = "${var.tenant_id}-${var.parking_management_sa}"
+  project      = var.project_id
+  display_name = "Parking Management Service Account"
+}
+
+resource "google_service_account_iam_member" "parking_management_sa_iam" {
+  service_account_id = google_service_account.parking_management_sa.id
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[${var.app_namespace}/${var.parking_management_sa}]"
+}
+
+variable "parking_management_sa_roles" {
+  type = list(string)
+  default = [
+    "roles/datastore.user",
+    "roles/iam.serviceAccountTokenCreator"
+  ]
+}
+
+resource "google_project_iam_member" "parking_management_sa_iam_member" {
+  for_each = { for value in var.parking_management_sa_roles : value => value }
+  project = var.project_id
+  role    = each.value
+  member = "serviceAccount:${google_service_account.parking_management_sa.email}"
+}
+
+
+resource "google_service_account" "frontend_sa" {
+  account_id   = "${var.tenant_id}-${var.frontend_sa}"
+  project      = var.project_id
+  display_name = "Frontend Service Account"
+}
+
+resource "google_service_account_iam_member" "frontend_sa_iam" {
+  service_account_id = google_service_account.frontend_sa.id
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[${var.app_namespace}/${var.frontend_sa}]"
+}
+
+variable "frontend_sa_roles" {
+  type = list(string)
+  default = [
+    "roles/iam.serviceAccountTokenCreator"
+  ]
+}
+
+resource "google_project_iam_member" "frontend_sa_iam_member" {
+  for_each = { for value in var.frontend_sa_roles : value => value }
+  project = var.project_id
+  role    = each.value
+  member = "serviceAccount:${google_service_account.frontend_sa.email}"
+}
 
 ### DNS record for the tenant
 

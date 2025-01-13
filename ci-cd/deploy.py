@@ -359,6 +359,7 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
         "--set", f"identityPlatForm.authDomain={cliArgs.identity_auth_domain}",
         "--set", f"gc_project_id={cliArgs.gc_project_id}",
         "--set", f"domain={cliArgs.domain_name}",
+        "--set", f"tenant_id={tenant_id}",
         "--set", f"subdomain={tenant_dns}",
         "--set", f"authenticationService.url=http://{cliArgs.domain_name}/auth",
         "--set", f"infrastructureManagement.url=http://{cliArgs.domain_name}/infra", #TODO: Change this to the actual URL
@@ -376,9 +377,10 @@ def sync_k8s_deployments_with_tenants(tenants, cliArgs: CliArgs):
         "--set", f"gc_project_id={cliArgs.gc_project_id}",
         "--set", f"frontend.env.authUrl=http://{cliArgs.domain_name}/auth",
         "--set", f"frontend.env.infrastructureUrl=http://{cliArgs.domain_name}/infra", #TODO: Change this to the actual URL
-        "--set", f"frontend.env.propertyUrl=http://{tenant_dns}{cliArgs.domain_name}/property",
-        "--set", f"frontend.env.parkingUrl=http://{tenant_dns}{cliArgs.domain_name}/parking",
+        "--set", f"frontend.env.propertyUrl=http://{tenant_dns}.{cliArgs.domain_name}/property",
+        "--set", f"frontend.env.parkingUrl=http://{tenant_dns}.{cliArgs.domain_name}/parking",
         "--set", f"domain={cliArgs.domain_name}",
+        "--set", f"tenant_id={tenant_id}",
         "--set", f"subdomain={tenant_dns}"
       ]
     run_subprocess(cmd)

@@ -17,7 +17,7 @@ spec:
         app: park-{{ .Release.Namespace }}
         component: frontend
     spec:
-      serviceAccountName: frontend-sa
+      serviceAccountName: front-sa
       containers:
         - name: frontend
           image: "{{ .Values.repository }}/{{.Values.frontend.image.name}}:{{ .Values.gitTag }}"
