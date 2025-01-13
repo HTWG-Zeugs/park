@@ -120,7 +120,8 @@ variable "infrastructure_management_sa_roles" {
   type = list(string)
   default = [
     "roles/datastore.user",
-    "roles/iam.serviceAccountTokenCreator"
+    "roles/iam.serviceAccountTokenCreator",
+    "roles/run.invoker"
   ]
 }
 
