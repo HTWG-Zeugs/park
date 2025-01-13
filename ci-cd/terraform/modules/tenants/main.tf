@@ -49,6 +49,12 @@ resource "google_project_iam_member" "property_management_firestore_access" {
   member  = "principal://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/${var.project_id}.svc.id.goog/subject/ns/${var.app_namespace}/sa/${var.property_management_sa}"
 }
 
+resource "google_project_iam_member" "property_management_token_creator" {
+  project = var.project_id
+  role    = "roles/iam.serviceAccountTokenCreator"
+  member  = "principal://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/${var.project_id}.svc.id.goog/subject/ns/${var.app_namespace}/sa/${var.property_management_sa}"
+}
+
 resource "google_project_iam_member" "property_management_storage_access" {
   project = var.project_id
   role    = "roles/storage.objectCreator"
@@ -58,6 +64,12 @@ resource "google_project_iam_member" "property_management_storage_access" {
 resource "google_project_iam_member" "parking_management_firestore_access" {
   project = var.project_id
   role    = "roles/datastore.user"
+  member  = "principal://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/${var.project_id}.svc.id.goog/subject/ns/${var.app_namespace}/sa/${var.parking_management_sa}"
+}
+
+resource "google_project_iam_member" "parking_management_token_creator" {
+  project = var.project_id
+  role    = "roles/iam.serviceAccountTokenCreator"
   member  = "principal://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/${var.project_id}.svc.id.goog/subject/ns/${var.app_namespace}/sa/${var.parking_management_sa}"
 }
 
