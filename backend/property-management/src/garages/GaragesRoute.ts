@@ -9,6 +9,7 @@ import { CreateGarageResponseObject } from "../../../../shared/CreateGarageRespo
 import { firestore } from "./../firestore";
 import validateFirebaseIdToken from "../middleware/validateFirebaseIdToken";
 import { GarageEventsNotifier } from "./GarageEventsNotifier";
+import jwt from "jsonwebtoken";
 
 const router = Router();
 
@@ -28,8 +29,9 @@ router.get("/", validateFirebaseIdToken, (req, res) => {
 });
 
 router.post("/", validateFirebaseIdToken, async (req, res) => {
+  const tenantId: string = getTenantId(req);
   const createGarageRequest = req.body as GarageRequestObject;
-  const garage = toGarage(createGarageRequest);
+  const garage = toGarage(tenantId, createGarageRequest);
 
   try {
     await repository.addGarage(garage);
@@ -64,8 +66,9 @@ router.get("/:id", validateFirebaseIdToken, (req, res) => {
 
 router.put("/:id", validateFirebaseIdToken, async (req, res) => {
   const id = req.params.id;
+  const tenantId = getTenantId(req);
   const createGarageRequest = req.body as GarageRequestObject;
-  const garage = toGarage(createGarageRequest);
+  const garage = toGarage(tenantId, createGarageRequest);
 
   const existingGarage = await repository.getGarage(id);
   existingGarage.update(garage);
@@ -107,6 +110,7 @@ function toGetGarageResponse(garage: Garage): GarageResponseObject {
 
   return {
     Id: garage.Id,
+    TenantId: garage.TenantId,
     Name: garage.Name,
     IsOpen: garage.IsOpen,
     NumberParkingSpots: garage.NumberParkingSpots,
@@ -119,8 +123,8 @@ function toGetGarageResponse(garage: Garage): GarageResponseObject {
   };
 }
 
-function toGarage(garage: GarageRequestObject): Garage {
-  const g = new Garage(garage.name);
+function toGarage(tenantId: string, garage: GarageRequestObject): Garage {
+  const g = new Garage(tenantId, garage.name);
   g.setNumberParkingSpots(garage.numberParkingSpots);
   g.setPricePerHourInEuros(garage.pricePerHourInEuros);
   g.setOpeningTimes(garage.openingTime, garage.closingTime);
@@ -132,6 +136,14 @@ function toGarage(garage: GarageRequestObject): Garage {
 
   g.setChargingStations(chargingStations);
   return g;
+}
+
+function getTenantId(req): string {
+  const authorizationHeader = req.headers["authorization"];
+  const token = authorizationHeader.split(" ")[1];
+  const decodedToken = jwt.decode(token, { complete: true });
+  const tenantId = (decodedToken.payload as jwt.JwtPayload).firebase?.tenant;
+  return tenantId;
 }
 
 export default router;

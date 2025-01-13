@@ -2,7 +2,7 @@ import  { Garage } from '../src/garages/models/Garage';
 
 describe('Create a Garage', () => {
   it('should create a new garage', () => {
-    const garage = new Garage('My Garage');
+    const garage = new Garage('123', 'My Garage');
     expect(garage).toBeInstanceOf(Garage);
     expect(garage.Name).toBe('My Garage');
     

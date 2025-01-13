@@ -2,6 +2,7 @@ import { ChargingStation } from "./chargingStation";
 
 export class Garage {
   id: string;
+  tenantId: string;
   name: string;
   isOpen: boolean;
   parkingPlacesTotal: number;
@@ -15,6 +16,7 @@ export class Garage {
 
   constructor(
     id: string,
+    tenantId: string,
     name: string,
     isOpen: boolean,
     parkingPlacesTotal: number,
@@ -27,6 +29,7 @@ export class Garage {
     chargingStations: ChargingStation[]
   ) {
     this.id = id;
+    this.tenantId = tenantId;
     this.name = name;
     this.isOpen = isOpen;
     this.parkingPlacesTotal = parkingPlacesTotal;

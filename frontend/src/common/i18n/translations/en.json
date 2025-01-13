@@ -254,7 +254,7 @@
   },
   "route_analytics": {
     "title": "Analytics",
-    "mean_daily_turnover": "Mean daily turnover",
+    "turnover": "Turnover",
     "mean_parking_duration": "Mean parking duration",
     "total_kwh_charged": "Total KWh charged",
     "parking_occupancy": "Parking occupancy",

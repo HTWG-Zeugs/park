@@ -11,10 +11,10 @@ import jwt from "jsonwebtoken";
 const router = Router();
 const repository = new AnalyticsRepo();
 
-router.put("/parking/status/:garageId", validateFirebaseIdToken, async (req, res) => {
+router.put("/parking/status/:tenantId/:garageId", verifyAuthToken, async (req, res) => {
   // save timestamp and Occupancy status in the garageId collection at this time
   try {
-    const tenantId: string = getTenantId(req);
+    const tenantId: string = req.params.tenantId;
     const garageId: string = req.params.garageId;
     const status: OccupancyStatus = req.body;
     const record: OccupancyRecord = {
@@ -74,12 +74,12 @@ router.get("/parking/status/:garageId/:start/:end", validateFirebaseIdToken, asy
   }
 });
 
-router.put("/parking/duration/:garageId", validateFirebaseIdToken, async (req, res) => {
+router.put("/parking/duration/:tenantId/:garageId/:duration", verifyAuthToken, async (req, res) => {
   // add new parking duration record from parking session
   try {
-    const tenantId: string = getTenantId(req);
+    const tenantId: string = req.params.tenantId;
     const garageId: string = req.params.garageId;
-    const parkingDuration: number = req.body;
+    const parkingDuration: number = Number(req.params.duration);
     const durationRecord: NumberRecord = {
       timestamp: new Date(),
       value: parkingDuration,
@@ -123,10 +123,10 @@ router.get("/parking/duration/:garageId/:start/:end", validateFirebaseIdToken, a
   }
 });
 
-router.put("/charging/status/:garageId", validateFirebaseIdToken, async (req, res) => {
+router.put("/charging/status/:tenantId/:garageId", verifyAuthToken, async (req, res) => {
   // save timestamp and charging occupancy in the garageId collection at this timestamp
   try {
-    const tenantId: string = getTenantId(req);
+    const tenantId: string = req.params.tenantId;
     const garageId: string = req.params.garageId;
     const status: OccupancyStatus = req.body;
     const record: OccupancyRecord = {
@@ -186,12 +186,12 @@ router.get("/charging/status/:garageId/:start/:end", validateFirebaseIdToken, as
   }
 });
 
-router.put("/charging/powerConsumed/:garageId", validateFirebaseIdToken, async (req, res) => {
+router.put("/charging/powerConsumed/:tenantId/:garageId/:consumption", verifyAuthToken, async (req, res) => {
   // add new record for consumed power from charging session in garage
   try {
-    const tenantId: string = getTenantId(req);
+    const tenantId: string = req.params.tenantId;
     const garageId: string = req.params.garageId;
-    const powerConsumed: number = req.body;
+    const powerConsumed: number = Number(req.params.consumption);
     const consumptionRecord: NumberRecord = {
       timestamp: new Date(),
       value: powerConsumed,
@@ -238,12 +238,12 @@ router.get(
   }
 );
 
-router.put("/turnover/:garageId", validateFirebaseIdToken, async (req, res) => {
+router.put("/turnover/:tenantId/:garageId/:turnover", verifyAuthToken, async (req, res) => {
   // add new record for turnover
   try {
-    const tenantId: string = getTenantId(req);
+    const tenantId: string = req.params.tenantId;
     const garageId: string = req.params.garageId;
-    const turnover: number = req.body;
+    const turnover: number = Number(req.params.turnover);
     const turnoverRecord: NumberRecord = {
       timestamp: new Date(),
       value: turnover,
@@ -282,11 +282,11 @@ router.get("/turnover/:garageId/:start/:end", validateFirebaseIdToken, async (re
   }
 });
 
-router.put("/defects/status/:garageId", validateFirebaseIdToken, async (req, res) => {
+router.put("/defects/status/:tenantId/:garageId", verifyAuthToken, async (req, res) => {
   // add new entry for change in defect status
   // ("x open, y in progress, z closed")
   try {
-    const tenantId: string = getTenantId(req);
+    const tenantId: string = req.params.tenantId;
     const garageId: string = req.params.garageId;
     const defectStatus: DefectStatusRecord = req.body;
     await repository.createDefectStatusRecord(tenantId, garageId, defectStatus);
@@ -357,7 +357,7 @@ router.put("/requests/:tenantId", verifyAuthToken, async (req, res) => {
       new Date(timestamp)
     );
 
-    if (new Date(requestsRecord.timestamp).getDate() == timestamp.getDate()) {
+    if (new Date(requestsRecord.timestamp).toDateString() == timestamp.toDateString()) {
       requestsRecord.value++;
       await repository.updateRequestRecord(tenantId, requestsRecord);
     } else {

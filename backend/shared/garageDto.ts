@@ -2,6 +2,7 @@ import { ChargingStationDto } from "./chargingStationDto";
 
 export class GarageDto {
     id: string;
+    tenantId: string;
     name: string;
     isOpen: boolean;
     totalParkingSpaces: number;
