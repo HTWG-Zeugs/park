@@ -146,6 +146,7 @@ app.get("/tenant-id/:mail", async (req, res) => {
       res.status(200).send(tenantId);
     });
   } catch (e) {
+    console.error(e);
     res.status(404).send("User not found");
   }
 });
