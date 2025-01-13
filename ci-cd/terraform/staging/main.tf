@@ -58,7 +58,7 @@ module "per_tenant" {
 
   tenant_id = each.value.id
   tenant_subdomain = each.value.domain
-  app_namespace = each.value.domain
+  app_namespace = "tenant-${each.value.id}-ns"
 }
 
 output "github_sa_email" {
