@@ -15,7 +15,7 @@ gateway:
 
 domain: null
 subdomain: null
-tenantId: null
+tenant_id: null
 
 frontend:
   image:
