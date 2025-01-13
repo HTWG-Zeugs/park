@@ -23,6 +23,7 @@ jobs:
           - { name: "property-management", dockerfile: "./property-management.Dockerfile" }
           - { name: "parking-management", dockerfile: "./parking-management.Dockerfile" }
           - { name: "authentication-service", dockerfile: "./authentication-service.Dockerfile" }
+          - { name: "infrastructure-administration", dockerfile: "./infrastructure-administration.Dockerfile" }
           - { name: "frontend", dockerfile: "./frontend.Dockerfile" }
 
     steps:
@@ -46,9 +47,7 @@ jobs:
       matrix:
         service: [
           backend/property-management,
-          backend/parking-management,
-          backend/authentication,
-          frontend
+          backend/parking-management
         ]
 
     steps:

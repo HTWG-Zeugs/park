@@ -61,7 +61,7 @@ resource "google_dns_record_set" "root_dns_record" {
 }
 
 
-### Application resources for the park app
+### Resources for the authentication service
 
 resource "google_firestore_database" "authentication-service-db" {
   project  = var.project_id
@@ -97,4 +97,36 @@ resource "google_project_iam_member" "authentication_service_sa_iam_member" {
   project = var.project_id
   role    = each.value
   member = "serviceAccount:${google_service_account.authentication_service_sa.email}"
+}
+
+### Resources for the infrastructure management service
+
+resource "google_firestore_database" "infrastructure-management-db" {
+  project  = var.project_id
+  name     = "${var.project_id}-infra-management"
+  location_id = var.region
+  type     = "FIRESTORE_NATIVE"
+  delete_protection_state = "DELETE_PROTECTION_DISABLED"
+  deletion_policy = "DELETE"
+}
+
+resource "google_service_account" "infrastructure_management_sa" {
+  account_id   = "${var.infra_namespace}-${var.infrastructure_management_sa}"
+  project      = var.project_id
+  display_name = "Infrastructure Management Service Account"
+}
+
+variable "infrastructure_management_sa_roles" {
+  type = list(string)
+  default = [
+    "roles/datastore.user",
+    "roles/iam.serviceAccountTokenCreator"
+  ]
+}
+
+resource "google_project_iam_member" "infrastructure_management_sa_iam_member" {	
+  for_each = { for value in var.infrastructure_management_sa_roles : value => value }
+  project = var.project_id
+  role    = each.value
+  member = "serviceAccount:${google_service_account.infrastructure_management_sa.email}"
 }

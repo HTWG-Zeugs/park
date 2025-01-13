@@ -24,6 +24,7 @@ jobs:
           - { name: "property-management", dockerfile: "./property-management.Dockerfile" }
           - { name: "parking-management", dockerfile: "./parking-management.Dockerfile" }
           - { name: "authentication-service", dockerfile: "./authentication-service.Dockerfile" }
+          - { name: "infrastructure-administration", dockerfile: "./infrastructure-administration.Dockerfile" }
           - { name: "frontend", dockerfile: "./frontend.Dockerfile" }
 
     steps:
@@ -62,7 +63,42 @@ jobs:
         run: |
           docker push ${{ env.GCR_REPO }}/${{ matrix.service.name }}:${{ env.TAG_ID }}
 
-  deploy:
+  deploy-cloud-run-services:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      SERVICE_ACCOUNT: infra-ns-infra-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com
+      DB_ID: "${{ vars.STAGING_PROJECT_ID }}-infra-management"
+      SERVICE_AUDIENCE: "infrastructure-administration-service"
+    needs: build-and-push-images
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Google Cloud
+        uses: 'google-github-actions/auth@v2'
+        with:
+          service_account: '${{ secrets.STAGING_GITHUB_SA }}'
+          workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
+
+      - name: Set up Google Cloud SDK
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: Deploy infrastructure-administration service to Cloud run
+        run: |
+          gcloud run deploy infrastructure-administration \
+            --image=${{ env.GCR_REPO }}/infrastructure-administration:${{env.TAG_ID}} \
+            --platform=managed \
+            --region=${{ vars.REGION }} \
+            --allow-unauthenticated \
+            --port=8083 \
+            --service-account=${{ env.SERVICE_ACCOUNT }} \
+            --set-env-vars "AUTHENTICATION_SERVICE_URL=http://${{ env.DOMAIN }}/auth" \
+            --set-env-vars "ANALYTICS_DB_ID=${{ env.DB_ID }}" \
+            --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
+
+  deploy-kubernetes-services:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
