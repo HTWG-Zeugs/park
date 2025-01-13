@@ -16,6 +16,13 @@ gateway:
 domain: null
 subdomain: null
 
+authenticationService:
+  url: ""
+infrastructureManagement:
+  url: ""
+infrastructureAdministration:
+  audience: "infrastructure-administration-service"
+
 propertyManagement:
   image:
     name: "property-management"

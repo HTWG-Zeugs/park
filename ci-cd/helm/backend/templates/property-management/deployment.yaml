@@ -33,6 +33,12 @@ spec:
               value: "{{ .Values.propertyManagement.service.port }}"
             - name: PARKING_MANAGEMENT_BACKEND_URL
               value: "http://parking-management:{{ .Values.parkingManagement.service.port }}"
+            - name: AUTHENTICATION_SERVICE_URL
+              value: "{{ .Values.authenticationService.url }}"
+            - name: INFRASTRUCTURE_MANAGEMENT_SERVICE_URL
+              value: "{{ .Values.infrastructureManagement.url }}"
+            - name: INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE
+              value: "{{ .Values.infrastructureAdministration.audience }}"
           livenessProbe:
             httpGet:
               path: {{ .Values.propertyManagement.healthCheck.endpoint }}
