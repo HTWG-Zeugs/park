@@ -12,6 +12,8 @@ permissions:
 env:
   TAG_ID: "${{ github.sha }}"
   GCR_REPO: "${{ vars.REGION }}-docker.pkg.dev/${{ vars.STAGING_PROJECT_ID }}/${{ vars.STAGING_ARTIFACT_REPO }}"
+  CLUSTER: "${{ vars.STAGING_PROJECT_ID }}-gke"
+  DOMAIN: "park-app.tech"
 
 jobs:
   build-and-push-images:
@@ -59,3 +61,50 @@ jobs:
       - name: Push Docker image to GCR
         run: |
           docker push ${{ env.GCR_REPO }}/${{ matrix.service.name }}:${{ env.TAG_ID }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    needs: build-and-push-images
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Google Cloud
+        uses: 'google-github-actions/auth@v2'
+        with:
+          service_account: '${{ secrets.STAGING_GITHUB_SA }}'
+          workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
+
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+          cache: 'pip'
+      - run: pip install -r ci-cd/requirements.txt
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Get GKE credentials
+        uses: 'google-github-actions/get-gke-credentials@v2'
+        with:
+          cluster_name: ${{ env.CLUSTER }}
+          location: ${{ vars.REGION }}
+
+      - name: Run deploy script
+        working-directory: ./ci-cd
+        run: |
+          python deploy.py \
+          --action apply \
+          --is-github-actions \
+          --create-cluster \
+          --project-id ${{ vars.STAGING_PROJECT_ID }} \
+          --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
+          --repository ${{ env.GCR_REPO }} \
+          --identity-api-key ${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }}  \
+          --identity-auth-domain ${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
+          --domain ${{ env.DOMAIN }} \
+          --git-tag ${{ env.TAG_ID}}
