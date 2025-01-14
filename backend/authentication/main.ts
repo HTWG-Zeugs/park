@@ -142,8 +142,8 @@ app.get("/tenant-id/:mail", async (req, res) => {
   }
   const mail = req.params.mail;
   try {
-    await userService.getTenantId(mail).then((tenantId) => {
-      res.status(200).send(tenantId);
+    await userService.getTenantId(mail).then((tenantInfo) => {
+      res.status(200).send(tenantInfo);
     });
   } catch (e) {
     console.error(e);

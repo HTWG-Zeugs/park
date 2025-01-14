@@ -3,5 +3,6 @@ export type CreateUserRequestObject = {
     mail: string;
     role: number;
     tenantId: string;
+    tenantType: string;
     password: string;
   }

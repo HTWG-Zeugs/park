@@ -16,8 +16,6 @@ class CliArgs:
   create_cluster: bool = False
   domain_name: str = "park-app.tech"
 
-
-
 def parse_args() -> CliArgs:
   parser = argparse.ArgumentParser(description="Sync tenants with Terraform and Helm.")
   parser.add_argument(
@@ -91,21 +89,19 @@ def run_subprocess(cmd: list, cwd: str = None):
     exit(1)
 
 # ------------------------------------------------------------------------------
-# 1. Read tenants.json from GCS
+# Read tenants.json from GCS
 # ------------------------------------------------------------------------------
-def read_tenants_from_gcs(bucket_name: str, file_name: str = "tenants.json"):
+def read_tenants_from_gcs(bucket_name: str, file_name: str):
     """
-    Reads the specified JSON file from a Google Cloud Storage bucket and returns
-    it as a list of tenant objects:
-      [
-        {
-          "tenantId": "...",
-          "dns": "..."
-        },
-        ...
-      ]
+    Reads the specified JSON file from a Google Cloud Storage bucket and
+    returns it as a dictionary, e.g.:
+      {
+        "free_tenants": [ { "tenantId": "...", "dns": "..." }, ... ],
+        "premium_tenants": [ { "tenantId": "...", "dns": "..." }, ... ],
+        "enterprise_tenants": [ { "tenantId": "...", "dns": "..." }, ... ]
+      }
 
-    Returns an empty list if the file does not exist.
+    Returns an empty dict if the file does not exist.
     """
     client = storage.Client()
     bucket = client.bucket(bucket_name)
@@ -113,26 +109,33 @@ def read_tenants_from_gcs(bucket_name: str, file_name: str = "tenants.json"):
 
     # Check if the file exists in the bucket
     if not blob.exists():
-        return []
+        return {}
 
     data = blob.download_as_text(encoding="utf-8")
-    tenants = json.loads(data)
-    return tenants
+    tenants_dict = json.loads(data)
+    return tenants_dict
 
 # ------------------------------------------------------------------------------
-# 2. Generate a .tfvars.json file from the tenant list
+# Generate a .tfvars.json file from the tenant list
 # ------------------------------------------------------------------------------
 def generate_tfvars_json(
-    tenants,
+    free_tenants,
+    premium_tenants,
+    enterprise_tenants,
     output_file: str,
     cliArgs: CliArgs
 ):
     """
     Creates a JSON file that Terraform can use for variables, e.g.:
       {
-        "tenants": [
-          { "id": "free", "domain": "free" },
+        "free_tenants": [
+          { "id": "free", "domain": "free" }
+        ],
+        "premium_tenants": [
           { "id": "premium", "domain": "premium" }
+        ],
+        "enterprise_tenants": [
+          { "id": "enterprise", "domain": "enterprise" }
         ],
         "is_github_actions": true,
         "region": "europe-west1",
@@ -141,16 +144,21 @@ def generate_tfvars_json(
         "create_cluster": true
       }
     """
-    variable_entries = []
-    for t in tenants:
-        variable_entries.append({
-            "id": t["tenantId"],
-            "domain": t["dns"]
-        })
+    free_tenants_entries = [
+        {"id": t["tenantId"], "domain": t["dns"]} for t in free_tenants
+    ]
+    premium_tenants_entries = [
+        {"id": t["tenantId"], "domain": t["dns"]} for t in premium_tenants
+    ]
+    enterprise_tenants_entries = [
+        {"id": t["tenantId"], "domain": t["dns"]} for t in enterprise_tenants
+    ]
 
     # Build the data we'll write to tenants.tfvars.json
     tfvars_data = {
-        "tenants": variable_entries,
+        "free_tenants": free_tenants_entries,
+        "premium_tenants": premium_tenants_entries,
+        "enterprise_tenants": enterprise_tenants_entries,
         "is_github_actions": cliArgs.is_github_actions,
         "region": cliArgs.region,
         "project_id": cliArgs.gc_project_id,
@@ -163,37 +171,35 @@ def generate_tfvars_json(
 
     print(f"Terraform tfvars JSON file written to: {output_file}")
 
-
 # ------------------------------------------------------------------------------
-# 3. Run terraform plan
+# Run terraform plan
 # ------------------------------------------------------------------------------
-def run_terraform_plan(tfvars_file="tenants.tfvars.json"):
+def run_terraform_plan():
   """
-  Runs `terraform plan -var-file=...` in the current working directory. Prints stdout/stderr.
+  Runs `terraform plan` in the ./terraform/staging directory. Prints stdout/stderr.
   """
   print("Running terraform init...")
   out = run_subprocess(["terraform", "init"], cwd="./terraform/staging")
   print(out)
 
   print("Running 'terraform plan'...")
-  out = run_subprocess(["terraform", "plan", f"-var-file={tfvars_file}"], cwd="./terraform/staging")
+  out = run_subprocess(["terraform", "plan"], cwd="./terraform/staging")
   print(out)
 
 # ------------------------------------------------------------------------------
-# 4. Run terraform apply
+# Run terraform apply
 # ------------------------------------------------------------------------------
-def run_terraform_apply(tfvars_file="tenants.tfvars.json"):
+def run_terraform_apply():
   """
-  Runs `terraform apply -var-file=... -auto-approve` in the current directory.
+  Runs `terraform apply -auto-approve` in the ./terraform/staging directory.
   Prints stdout/stderr.
   """
-
   print("Running terraform init...")
   out = run_subprocess(["terraform", "init"], cwd="./terraform/staging")
   print(out)
 
   print("Running 'terraform apply'...")
-  out = run_subprocess(["terraform", "apply", f"-var-file={tfvars_file}", "-auto-approve"], cwd="./terraform/staging")
+  out = run_subprocess(["terraform", "apply", "-auto-approve"], cwd="./terraform/staging")
   print(out)
 
 # ------------------------------------------------------------------------------
@@ -201,27 +207,35 @@ def run_terraform_apply(tfvars_file="tenants.tfvars.json"):
 # ------------------------------------------------------------------------------
 def main():
   args = parse_args()
-  # 1. Read tenants from GCS
-  bucket_name = args.bucket_name
-  tenants = read_tenants_from_gcs(bucket_name=bucket_name, file_name="tenants.json")
-  print(f"Retrieved {len(tenants)} tenants from GCS bucket '{bucket_name}'.")
 
-  # 2. Generate a .tfvars.json file from the tenant list
-  tfvars_file = "./terraform/staging/tenants.tfvars.json"
+  # 1. Read all tenants from a single file "tenants.json" in GCS
+  tenants_data = read_tenants_from_gcs(
+      bucket_name=args.bucket_name,
+      file_name="tenants.json"
+  )
+
+  # Safely extract tenant lists
+  free_tenants = tenants_data.get("free_tenants", [])
+  premium_tenants = tenants_data.get("premium_tenants", [])
+  enterprise_tenants = tenants_data.get("enterprise_tenants", [])
+
+  # 2. Generate .tfvars.json from the combined tenant lists
+  tfvars_file = "./terraform/staging/deployment.auto.tfvars.json"
   generate_tfvars_json(
-    tenants=tenants,
+    free_tenants=free_tenants,
+    premium_tenants=premium_tenants,
+    enterprise_tenants=enterprise_tenants,
     output_file=tfvars_file,
     cliArgs=args
   )
 
-  # 3. If action is "plan", run terraform plan and return
+  # 3. If action is "plan", run terraform plan
   if args.action == "plan":
-    run_terraform_plan(tfvars_file="tenants.tfvars.json")
+    run_terraform_plan()
     return
 
   # 4. If action is "apply", run terraform apply
-  run_terraform_apply(tfvars_file="tenants.tfvars.json")
-
+  run_terraform_apply()
 
 if __name__ == "__main__":
   main()

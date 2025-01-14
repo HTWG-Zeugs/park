@@ -84,6 +84,7 @@ export class UserService {
       user.id,
       getRoleById(attributesToChange.role),
       user.tenantId,
+      user.tenantType,
       attributesToChange.mail,
       attributesToChange.name
     );
@@ -109,8 +110,8 @@ export class UserService {
    * @param mail mail of the user to get the tenant_id for.
    * @returns Returns the tenant_id of the user.
    */
-  async getTenantId(mail: string): Promise<string> {
-    return await this.repo.getTenantId(mail);
+  async getTenantId(mail: string): Promise<{tenantId: string, tenantType: string}> {
+    return await this.repo.getTenantIdAndType(mail);
   }
 
   /**
@@ -143,8 +144,8 @@ export class UserService {
     signedInUser: User,
     user: CreateUserRequestObject
   ): Promise<void> {
-    const tenantId = await this.repo.getTenantId(user.mail);
-    if (!tenantId) {
+    const { tenantId, tenantType } = await this.repo.getTenantIdAndType(user.mail);
+    if (! tenantId) {
       // Solution Admin is allowed to create users for every tenant
       if (signedInUser.role === Role.solution_admin) {
         await this.repo.createUser(user);

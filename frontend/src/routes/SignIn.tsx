@@ -15,19 +15,36 @@ const SignIn: React.FC = () => {
   const AUTHENTICATION_BACKEND = import.meta.env
     .VITE_AUTHENTICATION_SERVICE_URL;
 
+  const TENANT_TYPE = import.meta.env.VITE_TENANT_TYPE;
+  const TENANT_ID = import.meta.env.VITE_TENANT_ID;
+
+  async function setTenantId(email: string) {
+    if (TENANT_ID !== "") {
+      auth.tenantId = TENANT_ID;
+    }
+    else{
+      const response = await axios.get(`${AUTHENTICATION_BACKEND}/tenant-id/${email}`);
+      if (response.data){
+        const { tenantId, tenantType } = response.data;
+        if (tenantType !== TENANT_TYPE) {
+          setError(t("route_sign_in.invalid_tenant_type"));
+          return;
+        }
+        auth.tenantId = tenantId;
+      }
+      else {
+        console.error(`Failed to fetch tenant id for user: ${email}`);
+      }
+    }
+  }
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setMessage(null);
 
     try {
-      const tenantId = import.meta.env.VITE_TENANT_ID;
-      const response = await axios.get(`${AUTHENTICATION_BACKEND}/tenant-id/${email}`);
-      if (response.data)
-        auth.tenantId = response.data;
-      else {
-        auth.tenantId = tenantId;
-      }
+      await setTenantId(email);
       const userCredential = await auth.signInWithEmailAndPassword(
         email,
         password
@@ -63,13 +80,7 @@ const SignIn: React.FC = () => {
     }
 
     try {
-      const tenantId = import.meta.env.VITE_TENANT_ID;
-      const response = await axios.get(`${AUTHENTICATION_BACKEND}/tenant-id/${email}`);
-      if (response.data)
-        auth.tenantId = response.data;
-      else {
-        auth.tenantId = tenantId;
-      }
+      await setTenantId(email);
       await auth.sendPasswordResetEmail(email);
       setMessage(t("route_sign_in.password_reset_email_sent"));
     } catch {

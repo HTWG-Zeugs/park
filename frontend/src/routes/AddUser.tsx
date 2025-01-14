@@ -11,6 +11,7 @@ import { UserRoleObject } from "shared/UserRoleObject";
 import { jwtDecode } from "jwt-decode";
 
 const AUTHENTICATION_URL = import.meta.env.VITE_AUTHENTICATION_SERVICE_URL;
+const TENANT_TYPE = import.meta.env.VITE_TENANT_TYPE;
 
 interface FormData {
   name: string;
@@ -120,12 +121,13 @@ export default function AddUsers() {
 
     // start of normal function
     e.preventDefault();
-    let userToCreate: CreateUserRequestObject = {
+    const userToCreate: CreateUserRequestObject = {
       name: formData.name,
       mail: formData.mail,
       role: parseInt(formData.role),
       password: formData.password,
       tenantId: tenantId,
+      tenantType: TENANT_TYPE
     };
     if (!validateAllFields()) return;
 

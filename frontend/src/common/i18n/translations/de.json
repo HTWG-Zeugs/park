@@ -238,7 +238,8 @@
     "sign_in_failed": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.",
     "email_required": "Bitte geben Sie Ihre E-Mail-Adresse ein.",
     "password_reset_email_sent": "Eine E-Mail zum Zurücksetzen des Passworts wurde gesendet.",
-    "password_reset_failed": "Passwort-Zurücksetzung fehlgeschlagen. Bitte versuchen Sie es erneut."
+    "password_reset_failed": "Passwort-Zurücksetzung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "invalid_tenant_type": "Dieser Benutzer darf sich bei dieser Anwendung nicht anmelden."
   },
   "route_sign_up": {
     "passwords_do_not_match": "Passwörter stimmen nicht überein.",
