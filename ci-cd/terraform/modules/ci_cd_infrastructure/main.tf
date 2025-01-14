@@ -62,7 +62,7 @@ variable "github_sa_roles" {
     "roles/iam.workloadIdentityPoolAdmin",
     "roles/iam.serviceAccountAdmin",
     "roles/serviceusage.serviceUsageAdmin",
-    "roles/run.developer"
+    "roles/run.admin"
   ]
 }
 
