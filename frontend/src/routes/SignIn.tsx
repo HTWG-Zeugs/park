@@ -19,10 +19,9 @@ const SignIn: React.FC = () => {
   const TENANT_ID = import.meta.env.VITE_TENANT_ID;
 
   async function setTenantId(email: string) {
-    console.log("Tenant ID is set to: ", TENANT_ID);
-    if (TENANT_ID != "NOT_SET") {
+
+    if (TENANT_ID !== "NOT_SET") {
       auth.tenantId = TENANT_ID;
-      console.log("TENANT_ID is not equal to 'NOT_SET'");
       return;
     }
     
