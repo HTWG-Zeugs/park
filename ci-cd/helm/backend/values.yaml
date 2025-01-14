@@ -15,6 +15,7 @@ gateway:
 
 domain: null
 subdomain: null
+environment_name: null
 tenant_id: null
 
 authenticationService:
