@@ -19,7 +19,7 @@ const SignIn: React.FC = () => {
   const TENANT_ID = import.meta.env.VITE_TENANT_ID;
 
   async function setTenantId(email: string) {
-    console.log(`TENANT_ID: ${TENANT_ID}`);
+    console.log(JSON.stringify(TENANT_ID));
 
     if (TENANT_ID === "NOT_SET") {
       console.log(`Fetching tenant id for user: ${email}`);
