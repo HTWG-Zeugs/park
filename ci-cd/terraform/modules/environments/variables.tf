@@ -23,11 +23,11 @@ variable dns_zone_domain_name {
   type    = string
 }
 
-variable tenant_id {
+variable environment_name {
   type    = string
 }
 
-variable tenant_subdomain {
+variable subdomain {
   type    = string
 }
 

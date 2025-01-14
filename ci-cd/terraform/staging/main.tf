@@ -50,9 +50,16 @@ module "free_tenants_env" {
   dns_zone_name = module.park_app_infrastructure.dns_zone_name
   dns_zone_domain_name = module.park_app_infrastructure.dns_zone_domain_name
 
-  tenant_id = each.value.id
-  tenant_subdomain = each.value.domain
+  environment_name = "free"
+  subdomain = "free"
   app_namespace = "free-ns"
+}
+
+module "free_tenants" {
+  for_each = { for tenant in var.free_tenants : tenant.id => tenant }
+  source = "../modules/tenant"
+  tenant_id = each.value.id
+  project_id = var.project_id
 }
 
 module "premium_tenants_env" {
@@ -65,11 +72,17 @@ module "premium_tenants_env" {
   dns_zone_name = module.park_app_infrastructure.dns_zone_name
   dns_zone_domain_name = module.park_app_infrastructure.dns_zone_domain_name
 
-  tenant_id = each.value.id
-  tenant_subdomain = each.value.domain
+  environment_name = "premium"
+  subdomain = "premium"
   app_namespace = "premium-ns"
 }
 
+module "premium_tenants" {
+  for_each = { for tenant in var.premium_tenants : tenant.id => tenant }
+  source = "../modules/tenant"
+  tenant_id = each.value.id
+  project_id = var.project_id
+}
 
 module "per_enterprise_tenant" {
   for_each = { for tenant in var.enterprise_tenants : tenant.id => tenant }
@@ -83,9 +96,16 @@ module "per_enterprise_tenant" {
   dns_zone_name = module.park_app_infrastructure.dns_zone_name
   dns_zone_domain_name = module.park_app_infrastructure.dns_zone_domain_name
 
-  tenant_id = each.value.id
-  tenant_subdomain = each.value.domain
+  environment_name = each.value.id
+  subdomain = each.value.domain
   app_namespace = "enterprise-tenant-${each.value.id}-ns"
+}
+
+module "enterprise_tenants" {
+  for_each = { for tenant in var.enterprise_tenants : tenant.id => tenant }
+  source = "../modules/tenant"
+  tenant_id = each.value.id
+  project_id = var.project_id
 }
 
 output "github_sa_email" {
