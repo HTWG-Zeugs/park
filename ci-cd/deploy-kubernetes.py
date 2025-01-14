@@ -292,7 +292,7 @@ def create_update_deployments(enterprise_tenants, cliArgs):
       subdomain = tenant["dns"]
       deploy_environment(cliArgs, envinronment_name=tenant_id, subdomain=subdomain, tenant_id=tenant_id, tenant_type="enterprise")
 
-def deploy_environment(cliArgs, envinronment_name, subdomain, tenant_id=None, tenant_type=None):
+def deploy_environment(cliArgs, envinronment_name, subdomain, tenant_type, tenant_id="NOT_SET", ):
     
     namespace = create_namespace_name(envinronment_name)
     release_name = create_deployment_name(envinronment_name, BACKEND_RELEASE_NAME)

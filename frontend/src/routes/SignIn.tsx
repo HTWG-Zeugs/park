@@ -19,23 +19,24 @@ const SignIn: React.FC = () => {
   const TENANT_ID = import.meta.env.VITE_TENANT_ID;
 
   async function setTenantId(email: string) {
-    if (TENANT_ID !== "") {
+    if (TENANT_ID != "NOT_SET") {
       auth.tenantId = TENANT_ID;
+      return;
     }
-    else{
-      const response = await axios.get(`${AUTHENTICATION_BACKEND}/tenant-id/${email}`);
-      if (response.data){
-        const { tenantId, tenantType } = response.data;
-        if (tenantType !== TENANT_TYPE) {
-          setError(t("route_sign_in.invalid_tenant_type"));
-          return;
-        }
-        auth.tenantId = tenantId;
+    
+    const response = await axios.get(`${AUTHENTICATION_BACKEND}/tenant-id/${email}`);
+    if (response.data){
+      const { tenantId, tenantType } = response.data;
+      if (tenantType !== TENANT_TYPE) {
+        setError(t("route_sign_in.invalid_tenant_type"));
+        return;
       }
-      else {
-        console.error(`Failed to fetch tenant id for user: ${email}`);
-      }
+      auth.tenantId = tenantId;
     }
+    else {
+      console.error(`Failed to fetch tenant id for user: ${email}`);
+    }
+    
   }
 
   const handleSignIn = async (e: React.FormEvent) => {
