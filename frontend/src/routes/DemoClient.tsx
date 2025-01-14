@@ -1,41 +1,33 @@
 import Paper from "@mui/material/Paper";
-  import { useCallback, useEffect } from "react";
+import { ChangeEvent, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import React from "react";
-import { GarageListItem, toGarageListItem } from "src/models/GarageListItem";
 import { Button, FormControl, MenuItem, Select, SelectChangeEvent, TextField, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import CallMadeIcon from '@mui/icons-material/CallMade';
 import axiosAuthenticated from "src/services/Axios";
 import { GarageResponseObject } from "shared/GarageResponseObject";
 import { ChargingStationResponseObject } from "shared/ChargingStationResponseObject";
+import { useNavigate } from "react-router-dom";
 
 export default function DemoClient() {
   const { t } = useTranslation();
   const [garages, setGarages] = React.useState<GarageResponseObject[]>([]);
   const [chargingStations, setChargingStations] = React.useState<ChargingStationResponseObject[]>([]);
-  const [selectedGarage, setSelectedGarage] = React.useState<string>();
-  const [selectedStation, setSelectedStation] = React.useState<string>();
+  const [selectedGarage, setSelectedGarage] = React.useState<GarageResponseObject>();
+  const [selectedStation, setSelectedStation] = React.useState<ChargingStationResponseObject>();
+  const [sessionId, setSessionId] = React.useState<string>();
+  const [ticketId, setTicketId] = React.useState<string>();
 
   const PROPERTY_MANAGEMENT_URL = import.meta.env.VITE_PROPERTY_MANAGEMENT_SERVICE_URL;
-  const INFRASTRUCTURE_MANAGEMENT_URL = import.meta.env.VITE_INFRASTRUCTURE_MANAGEMENT_SERVICE_URL;
-
-  const ticketId: string = "<ticketId>";
-  const sessionId: string = "<sessionId>";
-
-  //create garage with charging stations
-  //update garage and add charging station
-  //show analytics and occupancy page
-  //drive in (via dem client)
-  //start charging session (via dem client)
-  //show occupancy status
-  //create defect?
-  //stop charging session (via dem client)
-  //pay parking ticket (via dem client)
-  //drive out (via dem client)
+  const PARKING_MANAGEMENT_URL = import.meta.env.VITE_PARKING_MANAGEMENT_SERVICE_URL;
+  
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchGarages()
+    fetchGarages();
+    setSessionId("")
+    setTicketId("");
   }, [])
 
   const fetchGarages = useCallback(() => {
@@ -48,9 +40,10 @@ export default function DemoClient() {
         const responseData: GarageResponseObject[] = response.data;
         if (responseData.length > 0) {
           setGarages(responseData);
-          setSelectedGarage(responseData[0].Name)
+          setSelectedGarage(responseData[0])
           setChargingStations(responseData[0].ChargingStations);
-          setSelectedStation(responseData[0].ChargingStations[0].name)
+          setSelectedStation(responseData[0].ChargingStations[0])
+          console.log(responseData)
         }
       })
       .catch((error) => {
@@ -64,22 +57,62 @@ export default function DemoClient() {
   const handleGarageChange = (event: SelectChangeEvent<string>) => {
       const garage = garages.find(garage => garage.Name === event.target.value);
       if (garage?.Id) {
-        setSelectedGarage(event.target.value as string);
+        setSelectedGarage(garage);
         setChargingStations(garage.ChargingStations);
-        setSelectedStation(garage.ChargingStations[0].name)
+        setSelectedStation(garage.ChargingStations[0]);
       }
     }
 
-  const handleStationChange = (station: any) => {
-    console.log(station)
+  const handleStationChange = (event: SelectChangeEvent<string>) => {
+    const station = selectedGarage?.ChargingStations.find(station => station.name === event.target.value);
+    if (station) {
+      console.log(station)
+      setSelectedStation(station);
+    }
   }
 
-  const handleSessionIdChange = (sessionId: any) => {
-    console.log(sessionId)
+  const handleSessionIdChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setSessionId(event.target.value);
   }
 
-  const handleTicketIdChange = (sessionId: any) => {
-    console.log(sessionId)
+  const handleTicketIdChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setTicketId(event.target.value)
+  }
+
+  function enterGarage() {
+    axiosAuthenticated
+      .post(`${PARKING_MANAGEMENT_URL}/garage/enter/${selectedGarage?.Id}`)
+      .then((response) => { setTicketId(response.data) })
+      .catch((error) => console.error("Failed to enter garage:", error))
+  }
+
+  function payTicket() {
+    axiosAuthenticated
+      .post(`${PARKING_MANAGEMENT_URL}/garage/handlePayment/${ticketId}`)
+      .catch((error) => console.error("Ticket payment failed:", error))
+  }
+
+  function driveOut() {
+    axiosAuthenticated
+      .get(`${PARKING_MANAGEMENT_URL}/garage/mayExit/${ticketId}`)
+      .catch((error) => console.error("Failed to request mayExit:", error))
+    axiosAuthenticated
+      .post(`${PARKING_MANAGEMENT_URL}/garage/exit/${selectedGarage?.Id}`)
+      .catch((error) => console.error("Failed to enter garage:", error))
+  }
+
+  function startChargingSession() {
+    console.log(selectedStation)
+    axiosAuthenticated
+      .post(`${PARKING_MANAGEMENT_URL}/garage/charging/startSession/${selectedGarage?.Id}/${selectedStation?.id}/demo-user`)
+      .then((response) => { if (!response.data) { setSessionId(response.data) }})
+      .catch((error) => console.error("Failed to start charging session:", error))
+  }
+
+  function endChargingSession() {
+    axiosAuthenticated
+      .post(`${PARKING_MANAGEMENT_URL}/garage/charging/endSession/${selectedGarage?.Id}/${sessionId}`)
+      .catch((error) => console.error("Failed to start charging session:", error))
   }
 
   return (
@@ -101,7 +134,7 @@ export default function DemoClient() {
           <Grid size={1}>
             <Button
               color="primary"
-              onClick={() => {}}
+              onClick={() => navigate('/garages')}
               startIcon={<CallMadeIcon />}>
               go to 'garages'
             </Button>
@@ -118,7 +151,7 @@ export default function DemoClient() {
           <Grid size={1}>
             <Button
               color="primary"
-              onClick={() => {}}
+              onClick={() => navigate('/garages')}
               startIcon={<CallMadeIcon />}>
               go to 'garages'
             </Button>
@@ -135,7 +168,7 @@ export default function DemoClient() {
           <Grid size={1}>
             <Button
               color="primary"
-              onClick={() => {}}
+              onClick={() => navigate('/occupancy')}
               startIcon={<CallMadeIcon />}>
               go to 'occupancy'
             </Button>
@@ -152,7 +185,7 @@ export default function DemoClient() {
           <Grid size={1}>
             <Button
               color="primary"
-              onClick={() => {}}
+              onClick={() => navigate('/analytics')}
               startIcon={<CallMadeIcon />}>
               go to 'analytics'
             </Button>
@@ -171,7 +204,7 @@ export default function DemoClient() {
                 <Select
                   labelId="garage-select-label"
                   id="garage-select"
-                  value={selectedGarage!}
+                  value={selectedGarage!.Name}
                   onChange={handleGarageChange}>
                   { garages.map((garage, i) => <MenuItem key={i} value={garage.Name}>{garage.Name}</MenuItem>) }
                 </Select>
@@ -181,12 +214,12 @@ export default function DemoClient() {
           <Grid size={1}>
             <Button
               color="primary"
-              onClick={() => {}}>
+              onClick={() => enterGarage()}>
               enter garage
             </Button>
           </Grid>
           <Grid size={3} marginBottom={3}>
-            Drive in with your car: {ticketId}
+            Drive in with your car: { "<ticketId>" }
           </Grid>
 
           <Grid size={1}>
@@ -197,9 +230,9 @@ export default function DemoClient() {
           <Grid size={1}>
           { chargingStations.length > 0 && <FormControl variant="standard">
                 <Select
-                  labelId="staions-select-label"
+                  labelId="stations-select-label"
                   id="station-select"
-                  value={selectedStation!}
+                  value={selectedStation!.name}
                   onChange={handleStationChange}>
                   { chargingStations.map((station, i) => <MenuItem key={i} value={station.name}>{station.name}</MenuItem>) }
                 </Select>
@@ -209,12 +242,12 @@ export default function DemoClient() {
           <Grid size={1}>
             <Button
               color="primary"
-              onClick={() => {}}>
+              onClick={() => startChargingSession()}>
               Start session
             </Button>
           </Grid>
           <Grid size={3} marginBottom={3}>
-            Choose a charging station and start charging your car: {sessionId}
+            Choose a charging station and start charging your car: { "<sessionId>" } 
           </Grid>
 
           <Grid size={2}>
@@ -225,7 +258,7 @@ export default function DemoClient() {
           <Grid size={1}>
             <Button
               color="primary"
-              onClick={() => {}}
+              onClick={() => navigate('/occupancy')}
               startIcon={<CallMadeIcon />}>
               go to 'occupancy'
             </Button>
@@ -242,7 +275,7 @@ export default function DemoClient() {
           <Grid size={1}>
             <Button
               color="primary"
-              onClick={() => {}}
+              onClick={() => navigate('/defects')}
               startIcon={<CallMadeIcon />}>
               go to 'defects'
             </Button>
@@ -262,14 +295,14 @@ export default function DemoClient() {
               id="outlined-error"
               name="detailedDescription"
               placeholder="session id"
-              value={''}
+              value={sessionId}
               onChange={handleSessionIdChange}
             />
           </Grid>
           <Grid size={1}>
             <Button
               color="primary"
-              onClick={() => {}}>
+              onClick={() => endChargingSession()}>
               Stop session
             </Button>
           </Grid>
@@ -285,7 +318,7 @@ export default function DemoClient() {
           <Grid size={1}>
             <Button
               color="primary"
-              onClick={() => {}}
+              onClick={() => navigate('/analytics')}
               startIcon={<CallMadeIcon />}>
               go to 'analytics'
             </Button>
@@ -306,7 +339,7 @@ export default function DemoClient() {
               id="outlined-error"
               name="detailedDescription"
               placeholder="ticket id"
-              value={''}
+              value={ticketId}
               onChange={handleTicketIdChange}
             />
           </Grid>
@@ -314,7 +347,7 @@ export default function DemoClient() {
           <Grid size={1}>
             <Button
               color="primary"
-              onClick={() => {}}>
+              onClick={() => payTicket()}>
               Pay Ticket
             </Button>
           </Grid>
@@ -322,25 +355,15 @@ export default function DemoClient() {
             Pay your parking ticket. Now you have 15 minutes to leave!
           </Grid>
 
-          <Grid size={1}>
+          <Grid size={2}>
             <Typography variant="h6">
               13. Drive out
             </Typography>
           </Grid>
           <Grid size={1}>
-            <TextField
-            variant="standard"
-              id="outlined-error"
-              name="detailedDescription"
-              placeholder="ticket id"
-              value={''}
-              onChange={handleTicketIdChange}
-            />
-          </Grid>
-          <Grid size={1}>
             <Button
               color="primary"
-              onClick={() => {}}>
+              onClick={() => driveOut()}>
               Drive out
             </Button>
           </Grid>

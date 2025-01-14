@@ -37,7 +37,8 @@ export default function Header() {
     pages.push(
       { text: t("component_header.analytics"), href: "/analytics" },
       { text: t("component_header.garages"), href: "/garages" },
-      { text: t("component_header.defects"), href: "/defects" }
+      { text: t("component_header.defects"), href: "/defects" },
+      { text: t("component_header.demo_client"), href: "/demo-client" }
     );
   }
   
@@ -50,7 +51,6 @@ export default function Header() {
   ) {
     pages.push(
       { text: t("component_header.users"), href: "/users" },
-      { text: t("component_header.demo_client"), href: "/demo-client" }
     );
   }
 
