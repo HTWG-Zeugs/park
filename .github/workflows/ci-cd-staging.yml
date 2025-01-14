@@ -152,6 +152,10 @@ jobs:
             --set-env-vars "ANALYTICS_DB_ID=${{ env.DB_ID }}" \
             --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
             --set-custom-audiences "[ ${{ env.SERVICE_AUDIENCE }} ]"
+      - run: |
+          gcloud beta run services add-iam-policy-binding \
+          --region=${{ vars.REGION }} --member=allUsers \
+          --role=roles/run.invoker infrastructure-administration
 
       - name: Retrieve Backend URL
         run: |
