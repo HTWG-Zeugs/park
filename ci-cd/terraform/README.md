@@ -44,9 +44,10 @@
    - cloudresourcemanager.googleapis.com
    - serviceusage.googleapis.com
    - identitytoolkit.googleapis.com
+   - run.googleapis.com
    
     ```bash
-    gcloud services enable iam.googleapis.com storage.googleapis.com compute.googleapis.com container.googleapis.com artifactregistry.googleapis.com cloudresourcemanager.googleapis.com serviceusage.googleapis.com identitytoolkit.googleapis.com
+    gcloud services enable iam.googleapis.com storage.googleapis.com compute.googleapis.com container.googleapis.com artifactregistry.googleapis.com cloudresourcemanager.googleapis.com serviceusage.googleapis.com identitytoolkit.googleapis.com run.googleapis.com
     ```
 4. To get a list of enabled APIs:
     ```bash

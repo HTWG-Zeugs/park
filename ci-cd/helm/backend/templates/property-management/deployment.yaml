@@ -26,9 +26,9 @@ spec:
             - containerPort: {{ .Values.propertyManagement.service.port }}
           env:
             - name: FIRESTORE_DB_ID
-              value: "{{ .Values.gc_project_id }}-prop-ma-{{ .Release.Namespace }}"
+              value: "{{ .Values.gc_project_id }}-prop-ma-{{ .Values.tenant_id }}"
             - name: GCS_BUCKET_ID
-              value: "{{ .Values.gc_project_id }}-prop-ma-{{ .Release.Namespace }}"
+              value: "{{ .Values.gc_project_id }}-prop-ma-{{ .Values.tenant_id }}"
             - name: PORT
               value: "{{ .Values.propertyManagement.service.port }}"
             - name: PARKING_MANAGEMENT_BACKEND_URL

@@ -61,7 +61,8 @@ variable "property_management_sa_roles" {
   default = [
     "roles/datastore.user",
     "roles/iam.serviceAccountTokenCreator",
-    "roles/storage.objectCreator"
+    "roles/storage.objectCreator",
+    "roles/run.invoker"
   ]
 }
 
@@ -89,7 +90,8 @@ variable "parking_management_sa_roles" {
   type = list(string)
   default = [
     "roles/datastore.user",
-    "roles/iam.serviceAccountTokenCreator"
+    "roles/iam.serviceAccountTokenCreator",
+    "roles/run.invoker"
   ]
 }
 
