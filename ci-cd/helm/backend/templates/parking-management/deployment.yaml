@@ -26,7 +26,7 @@ spec:
             - containerPort: {{ .Values.parkingManagement.service.port }}
           env:
             - name: FIRESTORE_DB_ID
-              value: "{{ .Values.gc_project_id }}-park-ma-{{ .Release.Namespace }}"
+              value: "{{ .Values.gc_project_id }}-park-ma-{{ .Values.tenant_id }}"
             - name: AUTHENTICATION_SERVICE_URL
               value: "{{ .Values.authenticationService.url }}"
             - name: INFRASTRUCTURE_MANAGEMENT_SERVICE_URL

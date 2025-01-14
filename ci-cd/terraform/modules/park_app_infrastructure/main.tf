@@ -65,7 +65,7 @@ resource "google_dns_record_set" "root_dns_record" {
 
 resource "google_firestore_database" "authentication-service-db" {
   project  = var.project_id
-  name     = "${var.project_id}-auth-${var.infra_namespace}"
+  name     = "${var.project_id}-auth"
   location_id = var.region
   type     = "FIRESTORE_NATIVE"
   delete_protection_state = "DELETE_PROTECTION_DISABLED"

@@ -26,7 +26,7 @@ spec:
             - containerPort: {{ .Values.authenticationService.service.port }}
           env:
             - name: FIRESTORE_DB_ID
-              value: "{{ .Values.gc_project_id }}-auth-{{ .Release.Namespace }}"
+              value: "{{ .Values.gc_project_id }}-auth"
             - name: IDENTITY_PLATFORM_API_KEY
               value: {{ .Values.identityPlatForm.apiKey }}
             - name: IDENTITY_PLATFORM_AUTH_DOMAIN
