@@ -1,9 +1,9 @@
 import Paper from "@mui/material/Paper";
-import { useCallback, useEffect } from "react";
+  import { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import React from "react";
 import { GarageListItem, toGarageListItem } from "src/models/GarageListItem";
-import { Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Button, FormControl, MenuItem, Select, SelectChangeEvent, TextField, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import CallMadeIcon from '@mui/icons-material/CallMade';
 import axiosAuthenticated from "src/services/Axios";
@@ -12,7 +12,7 @@ import { ChargingStationResponseObject } from "shared/ChargingStationResponseObj
 
 export default function DemoClient() {
   const { t } = useTranslation();
-  const [garages, setGarages] = React.useState<GarageListItem[]>([]);
+  const [garages, setGarages] = React.useState<GarageResponseObject[]>([]);
   const [chargingStations, setChargingStations] = React.useState<ChargingStationResponseObject[]>([]);
   const [selectedGarage, setSelectedGarage] = React.useState<string>();
   const [selectedStation, setSelectedStation] = React.useState<string>();
@@ -46,12 +46,9 @@ export default function DemoClient() {
           throw new Error("fetching garages failed!");
         }
         const responseData: GarageResponseObject[] = response.data;
-        const listItems: GarageListItem[] = responseData.map((d) =>
-          toGarageListItem(d)
-        );
-        if (listItems.length > 0) {
-          setGarages(listItems);
-          setSelectedGarage(listItems[0].Name)
+        if (responseData.length > 0) {
+          setGarages(responseData);
+          setSelectedGarage(responseData[0].Name)
           setChargingStations(responseData[0].ChargingStations);
           setSelectedStation(responseData[0].ChargingStations[0].name)
         }
@@ -64,9 +61,14 @@ export default function DemoClient() {
       });
     }, [t]);
 
-  const handleGarageChange = (garage: any) => {
-    console.log(garage)
-  }
+  const handleGarageChange = (event: SelectChangeEvent<string>) => {
+      const garage = garages.find(garage => garage.Name === event.target.value);
+      if (garage?.Id) {
+        setSelectedGarage(event.target.value as string);
+        setChargingStations(garage.ChargingStations);
+        setSelectedStation(garage.ChargingStations[0].name)
+      }
+    }
 
   const handleStationChange = (station: any) => {
     console.log(station)

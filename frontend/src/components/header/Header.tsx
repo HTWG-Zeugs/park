@@ -48,12 +48,14 @@ export default function Header() {
     (userRole == UserRoleObject.tenant_admin || // has required role permission
       userRole == UserRoleObject.solution_admin)
   ) {
-    pages.push({ text: t("component_header.users"), href: "/users" });
+    pages.push(
+      { text: t("component_header.users"), href: "/users" },
+      { text: t("component_header.demo_client"), href: "/demo-client" }
+    );
   }
 
   pages.push(
     { text: t("component_header.contact"), href: "/contact" },
-    { text: t("component_header.demo_client"), href: "/demo-client" }
   );
 
   const [userEmail, setUserEmail] = useState<string | null>(null);
