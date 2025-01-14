@@ -9,6 +9,7 @@ interface ImportMetaEnv {
   readonly VITE_IDENTITY_PLATFORM_AUTH_DOMAIN: string;
   readonly VITE_IDENTITY_PLATFORM_PROJECT_ID: string;
   readonly VITE_TENANT_ID: string;
+  readonly VITE_TENANT_TYPE: string;
 }
 
 interface ImportMeta {

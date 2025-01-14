@@ -237,7 +237,8 @@
     "sign_in_failed": "Sign in failed. Please try again.",
     "email_required": "Please enter your email address.",
     "password_reset_email_sent": "An email to reset your password has been sent.",
-    "password_reset_failed": "Password reset failed. Please try again."
+    "password_reset_failed": "Password reset failed. Please try again.",
+    "invalid_tenant_type": "This user is not allowed to sign in here."
   },
   "route_sign_up": {
     "passwords_do_not_match": "Passwords do not match.",
