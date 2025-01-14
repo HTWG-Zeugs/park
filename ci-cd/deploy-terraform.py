@@ -91,9 +91,9 @@ def run_subprocess(cmd: list, cwd: str = None):
     exit(1)
 
 # ------------------------------------------------------------------------------
-# 1. Read tenants.json from GCS
+# Read tenants.json from GCS
 # ------------------------------------------------------------------------------
-def read_tenants_from_gcs(bucket_name: str, file_name: str = "tenants.json"):
+def read_tenants_from_gcs(bucket_name: str, file_name: str):
     """
     Reads the specified JSON file from a Google Cloud Storage bucket and returns
     it as a list of tenant objects:
@@ -120,18 +120,22 @@ def read_tenants_from_gcs(bucket_name: str, file_name: str = "tenants.json"):
     return tenants
 
 # ------------------------------------------------------------------------------
-# 2. Generate a .tfvars.json file from the tenant list
+# Generate a .tfvars.json file from the tenant list
 # ------------------------------------------------------------------------------
 def generate_tfvars_json(
-    tenants,
+    free_tenants,
+    premium_tenants,
+    enterprise_tenants,
     output_file: str,
     cliArgs: CliArgs
 ):
     """
     Creates a JSON file that Terraform can use for variables, e.g.:
       {
-        "tenants": [
-          { "id": "free", "domain": "free" },
+        "free_tenants": [
+          { "id": "free", "domain": "free" }
+        ],
+        "premium_tenants": [
           { "id": "premium", "domain": "premium" }
         ],
         "is_github_actions": true,
@@ -141,16 +145,30 @@ def generate_tfvars_json(
         "create_cluster": true
       }
     """
-    variable_entries = []
-    for t in tenants:
-        variable_entries.append({
+    free_tenants_entries = []
+    for t in free_tenants:
+        free_tenants_entries.append({
+            "id": t["tenantId"],
+            "domain": t["dns"]
+        })
+    premium_tenants_entries = []
+    for t in premium_tenants:
+        premium_tenants_entries.append({
+            "id": t["tenantId"],
+            "domain": t["dns"]
+        })
+    enterprise_tenants_entries = []
+    for t in enterprise_tenants:
+        enterprise_tenants_entries.append({
             "id": t["tenantId"],
             "domain": t["dns"]
         })
 
     # Build the data we'll write to tenants.tfvars.json
     tfvars_data = {
-        "tenants": variable_entries,
+        "free_tenants": free_tenants_entries,
+        "premium_tenants": premium_tenants_entries,
+        "enterprise_tenants": enterprise_tenants_entries,
         "is_github_actions": cliArgs.is_github_actions,
         "region": cliArgs.region,
         "project_id": cliArgs.gc_project_id,
@@ -165,9 +183,9 @@ def generate_tfvars_json(
 
 
 # ------------------------------------------------------------------------------
-# 3. Run terraform plan
+# Run terraform plan
 # ------------------------------------------------------------------------------
-def run_terraform_plan(tfvars_file="tenants.tfvars.json"):
+def run_terraform_plan():
   """
   Runs `terraform plan -var-file=...` in the current working directory. Prints stdout/stderr.
   """
@@ -176,13 +194,13 @@ def run_terraform_plan(tfvars_file="tenants.tfvars.json"):
   print(out)
 
   print("Running 'terraform plan'...")
-  out = run_subprocess(["terraform", "plan", f"-var-file={tfvars_file}"], cwd="./terraform/staging")
+  out = run_subprocess(["terraform", "plan"], cwd="./terraform/staging")
   print(out)
 
 # ------------------------------------------------------------------------------
-# 4. Run terraform apply
+# Run terraform apply
 # ------------------------------------------------------------------------------
-def run_terraform_apply(tfvars_file="tenants.tfvars.json"):
+def run_terraform_apply():
   """
   Runs `terraform apply -var-file=... -auto-approve` in the current directory.
   Prints stdout/stderr.
@@ -193,7 +211,7 @@ def run_terraform_apply(tfvars_file="tenants.tfvars.json"):
   print(out)
 
   print("Running 'terraform apply'...")
-  out = run_subprocess(["terraform", "apply", f"-var-file={tfvars_file}", "-auto-approve"], cwd="./terraform/staging")
+  out = run_subprocess(["terraform", "apply", "-auto-approve"], cwd="./terraform/staging")
   print(out)
 
 # ------------------------------------------------------------------------------
@@ -203,25 +221,25 @@ def main():
   args = parse_args()
   # 1. Read tenants from GCS
   bucket_name = args.bucket_name
-  tenants = read_tenants_from_gcs(bucket_name=bucket_name, file_name="tenants.json")
-  print(f"Retrieved {len(tenants)} tenants from GCS bucket '{bucket_name}'.")
-
-  # 2. Generate a .tfvars.json file from the tenant list
-  tfvars_file = "./terraform/staging/tenants.tfvars.json"
+  free_tenants = read_tenants_from_gcs(bucket_name=bucket_name, file_name="free-tenants.json")
+  premium_tenants = read_tenants_from_gcs(bucket_name=bucket_name, file_name="premium-tenants.json")
+  enterprise_tenants = read_tenants_from_gcs(bucket_name=bucket_name, file_name=f"enterprise-tenants.json")
+  tfvars_file = f"./terraform/staging/deployment.auto.tfvars.json"
   generate_tfvars_json(
-    tenants=tenants,
+    free_tenants=free_tenants,
+    premium_tenants=premium_tenants,
+    enterprise_tenants=enterprise_tenants,
     output_file=tfvars_file,
     cliArgs=args
   )
 
   # 3. If action is "plan", run terraform plan and return
   if args.action == "plan":
-    run_terraform_plan(tfvars_file="tenants.tfvars.json")
+    run_terraform_plan()
     return
 
   # 4. If action is "apply", run terraform apply
-  run_terraform_apply(tfvars_file="tenants.tfvars.json")
-
+  run_terraform_apply()
 
 if __name__ == "__main__":
   main()
