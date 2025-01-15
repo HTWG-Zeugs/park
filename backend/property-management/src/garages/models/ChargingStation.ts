@@ -33,7 +33,8 @@ export class ChargingStation {
     }
   }
   public static fromState(cs: ChargingStationState): ChargingStation {
-    return new ChargingStation(cs.name, cs.chargingSpeedInKw, cs.pricePerKwh);
+    let station = new ChargingStation(cs.name, cs.chargingSpeedInKw, cs.pricePerKwh);
+    station.Id = cs.id;
+    return station;
   }
-
 }

@@ -102,7 +102,7 @@ export class GarageService {
     ticket.paymentTimestamp = new Date();
     await this.repo.updateTicket(ticket);
     const garage = await this.repo.getGarage(ticket.garageId);
-    const diffInMilliseconds = ticket.paymentTimestamp.getMilliseconds() - ticket.entryTimestamp.getMilliseconds()
+    const diffInMilliseconds = ticket.paymentTimestamp.getMilliseconds() - new Date(ticket.entryTimestamp).getMilliseconds()
     const diffInMinutes = diffInMilliseconds / (1000 * 60)
     this.notifyAnalytics(
       garage.tenantId,
@@ -266,7 +266,7 @@ export class GarageService {
 
   private setChargingStationOccupied(garage: Garage, stationId: string, occupied: boolean): Garage {
     let stationIndex = garage.chargingStations.findIndex(
-      (station) => station.id == stationId
+      (station) => station.id === stationId
     );
 
     if (stationIndex !== -1) {
@@ -304,7 +304,6 @@ export class GarageService {
     session: ChargingSession
   ): number {
     const station = garage.chargingStations.find(s => s.id === session.chargingStationId)
-    console.log(station)
     const chargedHours =
       (session.sessionFinishedTimestamp.getTime() -
       new Date(session.sessionStartedTimestamp).getTime()) /
