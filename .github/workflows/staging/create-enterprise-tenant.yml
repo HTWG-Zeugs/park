@@ -1,38 +1,31 @@
-name: Build and Push Docker Images
+name: Create Tenant
 
 on:
-  push:
-    branches:
-      - dev
-
+  workflow_dispatch:
+    inputs:
+      tenant_name:
+        required: true
+      tenant_subdomain:
+        required: true
+      
 permissions:
   id-token: write 
   contents: read 
-
+  
 env:
-  TAG_ID: "${{ github.sha }}"
   GCR_REPO: "${{ vars.REGION }}-docker.pkg.dev/${{ vars.STAGING_PROJECT_ID }}/${{ vars.STAGING_ARTIFACT_REPO }}"
   CLUSTER: "${{ vars.STAGING_PROJECT_ID }}-gke"
-  DOMAIN: "park-app.tech"
+  DOMAIN: ${{ vars.STAGING_DOMAIN }}
 
 jobs:
-  build-and-push-images:
+  create-tenant:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service:
-          - { name: "property-management", dockerfile: "./property-management.Dockerfile" }
-          - { name: "parking-management", dockerfile: "./parking-management.Dockerfile" }
-          - { name: "authentication-service", dockerfile: "./authentication-service.Dockerfile" }
-          - { name: "infrastructure-administration", dockerfile: "./infrastructure-administration.Dockerfile" }
-          - { name: "frontend", dockerfile: "./frontend.Dockerfile" }
-
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
 
       - name: Login to Google Cloud
         uses: 'google-github-actions/auth@v2'
@@ -40,31 +33,35 @@ jobs:
           service_account: '${{ secrets.STAGING_GITHUB_SA }}'
           workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
 
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+          cache: 'pip'
+      - run: pip install -r ci-cd/requirements.txt
+
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
-
-      - name: Configure Docker for Google Cloud
-        run: gcloud auth configure-docker ${{ vars.REGION }}-docker.pkg.dev
-
-      - name: Build Docker image
+      
+      - uses: hashicorp/setup-terraform@v3
+      - name: Run deploy script
+        working-directory: ./ci-cd
         run: |
-          docker build \
-            -f ${{ matrix.service.dockerfile }} \
-            . \
-            -t ${{ matrix.service.name }}:${{ env.TAG_ID }} \
-            --no-cache \
-            --platform linux/amd64
-
-      - name: Tag Docker image
-        run: |
-          docker tag ${{ matrix.service.name }}:${{ env.TAG_ID }} ${{ env.GCR_REPO }}/${{ matrix.service.name }}:${{ env.TAG_ID }}
-
-      - name: Push Docker image to GCR
-        run: |
-          docker push ${{ env.GCR_REPO }}/${{ matrix.service.name }}:${{ env.TAG_ID }}
-
+          python manage_tenant.py \
+          --action add \
+          --is-github-actions \
+          --create-cluster \
+          --project-id ${{ vars.STAGING_PROJECT_ID }} \
+          --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
+          --repository ${{ env.GCR_REPO }} \
+          --identity-api-key ${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }}  \
+          --identity-auth-domain ${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
+          --domain ${{ env.DOMAIN }} \
+          --git-tag ${{ inputs.image_tag }}
+    
   deploy-terraform:
     runs-on: ubuntu-latest
+    needs: create-tenant
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
@@ -103,14 +100,11 @@ jobs:
 
   deploy-services:
     runs-on: ubuntu-latest
+    needs: deploy-terraform
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      SERVICE_ACCOUNT: infra-ns-infra-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com
-      DB_ID: "${{ vars.STAGING_PROJECT_ID }}-infra-management"
       SERVICE_AUDIENCE: "infrastructure-administration-service"
-    needs: 
-      - build-and-push-images
-      - deploy-terraform
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -137,21 +131,7 @@ jobs:
           cache: 'pip'
       - run: pip install -r ci-cd/requirements.txt
 
-      - name: Deploy infrastructure-administration service to Cloud run
-        run: |
-          gcloud run deploy infrastructure-administration \
-            --image=${{ env.GCR_REPO }}/infrastructure-administration:${{env.TAG_ID}} \
-            --platform=managed \
-            --region=${{ vars.REGION }} \
-            --allow-unauthenticated \
-            --port=8083 \
-            --service-account=${{ env.SERVICE_ACCOUNT }} \
-            --set-env-vars "AUTHENTICATION_SERVICE_URL=http://${{ env.DOMAIN }}/auth" \
-            --set-env-vars "ANALYTICS_DB_ID=${{ env.DB_ID }}" \
-            --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
-            --set-custom-audiences "[ ${{ env.SERVICE_AUDIENCE }} ]"
-
-      - name: Retrieve Backend URL
+      - name: Retrieve infrastructure administration service URL
         run: |
           echo "INFRASTRUCTURE_SERVICE_URL=$(gcloud run services describe infrastructure-administration --platform=managed --region=${{ vars.REGION }} --format 'value(status.url)')" >> $GITHUB_ENV
       
@@ -167,5 +147,4 @@ jobs:
           --identity-auth-domain ${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
           --infra-url $INFRASTRUCTURE_SERVICE_URL \
           --domain ${{ env.DOMAIN }} \
-          --git-tag ${{ env.TAG_ID}} \
           --region ${{ vars.REGION }}

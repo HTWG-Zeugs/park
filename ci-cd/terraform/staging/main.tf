@@ -55,13 +55,6 @@ module "free_tenants_env" {
   app_namespace = "free-ns"
 }
 
-module "free_tenants" {
-  for_each = { for tenant in var.free_tenants : tenant.id => tenant }
-  source = "../modules/tenant"
-  tenant_id = each.value.id
-  project_id = var.project_id
-}
-
 module "premium_tenants_env" {
   source = "../modules/environments"
   region = var.region
@@ -75,13 +68,6 @@ module "premium_tenants_env" {
   environment_name = "premium"
   subdomain = "premium"
   app_namespace = "premium-ns"
-}
-
-module "premium_tenants" {
-  for_each = { for tenant in var.premium_tenants : tenant.id => tenant }
-  source = "../modules/tenant"
-  tenant_id = each.value.id
-  project_id = var.project_id
 }
 
 module "per_enterprise_tenant" {
@@ -99,13 +85,6 @@ module "per_enterprise_tenant" {
   environment_name = each.value.id
   subdomain = each.value.domain
   app_namespace = "enterprise-tenant-${each.value.id}-ns"
-}
-
-module "enterprise_tenants" {
-  for_each = { for tenant in var.enterprise_tenants : tenant.id => tenant }
-  source = "../modules/tenant"
-  tenant_id = each.value.id
-  project_id = var.project_id
 }
 
 output "github_sa_email" {
