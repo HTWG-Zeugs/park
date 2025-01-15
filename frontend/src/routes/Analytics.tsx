@@ -1,5 +1,5 @@
 import Paper from "@mui/material/Paper";
-import Grid from "@mui/material/Grid2"
+import Grid from "@mui/material/Grid2";
 import { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Typography } from "@mui/material";
@@ -9,6 +9,7 @@ import React from "react";
 import { GarageResponseObject } from "shared/GarageResponseObject";
 import { DefectStatusRecord } from "shared/DefectStatusRecord";
 import { NumberRecord } from "shared/NumberRecord";
+import { OccupancyRecord } from "shared/OccupancyRecord";
 import { GarageListItem, toGarageListItem } from "src/models/GarageListItem";
 
 export default function Analytics() {
@@ -16,14 +17,15 @@ export default function Analytics() {
   const [garages, setGarages] = React.useState<GarageListItem[]>([]);
   const [selectedGarage, setSelectedGarage] = React.useState<string>();
 
-  const [meanTurnover, setMeanTurnover] = React.useState<number>();
-  const [meanParkingDuration, setMeanParkingDuration] = React.useState<number>();
-  const [kwhCharged, setKwhCharged] = React.useState<number>();
-  const [parkingOccupancyHist, setParkingOccupancyHist] = React.useState<any[][]>()
-  const [chargingOccupancyHist, setChargingOccupancyHist] = React.useState<any[][]>()
-  const [defectStatusHist, setDefectStatusHist] = React.useState<any[][]>()
+  const [turnover, setTurnover] = React.useState<number>(0);
+  const [meanParkingDuration, setMeanParkingDuration] = React.useState<number>(0);
+  const [kwhCharged, setKwhCharged] = React.useState<number>(0);
+  const [parkingOccupancyHist, setParkingOccupancyHist] = React.useState<any[][]>([])
+  const [chargingOccupancyHist, setChargingOccupancyHist] = React.useState<any[][]>([])
+  const [defectStatusHist, setDefectStatusHist] = React.useState<any[][]>([])
 
   const PROPERTY_MANAGEMENT_URL = import.meta.env.VITE_PROPERTY_MANAGEMENT_SERVICE_URL;
+  const INFRASTRUCTURE_MANAGEMENT_URL = import.meta.env.VITE_INFRASTRUCTURE_MANAGEMENT_SERVICE_URL;
 
   useEffect(() => {
     fetchGarages();
@@ -64,95 +66,150 @@ export default function Analytics() {
     }
   }
 
-  const fetchGarageAnalytics = (garageId: string) => {
-    console.log(`Fetching analytics for garage ${garageId}`);
-    setMeanTurnover(19000);
-    setMeanParkingDuration(91);
-    setKwhCharged(1001);
-
-    let parkingRecords: NumberRecord[] = [
-      { timestamp: new Date('2024-12-16T12:00:00Z'), value: 4 },
-      { timestamp: new Date('2024-12-22T12:00:00Z'), value: 2 },
-      { timestamp: new Date('2025-01-03T12:00:00Z'), value: 5 },
-      { timestamp: new Date('2025-01-08T12:00:00Z'), value: 3 },
-      { timestamp: new Date('2025-01-10T12:00:00Z'), value: 1 },
-      { timestamp: new Date('2025-01-10T12:00:00Z'), value: 3 },
-    ];
-
-    let chargingRecords: NumberRecord[] = [
-      { timestamp: new Date('2024-12-18T12:00:00Z'), value: 3 },
-      { timestamp: new Date('2024-12-26T12:00:00Z'), value: 13 },
-      { timestamp: new Date('2024-12-30T12:00:00Z'), value: 9 },
-      { timestamp: new Date('2025-01-3T12:00:00Z'), value: 2 },
-      { timestamp: new Date('2025-01-08T12:00:00Z'), value: 14 },
-    ];
-
-    let defectStatusRecords: DefectStatusRecord[] = [
-      {
-          timestamp: new Date('2024-12-18T12:00:00Z'),
-          open: 5,
-          inWork: 3,
-          closed: 2,
-          rejected: 0
-      },
-      {
-          timestamp: new Date('2024-12-22T12:00:00Z'),
-          open: 8,
-          inWork: 2,
-          closed: 4,
-          rejected: 1
-      },
-      {
-          timestamp: new Date('2024-12-30T12:00:00Z'),
-          open: 6,
-          inWork: 4,
-          closed: 3,
-          rejected: 2
-      },
-      {
-          timestamp: new Date('2025-01-04T08:00:00Z'),
-          open: 7,
-          inWork: 5,
-          closed: 6,
-          rejected: 1
-      },
-      {
-          timestamp: new Date('2025-01-05T08:00:00Z'),
-          open: 4,
-          inWork: 6,
-          closed: 7,
-          rejected: 0
-      },
-      {
-          timestamp: new Date('2025-01-06T08:00:00Z'),
-          open: 3,
-          inWork: 7,
-          closed: 5,
-          rejected: 2
-      },
-      {
-          timestamp: new Date('2025-01-07T08:00:00Z'),
-          open: 2,
-          inWork: 8,
-          closed: 9,
-          rejected: 3
-      },
-      {
-          timestamp: new Date('2025-01-08T08:00:00Z'),
-          open: 5,
-          inWork: 5,
-          closed: 5,
-          rejected: 1
-      }
-    ]
-  
-
-    setParkingOccupancyHist(create30DaysNumberRecordHistogram(parkingRecords));
-    setChargingOccupancyHist(create30DaysNumberRecordHistogram(chargingRecords));
-    setDefectStatusHist(create30DaysDefectRecordHistogram(defectStatusRecords));
+  const fetchTurnover = (garageId: string, start: Date, end: Date) => {
+    axiosAuthenticated
+      .get(`${INFRASTRUCTURE_MANAGEMENT_URL}/analytics/turnover/${garageId}/${start.toISOString()}/${end.toISOString()}`)
+      .then(turnoverResponse => {
+        if (!turnoverResponse.data) {
+          console.log("No turnover entries could be fetched")
+          return;
+        }
+        const turnoverEntries: NumberRecord[] = turnoverResponse.data;
+        if (turnoverEntries.length == 0) {
+          setTurnover(0);
+          return;
+        }
+        const totalTurnover = turnoverEntries.reduce((accumulator, currentValue) => accumulator + currentValue.value, 0);
+        setTurnover(Number(totalTurnover.toFixed(2)));
+      })
+      .catch((error) => {
+        console.error("Failed to fetch turnover entries:", error);
+      })
   }
 
-  const create30DaysNumberRecordHistogram = (records: NumberRecord[]) => {
+  const fetchMeanParkingDuration = (garageId: string, start: Date, end: Date) => {
+    axiosAuthenticated
+      .get(`${INFRASTRUCTURE_MANAGEMENT_URL}/analytics/parking/duration/${garageId}/${start.toISOString()}/${end.toISOString()}`)
+      .then(durationResponse => {
+        if (!durationResponse.data) {
+          console.log("No parking duration entries could be fetched")
+          return;
+        }
+        const durationEntries: NumberRecord[] = durationResponse.data;
+        if (durationEntries.length == 0) {
+          setMeanParkingDuration(0);
+          return;
+        }
+        const meanDuration = durationEntries.reduce((accumulator, currentValue) => accumulator + currentValue.value, 0);
+        setMeanParkingDuration(meanDuration/durationEntries.length);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch parking duration entries:", error);
+      })
+  }
+
+  const fetchTotalKwhConsumed = (garageId: string, start: Date, end: Date) => {
+    axiosAuthenticated
+      .get(`${INFRASTRUCTURE_MANAGEMENT_URL}/analytics/charging/powerConsumed/${garageId}/${start.toISOString()}/${end.toISOString()}`)
+      .then(powerConsumptionResponse => {
+        if (!powerConsumptionResponse.data) {
+          console.log("No power consumption entries could be fetched")
+          return;
+        }
+        const powerConsumptionEntries: NumberRecord[] = powerConsumptionResponse.data;
+        if (powerConsumptionEntries.length == 0) {
+          setKwhCharged(0);
+          return;
+        }
+        const totalConsumedPower = powerConsumptionEntries.reduce((accumulator, currentValue) => accumulator + currentValue.value, 0);
+        setKwhCharged(totalConsumedPower);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch power consumption entries:", error);
+      })
+  }
+
+  const fetchParkingStatus = (garageId: string, start: Date, end: Date) => {
+    axiosAuthenticated
+      .get(`${INFRASTRUCTURE_MANAGEMENT_URL}/analytics/parking/status/${garageId}/${start.toISOString()}/${end.toISOString()}`)
+      .then(parkingStatusResponse => {
+        if (!parkingStatusResponse.data) {
+          console.log("No parking status entries could be fetched")
+          return;
+        }
+        const parkingStatusEntries: OccupancyRecord[] = parkingStatusResponse.data;
+        if (parkingStatusEntries.length == 0) {
+          setParkingOccupancyHist([]);
+          return;
+        }
+        setParkingOccupancyHist(
+          create30DaysNumberOccupancyHistogram(parkingStatusEntries)
+        );
+      })
+      .catch((error) => {
+        console.error("Failed to fetch parking occupancy entries:", error);
+      })
+  }
+
+  const fetchChargingStatus = (garageId: string, start: Date, end: Date) => {
+    axiosAuthenticated
+      .get(`${INFRASTRUCTURE_MANAGEMENT_URL}/analytics/charging/status/${garageId}/${start.toISOString()}/${end.toISOString()}`)
+      .then(chargingStatusResponse => {
+        if (!chargingStatusResponse.data) {
+          console.log("No charging status entries could be fetched")
+          return;
+        }
+        const chargingStatusEntries: OccupancyRecord[] = chargingStatusResponse.data;
+        if (chargingStatusEntries.length == 0) {
+          setChargingOccupancyHist([]);
+          return;
+        }
+        setChargingOccupancyHist(
+          create30DaysNumberOccupancyHistogram(chargingStatusEntries)
+        );
+      })
+      .catch((error) => {
+        console.error("Failed to fetch charging occupancy entries:", error);
+      })
+  }
+
+  const fetchDefectStatus = (garageId: string, start: Date, end: Date) => {
+    axiosAuthenticated
+      .get(`${INFRASTRUCTURE_MANAGEMENT_URL}/analytics/defects/status/${garageId}/${start.toISOString()}/${end.toISOString()}`)
+      .then(defectStatusResponse => {
+        if (!defectStatusResponse.data) {
+          console.log("No defect status entries could be fetched")
+          return;
+        }
+        const defectStatusEntries: DefectStatusRecord[] = defectStatusResponse.data;
+        if (defectStatusEntries.length == 0) {
+          setDefectStatusHist([]);
+          return;
+        }
+        setDefectStatusHist(
+          create30DaysDefectRecordHistogram(defectStatusEntries)
+        );
+      })
+      .catch((error) => {
+        console.error("Failed to fetch defect status entries:", error);
+      })
+  }
+
+  const fetchGarageAnalytics = (garageId: string) => {
+    console.log(`Fetching analytics for garage ${garageId}`);
+    const now = new Date();
+    const aMonthAgo = new Date(new Date().setDate(now.getDate()-30))
+
+    fetchTurnover(garageId, aMonthAgo, now);
+    fetchMeanParkingDuration(garageId, aMonthAgo, now);
+    fetchTotalKwhConsumed(garageId, aMonthAgo, now);
+
+    fetchParkingStatus(garageId, aMonthAgo, now);
+    fetchChargingStatus(garageId, aMonthAgo, now);
+    fetchDefectStatus(garageId, aMonthAgo, now);
+  }
+
+  const create30DaysNumberOccupancyHistogram = (records: OccupancyRecord[]) => {
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
 
@@ -172,12 +229,12 @@ export default function Analytics() {
       const recordDate = new Date(record.timestamp);
       recordDate.setHours(0, 0, 0, 0);
       
-      if (!dayValueMap.has(recordDate.getTime()) || dayValueMap.get(recordDate.getTime()) < record.value) {
-        dayValueMap.set(recordDate.getTime(), record.value);
+      if (!dayValueMap.has(recordDate.getTime()) || dayValueMap.get(recordDate.getTime()) < record.occupiedSpaces) {
+        dayValueMap.set(recordDate.getTime(), record.occupiedSpaces);
       }
     }
 
-    let lastValue: any = records[0].value;
+    let lastValue: any = records[0].occupiedSpaces;
     
     const dates: Date[] = [];
     const values: number[] = [];
@@ -244,7 +301,7 @@ export default function Analytics() {
     });
 
     return [dates, openValues, inWorkValues, closedValues, rejectedValues];
-};
+  };
 
   return (
     (selectedGarage?.length ?? 0) > 0 && <Paper
@@ -284,8 +341,8 @@ export default function Analytics() {
       <Grid size={{ xs: 1, sm: 1, md: 1, lg: 2 }}>
         <Card>
           <CardContent>
-            <Typography variant="h6"> {t('route_analytics.mean_daily_turnover')}<br /> ({t('route_analytics.last_30_days')})</Typography>
-            <Typography variant="h5">${meanTurnover}</Typography>
+            <Typography variant="h6"> {t('route_analytics.turnover')}<br /> ({t('route_analytics.last_30_days')})</Typography>
+            <Typography variant="h5">${turnover}</Typography>
           </CardContent>
         </Card>
       </Grid>
@@ -318,13 +375,13 @@ export default function Analytics() {
           <CardContent>
             <Typography variant="h6">{t('route_analytics.parking_occupancy')} ({t('route_analytics.last_30_days')})</Typography>
             <LineChart 
-                xAxis={[{
-                  data: parkingOccupancyHist![0],
+                xAxis={parkingOccupancyHist.length === 0 ? [] : [{
+                  data: parkingOccupancyHist[0],
                   valueFormatter: (value) => `${new Date(value).getDate()}.${new Date(value).getMonth()+1}`,
                   min: new Date().setDate(new Date().getDate() - 30)
                 }]}
-                series={[{ 
-                  data: parkingOccupancyHist![1],
+                series={parkingOccupancyHist.length === 0 ? [] : [{ 
+                  data: parkingOccupancyHist[1],
                   color: '#f28e2c', 
                   area: true, 
                 }]}
@@ -341,13 +398,13 @@ export default function Analytics() {
           <CardContent>
             <Typography variant="h6">{t('route_analytics.charging_occupancy')} ({t('route_analytics.last_30_days')})</Typography>
             <LineChart 
-                xAxis={[{
-                  data: chargingOccupancyHist![0],
+                xAxis={chargingOccupancyHist.length === 0 ? [] : [{
+                  data: chargingOccupancyHist[0],
                   valueFormatter: (value) => `${new Date(value).getDate()}.${new Date(value).getMonth()+1}`,
                   min: new Date().setDate(new Date().getDate() - 30)
                 }]}
-                series={[{ 
-                  data: chargingOccupancyHist![1],
+                series={chargingOccupancyHist.length === 0 ? [] : [{ 
+                  data: chargingOccupancyHist[1],
                   color: '#f28e2c', 
                   area: true, 
                 }]}
@@ -363,17 +420,17 @@ export default function Analytics() {
         <Card>
           <CardContent>
             <Typography variant="h6">{t('route_analytics.defect_status')} ({t('route_analytics.last_30_days')})</Typography>
-              <LineChart 
-                xAxis={[{
-                  data: chargingOccupancyHist![0],
+            <LineChart 
+                xAxis={defectStatusHist.length === 0 ? [] : [{
+                  data: defectStatusHist[0],
                   valueFormatter: (value) => `${new Date(value).getDate()}.${new Date(value).getMonth()+1}`,
                   min: new Date().setDate(new Date().getDate() - 30)
                 }]}
-                series={[
-                  { data: defectStatusHist![1], label: t('route_analytics.open') },
-                  { data: defectStatusHist![2], label: t('route_analytics.in_work') },
-                  { data: defectStatusHist![3], label: t('route_analytics.closed') },
-                  { data: defectStatusHist![4], label: t('route_analytics.rejected') },
+                series={defectStatusHist.length === 0 ? [] : [
+                  { data: defectStatusHist[1], label: t('route_analytics.open') },
+                  { data: defectStatusHist[2], label: t('route_analytics.in_work') },
+                  { data: defectStatusHist[3], label: t('route_analytics.closed') },
+                  { data: defectStatusHist[4], label: t('route_analytics.rejected') },
                 ]}
                 width={450}
                 height={320}

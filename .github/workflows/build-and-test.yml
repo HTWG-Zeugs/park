@@ -23,6 +23,7 @@ jobs:
           - { name: "property-management", dockerfile: "./property-management.Dockerfile" }
           - { name: "parking-management", dockerfile: "./parking-management.Dockerfile" }
           - { name: "authentication-service", dockerfile: "./authentication-service.Dockerfile" }
+          - { name: "infrastructure-administration", dockerfile: "./infrastructure-administration.Dockerfile" }
           - { name: "frontend", dockerfile: "./frontend.Dockerfile" }
 
     steps:
@@ -46,9 +47,7 @@ jobs:
       matrix:
         service: [
           backend/property-management,
-          backend/parking-management,
-          backend/authentication,
-          frontend
+          backend/parking-management
         ]
 
     steps:
@@ -90,13 +89,16 @@ jobs:
         with:
           service_account: '${{ secrets.STAGING_GITHUB_SA }}'
           workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
-
+      
+      - uses: hashicorp/setup-terraform@v3
       - name: Run Terraform plan
         working-directory: ./ci-cd
         run: |
-          python deploy.py \
+          python deploy-terraform.py \
           --action plan \
           --is-github-actions \
           --create-cluster \
           --project-id ${{ vars.STAGING_PROJECT_ID }} \
-          --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }}
+          --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
+          --domain-name ${{ env.DOMAIN }} \
+          --region ${{ vars.REGION }}

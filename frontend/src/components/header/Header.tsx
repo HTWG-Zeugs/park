@@ -30,27 +30,34 @@ export default function Header() {
   const { isAuthenticated, logout } = useAuth();
   const pages = [
     { text: <HomeIcon />, href: "/home" },
-    { text: t("component_header.analytics"), href: "/analytics" },
     { text: t("component_header.occupancy"), href: "/occupancy" },
-    { text: t("component_header.contact"), href: "/contact" },
   ];
-
+  
   if (isAuthenticated) {
     pages.push(
+      { text: t("component_header.analytics"), href: "/analytics" },
       { text: t("component_header.garages"), href: "/garages" },
-      { text: t("component_header.defects"), href: "/defects" }
+      { text: t("component_header.defects"), href: "/defects" },
+      { text: t("component_header.demo_client"), href: "/demo-client" }
     );
   }
-
+  
   const [userRole, setUserRole] = useState<number>(0);
-
+  
   if (
     isAuthenticated && // signed-in
     (userRole == UserRoleObject.tenant_admin || // has required role permission
       userRole == UserRoleObject.solution_admin)
   ) {
-    pages.push({ text: t("component_header.users"), href: "/users" });
+    pages.push(
+      { text: t("component_header.users"), href: "/users" },
+    );
   }
+
+  pages.push(
+    { text: t("component_header.contact"), href: "/contact" },
+  );
+
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [language, setLanguage] = useState<string>("GB");
 

@@ -15,6 +15,15 @@ gateway:
 
 domain: null
 subdomain: null
+environment_name: null
+tenant_id: null
+
+authenticationService:
+  url: ""
+infrastructureManagement:
+  url: ""
+infrastructureAdministration:
+  audience: "infrastructure-administration-service"
 
 propertyManagement:
   image:

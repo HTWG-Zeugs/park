@@ -15,11 +15,6 @@ const port = Config.PORT;
 app.use(express.json());
 
 app.use(cors());
-app.use(cors({
-  origin: "http://localhost:3000",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
 
 const repo: Repository = FirestoreRepository.getInstance();
 const userService: UserService = UserService.getInstance(repo);
@@ -147,10 +142,11 @@ app.get("/tenant-id/:mail", async (req, res) => {
   }
   const mail = req.params.mail;
   try {
-    await userService.getTenantId(mail).then((tenantId) => {
-      res.status(200).send(tenantId);
+    await userService.getTenantId(mail).then((tenantInfo) => {
+      res.status(200).send(tenantInfo);
     });
   } catch (e) {
+    console.error(e);
     res.status(404).send("User not found");
   }
 });

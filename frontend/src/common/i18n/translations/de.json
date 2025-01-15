@@ -92,7 +92,8 @@
     "sign_out": "Abmelden",
     "sign_in": "Anmelden",
     "users": "Benutzer",
-    "analytics": "Analysen"
+    "analytics": "Analysen",
+    "demo_client": "Demo"
   },
   "component_sign_in": {
     "title": "Anmelden",
@@ -238,7 +239,8 @@
     "sign_in_failed": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.",
     "email_required": "Bitte geben Sie Ihre E-Mail-Adresse ein.",
     "password_reset_email_sent": "Eine E-Mail zum Zurücksetzen des Passworts wurde gesendet.",
-    "password_reset_failed": "Passwort-Zurücksetzung fehlgeschlagen. Bitte versuchen Sie es erneut."
+    "password_reset_failed": "Passwort-Zurücksetzung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "invalid_tenant_type": "Dieser Benutzer darf sich bei dieser Anwendung nicht anmelden."
   },
   "route_sign_up": {
     "passwords_do_not_match": "Passwörter stimmen nicht überein.",
@@ -255,7 +257,7 @@
   },
   "route_analytics": {
     "title": "Analysen",
-    "mean_daily_turnover": "Durchschnittlicher Tagesumsatz",
+    "turnover": "Umsatz",
     "mean_parking_duration": "Durchschnittliche Parkdauer",
     "total_kwh_charged": "Gesamt geladene KWh",
     "parking_occupancy": "Belegung Parkplätze",

@@ -29,6 +29,7 @@ export class JsonFileRepository implements Repository {
         id: user.id,
         role: user.role.valueOf(),
         tenantId: user.tenantId,
+        tenantType: user.tenantType,
         mail: user.mail,
         name: user.name,
       };
@@ -45,12 +46,12 @@ export class JsonFileRepository implements Repository {
   /**
    * @inheritdoc
    */
-  async getTenantId(mail: string): Promise<string> {
+  async getTenantIdAndType(mail: string): Promise<{ tenantId: string, tenantType: string }> {
     const data = await promises.readFile(USER_COLLECTION_PATH, "utf-8");
     const jsonData = JSON.parse(data);
     const user = jsonData.find((u: any) => u.mail === mail);
     if (user) {
-      return user.tenantId;
+      return {tenantId: user.tenantId, tenantType: user.tenantType};
     } else {
       throw new Error("User not found");
     }
@@ -62,7 +63,7 @@ export class JsonFileRepository implements Repository {
   async getAllUsers(): Promise<User[]> {
     const data = await promises.readFile(USER_COLLECTION_PATH, "utf-8");
     const jsonData = JSON.parse(data);
-    return jsonData.map((u: any) => new User(u.id, getRoleById(u.role), u.tenantId, u.mail, u.name));
+    return jsonData.map((u: any) => new User(u.id, getRoleById(u.role), u.tenantId, u.tenantType, u.mail, u.name));
   }
 
   /**
@@ -73,7 +74,7 @@ export class JsonFileRepository implements Repository {
     const jsonData = JSON.parse(data);
     return jsonData
       .filter((u: any) => u.tenantId === tenantId)
-      .map((u: any) => new User(u.id, getRoleById(u.role), u.tenantId, u.mail, u.name));
+      .map((u: any) => new User(u.id, getRoleById(u.role), u.tenantId, u.tenantType, u.mail, u.name));
   }
 
   /**
@@ -98,6 +99,7 @@ export class JsonFileRepository implements Repository {
         jsonData[index].id,
         getRoleById(jsonData[index].role),
         jsonData[index].tenantId,
+        jsonData[index].tenantType,
         jsonData[index].mail,
         jsonData[index].name
       );
@@ -135,6 +137,7 @@ export class JsonFileRepository implements Repository {
         id: uuidv4(),
         role: user.role.valueOf(),
         tenantId: user.tenantId,
+        tenantType: user.tenantType,
         mail: user.mail,
         name: user.name,
       });

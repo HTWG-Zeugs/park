@@ -91,7 +91,8 @@
     "sign_out": "Sign out",
     "sign_in": "Sign in",
     "users": "Users",
-    "analytics": "Analytics"
+    "analytics": "Analytics",
+    "demo_client": "Demo"
   },
   "component_sign_in": {
     "title": "Sign-In",
@@ -237,7 +238,8 @@
     "sign_in_failed": "Sign in failed. Please try again.",
     "email_required": "Please enter your email address.",
     "password_reset_email_sent": "An email to reset your password has been sent.",
-    "password_reset_failed": "Password reset failed. Please try again."
+    "password_reset_failed": "Password reset failed. Please try again.",
+    "invalid_tenant_type": "This user is not allowed to sign in here."
   },
   "route_sign_up": {
     "passwords_do_not_match": "Passwords do not match.",
@@ -254,7 +256,7 @@
   },
   "route_analytics": {
     "title": "Analytics",
-    "mean_daily_turnover": "Mean daily turnover",
+    "turnover": "Turnover",
     "mean_parking_duration": "Mean parking duration",
     "total_kwh_charged": "Total KWh charged",
     "parking_occupancy": "Parking occupancy",

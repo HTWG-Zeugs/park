@@ -51,7 +51,7 @@ export class FirestoreRepository implements Repository {
   /**
    * @inheritdoc
    */
-  async getTenantId(mail: string): Promise<string> {
+  async getTenantIdAndType(mail: string): Promise<{ tenantId: string, tenantType: string }> {
     const usersSnapshot = await this.db
       .collection(this.USER_COLLECTION_PATH)
       .where("mail", "==", mail)
@@ -59,7 +59,9 @@ export class FirestoreRepository implements Repository {
       .get();
     if (!usersSnapshot.empty) {
       const userDoc = usersSnapshot.docs[0];
-      return userDoc.data().tenantId;
+      const tenantId = userDoc.data().tenantId;
+      const tenantType = userDoc.data().tenantType;
+      return { tenantId: tenantId, tenantType: tenantType };
     }
   }
 
@@ -76,6 +78,7 @@ export class FirestoreRepository implements Repository {
         doc.data().id,
         getRoleById(doc.data().role),
         doc.data().tenantId,
+        doc.data().tenantType,
         doc.data().mail,
         doc.data().name
       );
@@ -98,6 +101,7 @@ export class FirestoreRepository implements Repository {
         doc.data().id,
         getRoleById(doc.data().role),
         doc.data().tenantId,
+        doc.data().tenantType,
         doc.data().mail,
         doc.data().name
       );
@@ -127,6 +131,7 @@ export class FirestoreRepository implements Repository {
         doc.data().id,
         getRoleById(doc.data().role),
         doc.data().tenantId,
+        doc.data().tenantType,
         doc.data().mail,
         doc.data().name
       );
@@ -169,6 +174,7 @@ export class FirestoreRepository implements Repository {
         userRecord.uid,
         user.role,
         user.tenantId,
+        user.tenantType,
         user.mail,
         user.name
       );

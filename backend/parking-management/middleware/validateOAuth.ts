@@ -19,7 +19,7 @@ async function verifyAuthToken(req, res, next) {
     // Verify the token
     const ticket = await client.verifyIdToken({
       idToken: token,
-      audience: process.env.INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE || 'http://localhost:8083'
+      audience: process.env.INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE
     });
 
     // Get the payload (decoded token data)

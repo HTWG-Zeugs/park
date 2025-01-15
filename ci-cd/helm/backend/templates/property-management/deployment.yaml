@@ -17,7 +17,7 @@ spec:
         app: park-{{ .Release.Namespace }}
         component: property-management
     spec:
-      serviceAccountName: property-management-sa
+      serviceAccountName: prop-sa
       containers:
         - name: property-management
           image: "{{ .Values.repository }}/{{.Values.propertyManagement.image.name}}:{{ .Values.gitTag }}"
@@ -26,13 +26,19 @@ spec:
             - containerPort: {{ .Values.propertyManagement.service.port }}
           env:
             - name: FIRESTORE_DB_ID
-              value: "{{ .Values.gc_project_id }}-prop-ma-{{ .Release.Namespace }}"
+              value: "{{ .Values.gc_project_id }}-prop-ma-{{ .Values.environment_name }}"
             - name: GCS_BUCKET_ID
-              value: "{{ .Values.gc_project_id }}-prop-ma-{{ .Release.Namespace }}"
+              value: "{{ .Values.gc_project_id }}-prop-ma-{{ .Values.environment_name }}"
             - name: PORT
               value: "{{ .Values.propertyManagement.service.port }}"
             - name: PARKING_MANAGEMENT_BACKEND_URL
               value: "http://parking-management:{{ .Values.parkingManagement.service.port }}"
+            - name: AUTHENTICATION_SERVICE_URL
+              value: "{{ .Values.authenticationService.url }}"
+            - name: INFRASTRUCTURE_MANAGEMENT_SERVICE_URL
+              value: "{{ .Values.infrastructureManagement.url }}"
+            - name: INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE
+              value: "{{ .Values.infrastructureAdministration.audience }}"
           livenessProbe:
             httpGet:
               path: {{ .Values.propertyManagement.healthCheck.endpoint }}

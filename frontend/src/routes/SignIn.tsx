@@ -15,19 +15,39 @@ const SignIn: React.FC = () => {
   const AUTHENTICATION_BACKEND = import.meta.env
     .VITE_AUTHENTICATION_SERVICE_URL;
 
+  const TENANT_TYPE = import.meta.env.VITE_TENANT_TYPE;
+  const TENANT_ID = import.meta.env.VITE_TENANT_ID;
+
+  async function setTenantId(email: string) : Promise<boolean> {
+    if (String(TENANT_ID) === String("NOT_SET")) {
+      const response = await axios.get(`${AUTHENTICATION_BACKEND}/tenant-id/${email}`);
+      if (response.data){
+        const { tenantId, tenantType } = response.data;
+        if (tenantType !== TENANT_TYPE) {
+          setError(t("route_sign_in.invalid_tenant_type"));
+          return false;
+        }
+        auth.tenantId = tenantId;
+      }
+      else {
+        console.error(`Failed to fetch tenant id for user: ${email}`);
+      }
+      return true;
+    }
+
+    auth.tenantId = TENANT_ID;
+    return true;
+  }
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setMessage(null);
 
     try {
-      const tenantId = import.meta.env.VITE_TENANT_ID;
-      if (!auth.tenantId) {
-        const response = await axios.get(`${AUTHENTICATION_BACKEND}/tenant-id/${email}`);
-        auth.tenantId = response.data;
-      } else {
-        auth.tenantId = tenantId;
-      }
+      if (!await setTenantId(email))
+        return;
+
       const userCredential = await auth.signInWithEmailAndPassword(
         email,
         password
@@ -63,13 +83,9 @@ const SignIn: React.FC = () => {
     }
 
     try {
-      const tenantId = import.meta.env.VITE_TENANT_ID;
-      if (!auth.tenantId) {
-        const response = await axios.get(`${AUTHENTICATION_BACKEND}/tenant-id/${email}`);
-        auth.tenantId = response.data.tenant_id;
-      } else {
-        auth.tenantId = tenantId;
-      }
+      if (!await setTenantId(email))
+        return;
+      
       await auth.sendPasswordResetEmail(email);
       setMessage(t("route_sign_in.password_reset_email_sent"));
     } catch {

@@ -17,7 +17,7 @@ spec:
         app: park-{{ .Release.Namespace }}
         component: frontend
     spec:
-      serviceAccountName: frontend-sa
+      serviceAccountName: front-sa
       containers:
         - name: frontend
           image: "{{ .Values.repository }}/{{.Values.frontend.image.name}}:{{ .Values.gitTag }}"
@@ -25,22 +25,31 @@ spec:
           ports:
             - containerPort: {{ .Values.frontend.service.port }}
           env:
+            {{ if .Values.identityPlatForm.tenantId }}
+            - name: PARK_TENANT_ID
+              value: {{ .Values.identityPlatForm.tenantId }}
+            {{ end }}
+
             - name: PARK_PROPERTY_MANAGEMENT_URL
-              value: "{{ .Values.frontend.env.BackendUrl }}{{ .Values.frontend.env.propertyUrl }}"
+              value: "{{ .Values.frontend.env.propertyUrl }}"
             - name: PARK_PARKING_MANAGEMENT_URL
-              value: "{{ .Values.frontend.env.BackendUrl }}{{ .Values.frontend.env.parkingUrl }}"
+              value: "{{ .Values.frontend.env.parkingUrl }}"
             - name: PARK_AUTHENTICATION_URL
-              value: "{{ .Values.frontend.env.BackendUrl }}{{ .Values.frontend.env.authUrl }}"
+              value: "{{ .Values.frontend.env.authUrl }}"
+            - name: PARK_INFRASTRUCTURE_MANAGEMENT_URL
+              value: "{{ .Values.frontend.env.infrastructureUrl}}"
+
             - name: PARK_IDENTITY_PLATFORM_API_KEY
               value: {{ .Values.identityPlatForm.apiKey }}
             - name: PARK_IDENTITY_PLATFORM_AUTH_DOMAIN
               value: {{ .Values.identityPlatForm.authDomain }}
             - name: PARK_IDENTITY_PLATFORM_PROJECT_ID
               value: {{ .Values.gc_project_id }}
-            {{ if .Values.identityPlatForm.tenantId }}
+
             - name: PARK_TENANT_ID
-              value: {{ .Values.identityPlatForm.tenantId }}
-            {{ end }}
+              value: {{ .Values.tenant_id }}
+            - name: PARK_TENANT_TYPE
+              value: {{ .Values.tenant_type }}
           livenessProbe:
             httpGet:
               path: {{ .Values.frontend.healthCheck.endpoint }}

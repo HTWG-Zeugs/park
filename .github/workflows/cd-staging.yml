@@ -6,10 +6,6 @@ on:
       image_tag:
         description: "Image tag to deploy"
         required: true
-      branch:
-        description: 'The branch to run this workflow on'
-        required: true
-        default: 'dev'
 
 permissions:
   id-token: write 
@@ -29,8 +25,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.branch }}
 
       - name: Login to Google Cloud
         uses: 'google-github-actions/auth@v2'

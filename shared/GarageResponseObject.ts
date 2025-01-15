@@ -2,6 +2,7 @@ import { ChargingStationResponseObject } from './ChargingStationResponseObject';
 
 export type GarageResponseObject = {
   Id: string;
+  TenantId: string;
   Name: string;
   IsOpen: boolean;
   NumberParkingSpots: number;
