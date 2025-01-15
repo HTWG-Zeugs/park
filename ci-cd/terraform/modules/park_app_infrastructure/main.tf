@@ -121,7 +121,8 @@ variable "infrastructure_management_sa_roles" {
   default = [
     "roles/datastore.user",
     "roles/iam.serviceAccountTokenCreator",
-    "roles/run.invoker"
+    "roles/run.invoker",
+    "roles/identityplatform.admin"
   ]
 }
 
