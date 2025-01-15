@@ -43,7 +43,6 @@ export default function DemoClient() {
           setSelectedGarage(responseData[0])
           setChargingStations(responseData[0].ChargingStations);
           setSelectedStation(responseData[0].ChargingStations[0])
-          console.log(responseData)
         }
       })
       .catch((error) => {
@@ -66,7 +65,6 @@ export default function DemoClient() {
   const handleStationChange = (event: SelectChangeEvent<string>) => {
     const station = selectedGarage?.ChargingStations.find(station => station.name === event.target.value);
     if (station) {
-      console.log(station)
       setSelectedStation(station);
     }
   }
@@ -105,7 +103,7 @@ export default function DemoClient() {
     console.log(selectedStation)
     axiosAuthenticated
       .post(`${PARKING_MANAGEMENT_URL}/garage/charging/startSession/${selectedGarage?.Id}/${selectedStation?.id}/demo-user`)
-      .then((response) => { if (!response.data) { setSessionId(response.data) }})
+      .then((response) => { setSessionId(response.data) })
       .catch((error) => console.error("Failed to start charging session:", error))
   }
 
@@ -219,7 +217,7 @@ export default function DemoClient() {
             </Button>
           </Grid>
           <Grid size={3} marginBottom={3}>
-            Drive in with your car: { "<ticketId>" }
+            Drive in with your car: { ticketId }
           </Grid>
 
           <Grid size={1}>
@@ -247,7 +245,7 @@ export default function DemoClient() {
             </Button>
           </Grid>
           <Grid size={3} marginBottom={3}>
-            Choose a charging station and start charging your car: { "<sessionId>" } 
+            Choose a charging station and start charging your car: { sessionId } 
           </Grid>
 
           <Grid size={2}>
