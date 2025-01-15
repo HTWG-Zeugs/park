@@ -88,7 +88,8 @@ variable "authentication_service_sa_roles" {
   type = list(string)
   default = [
     "roles/datastore.user",
-    "roles/iam.serviceAccountTokenCreator"
+    "roles/iam.serviceAccountTokenCreator",
+    "roles/identityplatform.admin"
   ]
 }
 
