@@ -17,7 +17,7 @@ router.post("/add", async (req, res) => {
 
   // Create tenant
   tenantManager.createTenant({
-    displayName: tenantRequest.name,
+    displayName: String(tenantRequest.name).toLowerCase(),
     emailSignInConfig: {
       enabled: true,
       passwordRequired: true
