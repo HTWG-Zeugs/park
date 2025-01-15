@@ -25,11 +25,6 @@ spec:
           ports:
             - containerPort: {{ .Values.frontend.service.port }}
           env:
-            {{ if .Values.identityPlatForm.tenantId }}
-            - name: PARK_TENANT_ID
-              value: {{ .Values.identityPlatForm.tenantId }}
-            {{ end }}
-
             - name: PARK_PROPERTY_MANAGEMENT_URL
               value: "{{ .Values.frontend.env.propertyUrl }}"
             - name: PARK_PARKING_MANAGEMENT_URL

@@ -276,10 +276,12 @@ def delete_old_deployments(enterprise_tenants):
     for release_info in existing_releases:
       release_name = release_info["name"]
       release_ns = release_info["namespace"]
-      if release_name.startswith(BACKEND_RELEASE_NAME) or release_name.startswith(FRONTEND_RELEASE_NAME):
+      if release_name.endswith(BACKEND_RELEASE_NAME) or release_name.endswith(FRONTEND_RELEASE_NAME):
+        run_subprocess(["helm", "uninstall", release_name, "-n", release_ns])
         existing_release_namespaces.append(release_ns)
-
-  # Delete namespaces for tenants that are no longer in the list
+          
+    existing_release_namespaces = list(set(existing_release_namespaces))
+    # Delete namespaces for tenants that are no longer in the list
     for release_ns in existing_release_namespaces:
       if release_ns not in namespaces:
         print(f"Deleting namespace '{release_ns}' because it's not in the tenants list...")

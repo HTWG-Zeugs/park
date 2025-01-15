@@ -36,6 +36,7 @@ const SignIn: React.FC = () => {
     }
 
     auth.tenantId = TENANT_ID;
+    console.log(`Using tenant id from environment variable: ${TENANT_ID}`);
     return true;
   }
 
