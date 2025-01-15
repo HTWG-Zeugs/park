@@ -50,7 +50,8 @@ variable "property_management_sa_roles" {
     "roles/datastore.user",
     "roles/iam.serviceAccountTokenCreator",
     "roles/storage.objectCreator",
-    "roles/run.invoker"
+    "roles/run.invoker",
+    "roles/iam.serviceAccountOpenIdTokenCreator"
   ]
 }
 
@@ -79,7 +80,8 @@ variable "parking_management_sa_roles" {
   default = [
     "roles/datastore.user",
     "roles/iam.serviceAccountTokenCreator",
-    "roles/run.invoker"
+    "roles/run.invoker",
+    "roles/iam.serviceAccountOpenIdTokenCreator"
   ]
 }
 
@@ -106,7 +108,8 @@ resource "google_service_account_iam_member" "frontend_sa_iam" {
 variable "frontend_sa_roles" {
   type = list(string)
   default = [
-    "roles/iam.serviceAccountTokenCreator"
+    "roles/iam.serviceAccountTokenCreator",
+    "roles/iam.serviceAccountOpenIdTokenCreator"
   ]
 }
 
