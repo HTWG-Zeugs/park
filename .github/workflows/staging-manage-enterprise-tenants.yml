@@ -3,10 +3,13 @@ name: Create Tenant
 on:
   workflow_dispatch:
     inputs:
+      action:
+        description: 'add or remove'
+        required: true
       tenant_id:
         required: true
       tenant_subdomain:
-        required: true
+        default: ""
       
 permissions:
   id-token: write 
@@ -18,7 +21,7 @@ env:
   DOMAIN: ${{ vars.STAGING_DOMAIN }}
 
 jobs:
-  create-tenant:
+  manage-tenant:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -48,14 +51,14 @@ jobs:
         working-directory: ./ci-cd
         run: |
           python manage_enterprise_tenants.py \
-          --action add \
+          --action ${{ inputs.action }} \
           --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
           --tenant-id ${{ inputs.tenant_id }} \
           --tenant-subdomain ${{ inputs.tenant_subdomain }} \
     
   deploy-terraform:
     runs-on: ubuntu-latest
-    needs: create-tenant
+    needs: manage-tenant
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
