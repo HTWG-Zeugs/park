@@ -43,7 +43,7 @@ def parse_args() -> CliArgs:
   parser.add_argument(
     "--gcs-bucket",
     required=True,
-    help="Name of the GCS bucket containing tenants.json"
+    help="Name of the GCS bucket containing enterprise-tenants.json"
   )
   parser.add_argument(
     "--is-github-actions",
@@ -149,35 +149,37 @@ def run_subprocess(cmd: list, cwd: str = None):
     exit(1)
 
 # ------------------------------------------------------------------------------
-# 1. Read tenants.json from GCS
+# 1. Read enterprise-tenants.json from GCS
 # ------------------------------------------------------------------------------
-def read_tenants_from_gcs(bucket_name: str, file_name: str = "tenants.json"):
-    """
-    Reads the specified JSON file from a Google Cloud Storage bucket and returns
-    it as a list of tenant objects:
-      [
-        {
-          "tenantId": "...",
-          "dns": "..."
-        },
-        ...
-      ]
+def read_tenants_from_gcs(bucket_name: str, file_name: str) -> list:
+  """
+  Reads the specified JSON file from a GCS bucket and returns it as a list of
+  tenant objects, e.g.:
+    [
+      {
+        "tenantId": "...",
+        "dns": "..."
+      },
+      ...
+    ]
 
-    Returns an empty list if the file does not exist.
-    """
-    client = storage.Client()
-    bucket = client.bucket(bucket_name)
-    blob = bucket.blob(file_name)
+  Returns an empty list if the file does not exist.
+  """
+  print(f"Downloading '{file_name}' from bucket '{bucket_name}'...")
+  client = storage.Client()
+  bucket = client.bucket(bucket_name)
+  blob = bucket.blob(file_name)
 
-    # Check if the file exists in the bucket
-    if not blob.exists():
-        return []
+  # Check if the file exists in the bucket
+  if not blob.exists():
+      return []
 
-    data = blob.download_as_text(encoding="utf-8")
-    tenants = json.loads(data)
-    return tenants
+  data = blob.download_as_text(encoding="utf-8")
+  tenants = json.loads(data)
+  return tenants
 
-def read_deployment_info_from_gcs(bucket_name: str, file_name: str = "deployment.json") -> DeploymentInfo:
+
+def read_deployment_info_from_gcs(bucket_name: str, file_name: str) -> DeploymentInfo:
   """
   Reads deployment information from a Google Cloud Storage bucket.
   Returns a dictionary with the following keys:
@@ -197,7 +199,8 @@ def read_deployment_info_from_gcs(bucket_name: str, file_name: str = "deployment
   deployment_info = json.loads(data)
   return DeploymentInfo(**deployment_info)
 
-def write_deployment_info_to_gcs(bucket_name: str, deployment_info: DeploymentInfo, file_name: str = "deployment.json"):
+
+def write_deployment_info_to_gcs(bucket_name: str, deployment_info: DeploymentInfo, file_name: str):
   """
   Writes deployment information to a Google Cloud Storage bucket.
   """
@@ -254,7 +257,7 @@ def sync_k8s_deployments_with_tenants(enterprise_tenants, cliArgs: CliArgs):
 
   delete_old_deployments(enterprise_tenants)
 
-  create_update_deployments(enterprise_tenants, cliArgs)
+  create_and_update_deployments(enterprise_tenants, cliArgs)
     
   print("Deployment sync complete.")
 
@@ -282,7 +285,7 @@ def delete_old_deployments(enterprise_tenants):
         print(f"Deleting namespace '{release_ns}' because it's not in the tenants list...")
         run_subprocess(["kubectl", "delete", "namespace", release_ns])
 
-def create_update_deployments(enterprise_tenants, cliArgs):
+def create_and_update_deployments(enterprise_tenants, cliArgs):
     deploy_environment(cliArgs, envinronment_name="free", subdomain="free", tenant_type="free")
     deploy_environment(cliArgs, envinronment_name="premium", subdomain="premium", tenant_type="premium")
 
@@ -342,13 +345,11 @@ def deploy_environment(cliArgs, envinronment_name, subdomain, tenant_type, tenan
 def main():
   args = parse_args()
   
-  # 1. Read all tenants from a single file "tenants.json" in GCS
-  tenants_data = read_tenants_from_gcs(
-      bucket_name=args.bucket_name,
-      file_name="tenants.json"
+  # 1. Read all tenants from a single file "enterprise-tenants.json" in GCS
+  enterprise_tenants = read_tenants_from_gcs(
+    bucket_name=args.bucket_name,
+    file_name="enterprise-tenants.json"
   )
-
-  enterprise_tenants = tenants_data.get("enterprise_tenants", [])
 
   if args.git_tag:
     # Update the deployment info in GCS

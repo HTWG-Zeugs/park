@@ -12,7 +12,7 @@ permissions:
   pull-requests: write
 
 env:
-  DOMAIN: "park-app.tech"
+  DOMAIN: ${{ vars.STAGING_DOMAIN }}
 
 jobs:
   build:

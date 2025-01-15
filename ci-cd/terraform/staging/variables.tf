@@ -25,30 +25,4 @@ variable create_cluster {
 
 variable enterprise_tenants{
   type   = list(map(string))
-  default = [
-    {
-      "id" = "porsche",
-      "domain" = "porsche"
-    },
-  ]
-}
-
-variable premium_tenants {
-  type    = list(map(string))
-  default = [
-    {
-      "id" = "htwg",
-      "domain" = "htwg"
-    }
-  ]
-}
-
-variable free_tenants {
-  type    = list(map(string))
-  default = [
-    {
-      "id" = "dhbw",
-      "domain" = "dhbw"
-    }
-  ]
 }
