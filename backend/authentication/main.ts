@@ -65,7 +65,7 @@ app.post("/user", validateFirebaseIdToken, async (req, res) => {
 /*
   * Create a new user service to service
 */
-app.post("/user-service", async (req, res) => {
+app.post("/service/user", async (req, res) => {
   try {
     const userToCreate: CreateUserRequestObject = req.body;
     await userService.createUserByService(userToCreate);

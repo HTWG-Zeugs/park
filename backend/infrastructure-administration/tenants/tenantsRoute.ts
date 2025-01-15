@@ -30,7 +30,7 @@ router.post("/add", async (req, res) => {
       role: 400
     };
     // Call authentication service to create user
-    await axios.post(`${AUTHENTICATION_SERVICE_URL}/user-service`, userRequestObject);
+    await axios.post(`${AUTHENTICATION_SERVICE_URL}/service/user`, userRequestObject);
   })
   .then(() => {
     if(tenantRequest.type === "enterprise"){
@@ -38,8 +38,12 @@ router.post("/add", async (req, res) => {
       // Need tenantId and subdomain
     }
   })
+  .then(() => {
+    res.status(200).send("Tenant created");
+  })
   .catch((error) => {
     console.error("Error creating tenant:", error);
+    res.status(500).send("Error creating tenant");
   });
 });
 
