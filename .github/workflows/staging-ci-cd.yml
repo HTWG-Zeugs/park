@@ -92,7 +92,7 @@ jobs:
       - name: Run terraform apply
         working-directory: ./ci-cd
         run: |
-          python deploy-terraform.py \
+          python -u deploy-terraform.py \
           --action apply \
           --is-github-actions \
           --create-cluster \
@@ -161,7 +161,7 @@ jobs:
       - name: Install Helm charts
         working-directory: ./ci-cd
         run: |
-          python deploy-kubernetes.py \
+          python -u deploy-kubernetes.py \
           --is-github-actions \
           --project-id ${{ vars.STAGING_PROJECT_ID }} \
           --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \

@@ -94,7 +94,7 @@ jobs:
       - name: Run Terraform plan
         working-directory: ./ci-cd
         run: |
-          python deploy-terraform.py \
+          python -u deploy-terraform.py \
           --action plan \
           --is-github-actions \
           --create-cluster \
