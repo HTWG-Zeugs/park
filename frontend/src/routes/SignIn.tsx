@@ -19,9 +19,8 @@ const SignIn: React.FC = () => {
   const TENANT_ID = import.meta.env.VITE_TENANT_ID;
 
   async function setTenantId(email: string) {
-    console.log(JSON.stringify(TENANT_ID));
 
-    if (TENANT_ID === "NOT_SET") {
+    if (String(TENANT_ID) === String("NOT_SET")) {
       console.log(`Fetching tenant id for user: ${email}`);
       const response = await axios.get(`${AUTHENTICATION_BACKEND}/tenant-id/${email}`);
       if (response.data){
