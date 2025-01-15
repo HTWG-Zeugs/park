@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, TextField, Button } from '@mui/material';
 
 const SignupPage = () => {
   const { planId } = useParams<{ planId: string }>();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [tenantName, setTenantName] = useState('');
+  const [userName, setUserName] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Plan:', planId, 'Email:', email, 'Password:', password);
-    alert(`You have selected the ${planId} plan!`);
+    navigate('/signup/success');
   };
 
   return (
@@ -22,6 +24,24 @@ const SignupPage = () => {
         {planId} Plan
       </Typography>
       <form onSubmit={handleSubmit}>
+      <TextField
+          label="Tenant Name"
+          type="text"
+          fullWidth
+          margin="normal"
+          value={tenantName}
+          onChange={(e) => setTenantName(e.target.value)}
+          required
+        />
+        <TextField
+          label="User Name"
+          type="text"
+          fullWidth
+          margin="normal"
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
+          required
+        />
         <TextField
           label="Email"
           type="email"

@@ -7,7 +7,7 @@ const SignupSuccessPage = () => {
         You Signed Up Successfully!
       </Typography>
       <Typography variant="body1" gutterBottom>
-        We're configuring everything for you. You'll receive an email when everything is ready.
+        We're configuring everything for you. Your application will be ready to use in a few minutes.
       </Typography>
       <CircularProgress sx={{ mt: 4 }} />
     </Box>
