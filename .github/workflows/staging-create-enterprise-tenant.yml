@@ -3,7 +3,7 @@ name: Create Tenant
 on:
   workflow_dispatch:
     inputs:
-      tenant_name:
+      tenant_id:
         required: true
       tenant_subdomain:
         required: true
@@ -47,17 +47,11 @@ jobs:
       - name: Run deploy script
         working-directory: ./ci-cd
         run: |
-          python manage_tenant.py \
+          python manage_enterprise_tenants.py \
           --action add \
-          --is-github-actions \
-          --create-cluster \
-          --project-id ${{ vars.STAGING_PROJECT_ID }} \
           --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
-          --repository ${{ env.GCR_REPO }} \
-          --identity-api-key ${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }}  \
-          --identity-auth-domain ${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
-          --domain ${{ env.DOMAIN }} \
-          --git-tag ${{ inputs.image_tag }}
+          --tenant-id ${{ inputs.tenant_id }} \
+          --tenant-subdomain ${{ inputs.tenant_subdomain }} \
     
   deploy-terraform:
     runs-on: ubuntu-latest

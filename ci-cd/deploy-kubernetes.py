@@ -293,7 +293,11 @@ def create_and_update_deployments(enterprise_tenants, cliArgs):
     for tenant in enterprise_tenants:
       tenant_id = tenant["tenantId"]
       subdomain = tenant["dns"]
-      deploy_environment(cliArgs, envinronment_name=tenant_id, subdomain=subdomain, tenant_id=tenant_id, tenant_type="enterprise")
+      deploy_environment(cliArgs, 
+                         envinronment_name=tenant_id, 
+                         subdomain=subdomain, 
+                         tenant_type="enterprise",
+                         tenant_id=tenant_id)
 
 def deploy_environment(cliArgs, envinronment_name, subdomain, tenant_type, tenant_id="NOT_SET", ):
     

@@ -10,7 +10,7 @@ from dataclasses import dataclass
 class CliArgs:
   action: str
   bucket_name: str
-  tenant_name: str
+  tenant_id: str
   tenant_subdomain: str
   
 
@@ -27,7 +27,7 @@ def parse_args() -> CliArgs:
       help="Name of the GCS bucket containing enterprise-tenants.json"
   )
   parser.add_argument(
-    "--tenant-name",
+    "--tenant-id",
     required=True,
   )
   parser.add_argument(
@@ -40,7 +40,7 @@ def parse_args() -> CliArgs:
   return CliArgs(
     action=args.action,
     bucket_name=args.gcs_bucket,
-    tenant_name=args.tenant_name,
+    tenant_id=args.tenant_id,
     tenant_subdomain=args.tenant_subdomain
   )
 
@@ -109,7 +109,7 @@ def write_tenants_to_gcs(bucket_name: str, tenants: list, file_name: str):
     print("Upload complete.")
 
 
-def add_tenant(tenants: list, tenant_name: str, tenant_dns: str) -> list:
+def add_tenant(tenants: list, tenant_id: str, tenant_dns: str) -> list:
     """
     Adds a new tenant to the list if it doesn't already exist.
     Each tenant is a dict like { "tenantId": ..., "dns": ... }.
@@ -117,29 +117,29 @@ def add_tenant(tenants: list, tenant_name: str, tenant_dns: str) -> list:
     """
     # Check if tenant already exists
     for tenant in tenants:
-        if tenant["tenantId"] == tenant_name:
-            print(f"Tenant '{tenant_name}' already exists. No action taken.")
+        if tenant["tenantId"] == tenant_id:
+            print(f"Tenant '{tenant_id}' already exists. No action taken.")
             return tenants
 
     # If not existing, add it
     tenants.append({
-        "tenantId": tenant_name,
+        "tenantId": tenant_id,
         "dns": tenant_dns
     })
     return tenants
 
 
-def remove_tenant(tenants: list, tenant_name: str) -> list:
+def remove_tenant(tenants: list, tenant_id: str) -> list:
     """
     Removes the tenant with the given tenantId from the list if it exists.
     Returns the updated list.
     """
     original_len = len(tenants)
-    tenants = [t for t in tenants if t["tenantId"] != tenant_name]
+    tenants = [t for t in tenants if t["tenantId"] != tenant_id]
     if len(tenants) < original_len:
-        print(f"Tenant '{tenant_name}' removed.")
+        print(f"Tenant '{tenant_id}' removed.")
     else:
-        print(f"Tenant '{tenant_name}' not found. No action taken.")
+        print(f"Tenant '{tenant_id}' not found. No action taken.")
     return tenants
 
 
@@ -154,9 +154,9 @@ def main():
   
   # Modify the tenants list
   if args.action == "add":
-      tenants = add_tenant(tenants, args.tenant_name, args.tenant_subdomain)
+      tenants = add_tenant(tenants, args.tenant_id, args.tenant_subdomain)
   else:  # action == "remove"
-      tenants = remove_tenant(tenants, args.tenant_name)
+      tenants = remove_tenant(tenants, args.tenant_id)
 
   # Write updated tenants
   write_tenants_to_gcs(args.bucket_name, tenants, file_name="enterprise-tenants.json")
