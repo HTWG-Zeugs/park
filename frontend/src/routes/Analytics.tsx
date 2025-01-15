@@ -1,5 +1,5 @@
 import Paper from "@mui/material/Paper";
-import Grid from "@mui/material/Grid2"
+import Grid from "@mui/material/Grid2";
 import { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Typography } from "@mui/material";
