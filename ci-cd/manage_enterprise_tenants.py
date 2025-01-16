@@ -31,11 +31,14 @@ def parse_args() -> CliArgs:
     required=True,
   )
   parser.add_argument(
-    "--tenant-subdomain",
-    required=True,
+    "--tenant-subdomain"
   )
 
   args = parser.parse_args()
+
+  # If action is "add", tenant_subdomain is required
+  if args.action == "add" and not args.tenant_subdomain:
+    parser.error("--tenant-subdomain is required when action is 'add'.")
 
   return CliArgs(
     action=args.action,
