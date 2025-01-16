@@ -154,7 +154,7 @@ app.get("/tenant-id/:mail", async (req, res) => {
 });
 
 
-app.get("/tenants/add", (req, res) => {
+app.post("/tenants/add", (req, res) => {
   tenantService.createTenant(req.body)
   .then(() => {
     res.status(200).send("Tenant created");
