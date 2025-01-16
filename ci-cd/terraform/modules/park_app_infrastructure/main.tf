@@ -73,15 +73,9 @@ resource "google_firestore_database" "authentication-service-db" {
 }
 
 resource "google_service_account" "authentication_service_sa" {
-  account_id   = "${var.infra_namespace}-${var.authentication_service_sa}"
+  account_id   = "${var.authentication_service_sa}"
   project      = var.project_id
   display_name = "Authentication Service Account"
-}
-
-resource "google_service_account_iam_member" "authentication_service_sa_iam" {
-  service_account_id = google_service_account.authentication_service_sa.id
-  role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[${var.infra_namespace}/${var.authentication_service_sa}]"
 }
 
 variable "authentication_service_sa_roles" {
@@ -89,7 +83,8 @@ variable "authentication_service_sa_roles" {
   default = [
     "roles/datastore.user",
     "roles/iam.serviceAccountTokenCreator",
-    "roles/identityplatform.admin"
+    "roles/identityplatform.admin",
+    "roles/iam.serviceAccountOpenIdTokenCreator"
   ]
 }
 
@@ -112,7 +107,7 @@ resource "google_firestore_database" "infrastructure-management-db" {
 }
 
 resource "google_service_account" "infrastructure_management_sa" {
-  account_id   = "${var.infra_namespace}-${var.infrastructure_management_sa}"
+  account_id   = "${var.infrastructure_management_sa}"
   project      = var.project_id
   display_name = "Infrastructure Management Service Account"
 }
@@ -121,9 +116,7 @@ variable "infrastructure_management_sa_roles" {
   type = list(string)
   default = [
     "roles/datastore.user",
-    "roles/iam.serviceAccountTokenCreator",
-    "roles/run.invoker",
-    "roles/identityplatform.admin"
+    "roles/iam.serviceAccountTokenCreator"
   ]
 }
 

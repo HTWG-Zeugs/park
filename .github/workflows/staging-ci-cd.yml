@@ -105,8 +105,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      INFRA_SERVICE_ACCOUNT: infra-ns-infra-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com
+      INFRA_SERVICE_ACCOUNT: infra-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com
       INFRA_DB_ID: "${{ vars.STAGING_PROJECT_ID }}-infra-management"
+      AUTH_SERVICE_ACCOUNT: auth-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com
+      AUTH_DB_ID: "${{ vars.STAGING_PROJECT_ID }}-auth"
       SERVICE_AUDIENCE: "infrastructure-administration-service"
     needs: 
       - build-and-push-images
@@ -154,11 +156,32 @@ jobs:
             --set-env-vars "GITHUB_TENANT_WORKFLOW_BRANCH=dev" \
             --set-custom-audiences "[ ${{ env.SERVICE_AUDIENCE }} ]"
 
-      - name: Retrieve Backend URL
+      - name: Retrieve Infrastructure Service URL
         run: |
           echo "INFRASTRUCTURE_SERVICE_URL=$(gcloud run services describe infrastructure-administration --platform=managed --region=${{ vars.REGION }} --format 'value(status.url)')" >> $GITHUB_ENV
+
+      - name: Deploy authentication-service to Cloud Run
+        run: |
+          gcloud run deploy authentication-service \
+            --image=${{ env.GCR_REPO }}/authentication-service:${{env.TAG_ID}} \
+            --platform=managed \
+            --region=${{ vars.REGION }} \
+            --allow-unauthenticated \
+            --port=8082 \
+            --service-account=${{ env.AUTH_SERVICE_ACCOUNT }} \
+            --set-env-vars "FIRESTORE_DB_ID=${{ env.AUTH_DB_ID }}" \
+            --set-env-vars "IDENTITY_PLATFORM_API_KEY=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }}" \
+            --set-env-vars "IDENTITY_PLATFORM_AUTH_DOMAIN=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }}" \
+            --set-env-vars "PARK_IDENTITY_PLATFORM_PROJECT_ID=${{ vars.STAGING_PROJECT_ID }}" \
+            --set-env-vars "INFRASTRUCTURE_SERVICE_URL=$INFRASTRUCTURE_SERVICE_URL" \
+            --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
+            --set-custom-audiences "[ ${{ env.SERVICE_AUDIENCE }} ]"
+
+      - name: Retrieve Authentication Service URL
+        run: |
+          echo "AUTHENTICATION_SERVICE_URL=$(gcloud run services describe authentication-service --platform=managed --region=${{ vars.REGION }} --format 'value(status.url)')" >> $GITHUB_ENV
       
-      - name: Sync deployments
+      - name: Sync helm deployments
         working-directory: ./ci-cd
         run: |
           python -u deploy-kubernetes.py \
@@ -169,6 +192,7 @@ jobs:
           --identity-api-key ${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }}  \
           --identity-auth-domain ${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
           --infra-url $INFRASTRUCTURE_SERVICE_URL \
+          --auth-url $AUTHENTICATION_SERVICE_URL \
           --domain ${{ env.DOMAIN }} \
           --git-tag ${{ env.TAG_ID}} \
           --region ${{ vars.REGION }}

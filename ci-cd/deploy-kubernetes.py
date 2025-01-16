@@ -21,6 +21,7 @@ class CliArgs:
   identity_auth_domain: str = ""
   domain_name: str = "park-app.tech"
   infra_url: str = ""
+  auth_url: str = ""
 
 
 @dataclass
@@ -80,6 +81,11 @@ def parse_args() -> CliArgs:
     required=True,
     help="URL for the infrastructure management service."
   )
+  parser.add_argument(
+    "--auth-url",
+    required=True,
+    help="URL for the authentication service."
+  )
 
   args = parser.parse_args()
 
@@ -93,7 +99,8 @@ def parse_args() -> CliArgs:
     identity_api_key=args.identity_api_key,
     identity_auth_domain=args.identity_auth_domain,
     domain_name=args.domain_name,
-    infra_url=args.infra_url
+    infra_url=args.infra_url,
+    auth_url=args.auth_url
   )
     
 
@@ -240,16 +247,7 @@ def sync_k8s_deployments_with_tenants(enterprise_tenants, cliArgs: CliArgs):
   # Deploy the infrastructure chart
   print("Deploying infrastructure ...")
   create_and_annotate_namespace("infra-ns")
-  cmd = [
-      "helm", "upgrade", "--install" , "park-infra", "./helm/infrastructure",
-      "-n", "infra-ns",
-      "--set", f"repository={cliArgs.repository}",
-      "--set", f"gitTag={cliArgs.git_tag}",
-      "--set", f"identityPlatForm.apiKey={cliArgs.identity_api_key}",
-      "--set", f"identityPlatForm.authDomain={cliArgs.identity_auth_domain}",
-      "--set", f"gc_project_id={cliArgs.gc_project_id}",
-      "--set", f"domain={cliArgs.domain_name}"
-    ]
+  cmd = [ "helm", "upgrade", "--install" , "park-infra", "./helm/infrastructure", "-n", "infra-ns" ]
   run_subprocess(cmd)
 
   delete_old_deployments(enterprise_tenants)
@@ -323,7 +321,7 @@ def deploy_environment(cliArgs, envinronment_name, subdomain, tenant_type, tenan
     "--set", f"domain={cliArgs.domain_name}",
     "--set", f"environment_name={envinronment_name}",
     "--set", f"subdomain={subdomain}",
-    "--set", f"authenticationService.url=http://{cliArgs.domain_name}/auth",
+    "--set", f"authenticationService.url={cliArgs.auth_url}",
     "--set", f"infrastructureManagement.url={cliArgs.infra_url}"
     ]
   run_subprocess(cmd)
@@ -338,7 +336,7 @@ def deploy_environment(cliArgs, envinronment_name, subdomain, tenant_type, tenan
     "--set", f"identityPlatForm.apiKey={cliArgs.identity_api_key}",
     "--set", f"identityPlatForm.authDomain={cliArgs.identity_auth_domain}",
     "--set", f"gc_project_id={cliArgs.gc_project_id}",
-    "--set", f"frontend.env.authUrl=http://{cliArgs.domain_name}/auth",
+    "--set", f"frontend.env.authUrl={cliArgs.auth_url}",
     "--set", f"frontend.env.infrastructureUrl={cliArgs.infra_url}",
     "--set", f"frontend.env.propertyUrl=http://{subdomain}.{cliArgs.domain_name}/property",
     "--set", f"frontend.env.parkingUrl=http://{subdomain}.{cliArgs.domain_name}/parking",
