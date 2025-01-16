@@ -29,7 +29,7 @@ class DeploymentInfo:
 
 
 def parse_args() -> CliArgs:
-  parser = argparse.ArgumentParser(description="Sync tenants with Terraform and Helm.")
+  parser = argparse.ArgumentParser()
   parser.add_argument(
     "--region",
     default="europe-west1",
@@ -111,14 +111,11 @@ def create_and_annotate_namespace(namespace: str):
     capture_output=True,
     text=True
   )
-  if result.returncode == 0:
-    print(f"Namespace '{namespace}' already exists. Skipping creation.")
-  else:
+  if result.returncode != 0:
     print(f"Creating namespace '{namespace}'...")
     cmd = ["kubectl", "create", "namespace", namespace]
     run_subprocess(cmd)
     
-
   annotation_key = "shared-gateway-access"
   annotation_value = "true"
   cmd = [
@@ -241,8 +238,8 @@ def sync_k8s_deployments_with_tenants(enterprise_tenants, cliArgs: CliArgs):
     run_subprocess(cmd)
   
   # Deploy the infrastructure chart
+  print("Deploying infrastructure ...")
   create_and_annotate_namespace("infra-ns")
-  print("Deploying infrastructure chart...")
   cmd = [
       "helm", "upgrade", "--install" , "park-infra", "./helm/infrastructure",
       "-n", "infra-ns",
@@ -266,7 +263,7 @@ def delete_old_deployments(enterprise_tenants):
     namespaces.append(create_namespace_name("free"))
     namespaces.append(create_namespace_name("premium"))
 
-    print("Listing existing Helm releases in all namespaces...")
+    print("Deleting old deployments...")
     cmd = ["helm", "list", "--all-namespaces", "-o", "json"]
     stdout = run_subprocess(cmd)
 
@@ -277,6 +274,7 @@ def delete_old_deployments(enterprise_tenants):
       release_name = release_info["name"]
       release_ns = release_info["namespace"]
       if release_name.endswith(BACKEND_RELEASE_NAME) or release_name.endswith(FRONTEND_RELEASE_NAME):
+        print(f"Deleting deployment '{release_name}' in namespace '{release_ns}'...")
         run_subprocess(["helm", "uninstall", release_name, "-n", release_ns])
         existing_release_namespaces.append(release_ns)
           
@@ -284,7 +282,7 @@ def delete_old_deployments(enterprise_tenants):
     # Delete namespaces for tenants that are no longer in the list
     for release_ns in existing_release_namespaces:
       if release_ns not in namespaces:
-        print(f"Deleting namespace '{release_ns}' because it's not in the tenants list...")
+        print(f"Deleting namespace '{release_ns}'...")
         run_subprocess(["kubectl", "delete", "namespace", release_ns])
 
 def create_and_update_deployments(enterprise_tenants, cliArgs):
@@ -303,46 +301,47 @@ def create_and_update_deployments(enterprise_tenants, cliArgs):
 
 def deploy_environment(cliArgs, envinronment_name, subdomain, tenant_type, tenant_id="NOT_SET", ):
     
-    namespace = create_namespace_name(envinronment_name)
-    release_name = create_deployment_name(envinronment_name, BACKEND_RELEASE_NAME)
-
-    create_and_annotate_namespace(namespace)
-    cmd = [
-        "helm", "upgrade", "--install", release_name, "./helm/backend",
-        "-n", namespace,
-        "--set", f"repository={cliArgs.repository}",
-        "--set", f"gitTag={cliArgs.git_tag}",
-        "--set", f"identityPlatForm.apiKey={cliArgs.identity_api_key}",
-        "--set", f"identityPlatForm.authDomain={cliArgs.identity_auth_domain}",
-        "--set", f"gc_project_id={cliArgs.gc_project_id}",
-        "--set", f"domain={cliArgs.domain_name}",
-        "--set", f"environment_name={envinronment_name}",
-        "--set", f"subdomain={subdomain}",
-        "--set", f"authenticationService.url=http://{cliArgs.domain_name}/auth",
-        "--set", f"infrastructureManagement.url={cliArgs.infra_url}"
-      ]
-    run_subprocess(cmd)
-    
-    release_name = create_deployment_name(envinronment_name, FRONTEND_RELEASE_NAME)
-    cmd = [
-        "helm", "upgrade", "--install", release_name, "./helm/frontend",
-        "-n", namespace,
-        "--set", f"repository={cliArgs.repository}",
-        "--set", f"gitTag={cliArgs.git_tag}",
-        "--set", f"identityPlatForm.apiKey={cliArgs.identity_api_key}",
-        "--set", f"identityPlatForm.authDomain={cliArgs.identity_auth_domain}",
-        "--set", f"gc_project_id={cliArgs.gc_project_id}",
-        "--set", f"frontend.env.authUrl=http://{cliArgs.domain_name}/auth",
-        "--set", f"frontend.env.infrastructureUrl={cliArgs.infra_url}",
-        "--set", f"frontend.env.propertyUrl=http://{subdomain}.{cliArgs.domain_name}/property",
-        "--set", f"frontend.env.parkingUrl=http://{subdomain}.{cliArgs.domain_name}/parking",
-        "--set", f"domain={cliArgs.domain_name}",
-        "--set", f"environment_name={envinronment_name}",
-        "--set", f"subdomain={subdomain}",
-        "--set", f"tenant_id={tenant_id}",
-        "--set", f"tenant_type={tenant_type}"
-      ]
-    run_subprocess(cmd)
+  namespace = create_namespace_name(envinronment_name)
+  release_name = create_deployment_name(envinronment_name, BACKEND_RELEASE_NAME)
+  print(f"Deploying backend in namespace '{namespace}'...")
+  create_and_annotate_namespace(namespace)
+  cmd = [
+    "helm", "upgrade", "--install", release_name, "./helm/backend",
+    "-n", namespace,
+    "--set", f"repository={cliArgs.repository}",
+    "--set", f"gitTag={cliArgs.git_tag}",
+    "--set", f"identityPlatForm.apiKey={cliArgs.identity_api_key}",
+    "--set", f"identityPlatForm.authDomain={cliArgs.identity_auth_domain}",
+    "--set", f"gc_project_id={cliArgs.gc_project_id}",
+    "--set", f"domain={cliArgs.domain_name}",
+    "--set", f"environment_name={envinronment_name}",
+    "--set", f"subdomain={subdomain}",
+    "--set", f"authenticationService.url=http://{cliArgs.domain_name}/auth",
+    "--set", f"infrastructureManagement.url={cliArgs.infra_url}"
+    ]
+  run_subprocess(cmd)
+  
+  print(f"Deploying frontend in namespace '{namespace}'...")
+  release_name = create_deployment_name(envinronment_name, FRONTEND_RELEASE_NAME)
+  cmd = [
+    "helm", "upgrade", "--install", release_name, "./helm/frontend",
+    "-n", namespace,
+    "--set", f"repository={cliArgs.repository}",
+    "--set", f"gitTag={cliArgs.git_tag}",
+    "--set", f"identityPlatForm.apiKey={cliArgs.identity_api_key}",
+    "--set", f"identityPlatForm.authDomain={cliArgs.identity_auth_domain}",
+    "--set", f"gc_project_id={cliArgs.gc_project_id}",
+    "--set", f"frontend.env.authUrl=http://{cliArgs.domain_name}/auth",
+    "--set", f"frontend.env.infrastructureUrl={cliArgs.infra_url}",
+    "--set", f"frontend.env.propertyUrl=http://{subdomain}.{cliArgs.domain_name}/property",
+    "--set", f"frontend.env.parkingUrl=http://{subdomain}.{cliArgs.domain_name}/parking",
+    "--set", f"domain={cliArgs.domain_name}",
+    "--set", f"environment_name={envinronment_name}",
+    "--set", f"subdomain={subdomain}",
+    "--set", f"tenant_id={tenant_id}",
+    "--set", f"tenant_type={tenant_type}"
+    ]
+  run_subprocess(cmd)
 
 
 # ------------------------------------------------------------------------------

@@ -244,6 +244,8 @@ export class GarageService {
         body = record;
       }
       
+      console.log("Calling Infrastructure service for analytics with route:", route); 
+      // TODO: remove when debugging is done
       response = await axios.put(route, body, { headers: { Authorization: `Bearer ${token}` } });
   
       if (response.status !== 200) {

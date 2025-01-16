@@ -17,7 +17,7 @@ class CliArgs:
   domain_name: str = "park-app.tech"
 
 def parse_args() -> CliArgs:
-  parser = argparse.ArgumentParser(description="Sync tenants with Terraform and Helm.")
+  parser = argparse.ArgumentParser()
   parser.add_argument(
      "--action",
       required=True,
