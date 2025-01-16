@@ -238,7 +238,13 @@ export class AnalyticsRepo {
     if (!querySnapshot.empty) {
       return querySnapshot.docs[0].data() as DefectStatusRecord;
     } else {
-      throw new Error("Unable to find defect status record");
+      return {
+        timestamp: new Date(),
+        open: 0,
+        closed: 0,
+        inWork: 0,
+        rejected: 0
+      } as DefectStatusRecord
     }
   }
 

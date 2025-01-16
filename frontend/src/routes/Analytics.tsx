@@ -45,7 +45,6 @@ export default function Analytics() {
         if (listItems.length > 0) {
           setGarages(listItems);
           setSelectedGarage(listItems[0].Name)
-          //fetch garage analytics here
           fetchGarageAnalytics(listItems[0].Id);
         }
       })
