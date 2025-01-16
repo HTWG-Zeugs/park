@@ -15,7 +15,6 @@ variable project_id {
 
 variable domain_name {
   type    = string
-  default = "park-app.tech"
 }
 
 variable create_cluster {

@@ -44,3 +44,15 @@ variable domain_name {
   description = "The domain name for the park app"
   type        = string
 }
+
+variable infra_service_name {
+  type = string
+}
+
+variable auth_service_name {
+  type = string
+}
+
+variable sign_up_frontend_service_name {
+  type = string
+}

@@ -146,3 +146,41 @@ resource "google_project_iam_member" "sign_up_frontend_sa_iam_member" {
   role    = each.value
   member = "serviceAccount:${google_service_account.sign_up_frontend_sa.email}"
 }
+
+resource "google_cloud_run_domain_mapping" "infra" {
+  location = var.region
+  name     = "infra.${var.domain_name}"
+
+  metadata {
+    namespace = var.project_id
+  }
+
+  spec {
+    route_name = var.infra_service_name
+  }
+}
+
+resource "google_cloud_run_domain_mapping" "auth" {
+  location = var.region
+  name     = "auth.${var.domain_name}"
+
+  metadata {
+    namespace = var.project_id
+  }
+
+  spec {
+    route_name = var.auth_service_name
+  }
+}
+
+resource "google_cloud_run_domain_mapping" "sign_up_frontend" {
+  location = var.region
+  name     = "sign-up.${var.domain_name}"
+
+  metadata {
+    namespace = var.project_id
+  }
+  spec {
+    route_name = var.sign_up_frontend_service_name
+  }
+}
