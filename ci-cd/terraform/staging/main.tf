@@ -38,9 +38,6 @@ module "park_app_infrastructure" {
   infra_namespace = "infra-ns"
   domain_name = var.domain_name
   domain_zone_name = "park-app-tech"
-  auth_service_name = "authentication-service "
-  infra_service_name = "infrastructure-administration"
-  sign_up_frontend_service_name = "signup-frontend "
 }
 
 module "free_tenants_env" {
