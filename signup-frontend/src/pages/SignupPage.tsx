@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, TextField, Button } from '@mui/material';
+import axios from "axios";
+import { CreateTenantRequestObject } from "../../../shared/CreateTenantRequestObject";
+
+const AUTHENTICATION_URL = import.meta.env.VITE_AUTHENTICATION_SERVICE_URL;
 
 const SignupPage = () => {
   const { planId } = useParams<{ planId: string }>();
@@ -12,7 +16,27 @@ const SignupPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/signup/success');
+
+    if (!planId){
+      console.error("Plan Id not set");
+      return;
+    }
+    
+    const request : CreateTenantRequestObject = {
+      name: tenantName,
+      type: planId,
+      subdomain: tenantName,
+      adminMail: email,
+      adminName: userName,
+      adminPassword: password
+    }
+
+    axios.post(`${AUTHENTICATION_URL}/tenants/add`, request)
+    .then(() => {
+      navigate('/signup/success');
+    }).catch((error) => {
+      console.error("Failed to create tenant", error);
+    });
   };
 
   return (
