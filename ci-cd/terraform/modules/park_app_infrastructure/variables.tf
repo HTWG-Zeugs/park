@@ -29,6 +29,12 @@ variable infrastructure_management_sa {
   default     = "infra-sa"
 }
 
+variable sign_up_frontend_sa {
+  description = "The service account to use for the sign up frontend"
+  type        = string
+  default     = "sign-up-frontend-sa"
+}
+
 variable domain_zone_name {
   description = "The DNS zone name for the park app"
   type        = string

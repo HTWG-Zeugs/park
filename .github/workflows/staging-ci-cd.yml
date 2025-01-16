@@ -111,6 +111,7 @@ jobs:
       AUTH_SERVICE_ACCOUNT: auth-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com
       AUTH_DB_ID: "${{ vars.STAGING_PROJECT_ID }}-auth"
       SERVICE_AUDIENCE: "infrastructure-administration-service"
+      SIGNUP_FRONTEND_SERVICE_ACCOUNT: sign-up-frontend-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com
     needs: 
       - build-and-push-images
       - sync-terraform
@@ -190,6 +191,7 @@ jobs:
             --region=${{ vars.REGION }} \
             --allow-unauthenticated \
             --port=80 \
+            --service-account=${{ env.SIGNUP_FRONTEND_SERVICE_ACCOUNT }} \
             --set-env-vars "PARK_AUTHENTICATION_URL=$AUTHENTICATION_SERVICE_URL"
 
       - name: Sync helm deployments

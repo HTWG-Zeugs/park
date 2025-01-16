@@ -126,3 +126,23 @@ resource "google_project_iam_member" "infrastructure_management_sa_iam_member" {
   role    = each.value
   member = "serviceAccount:${google_service_account.infrastructure_management_sa.email}"
 }
+
+resource "google_service_account" "sign_up_frontend_sa" {
+  account_id   = "${var.sign_up_frontend_sa}"
+  project      = var.project_id
+  display_name = "Infrastructure Management Service Account"
+}
+
+variable "sign_up_frontend_sa_roles" {
+  type = list(string)
+  default = [
+    "roles/iam.serviceAccountTokenCreator"
+  ]
+}
+
+resource "google_project_iam_member" "sign_up_frontend_sa_iam_member" {	
+  for_each = { for value in var.sign_up_frontend_sa_roles : value => value }
+  project = var.project_id
+  role    = each.value
+  member = "serviceAccount:${google_service_account.sign_up_frontend_sa.email}"
+}
