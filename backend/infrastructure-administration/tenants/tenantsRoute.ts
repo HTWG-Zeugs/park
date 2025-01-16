@@ -21,6 +21,9 @@ router.post("/add", verifyAuthToken, async (req, res) => {
       res.status(500).send("Error creating tenant");
     });
   }
+  else{
+    res.status(200).send("Nothing to do");
+  }
 });
 
 router.delete("/delete", verifyAuthToken, (req, res) => {
@@ -29,14 +32,15 @@ router.delete("/delete", verifyAuthToken, (req, res) => {
     dispatchWorkflow("remove", tenantId)
     .then(() => {
       res.send("Tenant deleted");
-      return;
     })
     .catch((error) => {
       console.error("Error deleting tenant:", error);
       res.status(500).send("Error deleting tenant");
     });
   }
-  res.status(200).send("Nothing to do");
+  else{
+    res.status(200).send("Nothing to do");
+  }
 });
 
 async function dispatchWorkflow(action: string, tenantId: string, subdomain: string = "") {

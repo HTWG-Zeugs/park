@@ -14,6 +14,7 @@ const SignupPage = () => {
   const [tenantName, setTenantName] = useState('');
   const [userName, setUserName] = useState('');
   const [subdomain, setSubdomain] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,8 +36,15 @@ const SignupPage = () => {
     axios.post(`${AUTHENTICATION_URL}/tenants/add`, request)
     .then(() => {
       navigate('/signup/success');
-    }).catch((error) => {
-      console.error("Failed to create tenant", error);
+    })
+    .catch(function (error) {
+      if (error.response && error.response.status === 409) {
+        setError(error.response.data);
+        
+      } else {
+        console.error('Error', error.message);
+        setError("Error creating tenant");
+      }
     });
   };
 
@@ -106,6 +114,11 @@ const SignupPage = () => {
           Sign Up
         </Button>
       </form>
+      {error && (
+        <Typography variant="body2" color="error" align="center" sx={{ mt: 2 }}>
+          {error}
+        </Typography>
+      )}
     </Box>
   );
 };

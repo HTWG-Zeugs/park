@@ -4,6 +4,7 @@ import { CreateTenantInfrastructureRequestObject } from "../../../shared/CreateT
 import { Repository } from "../repositories/repository";
 import axios from "axios";
 import { getIdToken } from "../middleware/serviceCommunication";
+import { Tenant } from "firebase-admin/lib/auth/tenant";
 
 const INFRASTRUCTURE_SERVICE_URL = process.env.INFRASTRUCTURE_SERVICE_URL;
 
@@ -29,6 +30,16 @@ export class TenantService {
   }
 
   async createTenant(tenantRequest: CreateTenantRequestObject): Promise<void> {
+    const tenants: Tenant[] = await this.fetchAllTenants();
+    if (tenants.some(tenant => tenant.displayName.toLowerCase() === tenantRequest.name.toLowerCase())) {
+      throw new Error("tenant_exists");
+    }
+
+    const users = await this.userRepo.getAllUsers();
+    if (users.some(user => user.mail === tenantRequest.adminMail)) {
+      throw new Error("admin_mail_exists");
+    }
+
     const tenant = await this.tenantManager.createTenant({
       displayName: String(tenantRequest.name).toLowerCase(),
       emailSignInConfig: {
@@ -46,7 +57,7 @@ export class TenantService {
       role: 400
     };
 
-    this.userRepo.createUser(userRequestObject);
+    await this.userRepo.createUser(userRequestObject);
 
     const infrastructureRequestObject: CreateTenantInfrastructureRequestObject = {
       tenantId: tenant.tenantId,
@@ -62,5 +73,17 @@ export class TenantService {
           Authorization: `Bearer ${token}`
         }
       });
+  }
+
+  private async fetchAllTenants() {
+    const tenants: Tenant[] = [];
+    let getTenantsResult = await this.tenantManager.listTenants(1000);
+    tenants.push(...getTenantsResult.tenants);
+
+    while (getTenantsResult.pageToken) {
+      getTenantsResult = await this.tenantManager.listTenants(1000, getTenantsResult.pageToken);
+      tenants.push(...getTenantsResult.tenants);
+    }
+    return tenants;
   }
 }

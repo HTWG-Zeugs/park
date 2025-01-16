@@ -1,4 +1,4 @@
-import { Typography, Box, CircularProgress } from '@mui/material';
+import { Typography, Box } from '@mui/material';
 
 const SignupSuccessPage = () => {
   return (
@@ -9,7 +9,6 @@ const SignupSuccessPage = () => {
       <Typography variant="body1" gutterBottom>
         We're configuring everything for you. Your application will be ready to use in a few minutes.
       </Typography>
-      <CircularProgress sx={{ mt: 4 }} />
     </Box>
   );
 };
