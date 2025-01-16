@@ -25,6 +25,7 @@ jobs:
           - { name: "authentication-service", dockerfile: "./authentication-service.Dockerfile" }
           - { name: "infrastructure-administration", dockerfile: "./infrastructure-administration.Dockerfile" }
           - { name: "frontend", dockerfile: "./frontend.Dockerfile" }
+          - { name: "signup-frontend", dockerfile: "./signup-frontend.Dockerfile" }
 
     steps:
       - name: Checkout code

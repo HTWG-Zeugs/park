@@ -128,11 +128,15 @@ jobs:
           cache: 'pip'
       - run: pip install -r ci-cd/requirements.txt
 
-      - name: Retrieve infrastructure administration service URL
+      - name: Retrieve Infrastructure Service URL
         run: |
           echo "INFRASTRUCTURE_SERVICE_URL=$(gcloud run services describe infrastructure-administration --platform=managed --region=${{ vars.REGION }} --format 'value(status.url)')" >> $GITHUB_ENV
+        
+      - name: Retrieve Authentication Service URL
+        run: |
+          echo "AUTHENTICATION_SERVICE_URL=$(gcloud run services describe authentication-service --platform=managed --region=${{ vars.REGION }} --format 'value(status.url)')" >> $GITHUB_ENV
       
-      - name: Install Helm charts
+      - name: Sync helm deployments
         working-directory: ./ci-cd
         run: |
           python -u deploy-kubernetes.py \
@@ -143,5 +147,6 @@ jobs:
           --identity-api-key ${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }}  \
           --identity-auth-domain ${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
           --infra-url $INFRASTRUCTURE_SERVICE_URL \
+          --auth-url $AUTHENTICATION_SERVICE_URL \
           --domain ${{ env.DOMAIN }} \
           --region ${{ vars.REGION }}

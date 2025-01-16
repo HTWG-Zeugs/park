@@ -7,7 +7,7 @@ import { User } from "./models/user";
 import cors from "cors";
 import { CreateUserRequestObject } from "../../shared/CreateUserRequestObject";
 import { EditUserRequestObject } from "../../shared/EditUserRequestObject";
-import verifyAuthToken from "./middleware/validateOAuth";
+import { TenantService } from "./services/tenantService";
 
 const express = require("express");
 const app = express();
@@ -19,6 +19,7 @@ app.use(cors());
 
 const repo: Repository = FirestoreRepository.getInstance();
 const userService: UserService = UserService.getInstance(repo);
+const tenantService: TenantService = TenantService.getInstance(repo);
 
 /**
  * Gets an user by ID.
@@ -56,19 +57,6 @@ app.post("/user", validateFirebaseIdToken, async (req, res) => {
   try {
     const userToCreate: CreateUserRequestObject = req.body;
     await userService.createUser(signedInUser, userToCreate);
-    res.status(200).send("User created");
-  } catch (e) {
-    res.status(500).send("Creating user failed: " + e);
-  }
-});
-
-/*
-  * Create a new user service to service
-*/
-app.post("/service/user", async (req, res) => {
-  try {
-    const userToCreate: CreateUserRequestObject = req.body;
-    await userService.createUserByService(userToCreate);
     res.status(200).send("User created");
   } catch (e) {
     res.status(500).send("Creating user failed: " + e);
@@ -163,6 +151,18 @@ app.get("/tenant-id/:mail", async (req, res) => {
     console.error(e);
     res.status(404).send("User not found");
   }
+});
+
+
+app.get("/tenants/add", (req, res) => {
+  tenantService.createTenant(req.body)
+  .then(() => {
+    res.status(200).send("Tenant created");
+  })
+  .catch((error) => {
+    console.log("Error creating tenant:", error);
+    res.status(500).send("Error creating tenant");
+  });
 });
 
 
