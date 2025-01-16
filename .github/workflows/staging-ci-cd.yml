@@ -26,6 +26,7 @@ jobs:
           - { name: "authentication-service", dockerfile: "./authentication-service.Dockerfile" }
           - { name: "infrastructure-administration", dockerfile: "./infrastructure-administration.Dockerfile" }
           - { name: "frontend", dockerfile: "./frontend.Dockerfile" }
+          - { name: "signup-frontend", dockerfile: "./signup-frontend.Dockerfile" }
 
     steps:
       - name: Checkout code
@@ -181,6 +182,16 @@ jobs:
         run: |
           echo "AUTHENTICATION_SERVICE_URL=$(gcloud run services describe authentication-service --platform=managed --region=${{ vars.REGION }} --format 'value(status.url)')" >> $GITHUB_ENV
       
+      - name: Deploy signup frontend
+        run: |
+          gcloud run deploy signup-frontend \
+            --image=${{ env.GCR_REPO }}/signup-frontend:${{env.TAG_ID}} \
+            --platform=managed \
+            --region=${{ vars.REGION }} \
+            --allow-unauthenticated \
+            --port=80 \
+            --set-env-vars "PARK_AUTHENTICATION_URL=$AUTHENTICATION_SERVICE_URL"
+
       - name: Sync helm deployments
         working-directory: ./ci-cd
         run: |
