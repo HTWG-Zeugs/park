@@ -84,7 +84,7 @@ module "per_enterprise_tenant" {
 
   environment_name = each.value.id
   subdomain = each.value.domain
-  app_namespace = "enterprise-tenant-${each.value.id}-ns"
+  app_namespace = "${each.value.id}-ns"
 }
 
 output "github_sa_email" {
