@@ -269,21 +269,28 @@ def delete_old_deployments(enterprise_tenants):
 
     existing_releases = json.loads(stdout)
 
-    existing_release_namespaces = []
+    deployments_to_delete = []
+    namespaces_to_delete = []
     for release_info in existing_releases:
       release_name = release_info["name"]
       release_ns = release_info["namespace"]
       if release_name.endswith(BACKEND_RELEASE_NAME) or release_name.endswith(FRONTEND_RELEASE_NAME):
-        print(f"Deleting deployment '{release_name}' in namespace '{release_ns}'...")
-        run_subprocess(["helm", "uninstall", release_name, "-n", release_ns])
-        existing_release_namespaces.append(release_ns)
-          
-    existing_release_namespaces = list(set(existing_release_namespaces))
+        if release_ns not in namespaces:
+          deployments_to_delete.append({ "deployment" : release_name, "namespace" : release_ns })
+          namespaces_to_delete.append(release_ns)
+    
+    # Remove duplicate namespaces
+    namespaces_to_delete = list(set(namespaces_to_delete))
+
+    for deployment, ns in deployments_to_delete:
+      print(f"Deleting deployment '{deployment}'...")
+      cmd = ["helm", "uninstall", deployment, "-n", ns]
+      run_subprocess(cmd)
+
     # Delete namespaces for tenants that are no longer in the list
-    for release_ns in existing_release_namespaces:
-      if release_ns not in namespaces:
-        print(f"Deleting namespace '{release_ns}'...")
-        run_subprocess(["kubectl", "delete", "namespace", release_ns])
+    for ns in namespaces_to_delete:
+      print(f"Deleting namespace '{release_ns}'...")
+      run_subprocess(["kubectl", "delete", "namespace", ns])
 
 def create_and_update_deployments(enterprise_tenants, cliArgs):
     deploy_environment(cliArgs, envinronment_name="free", subdomain="free", tenant_type="free")
