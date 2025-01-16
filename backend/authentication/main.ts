@@ -160,8 +160,15 @@ app.post("/tenants/add", (req, res) => {
     res.status(200).send("Tenant created");
   })
   .catch((error) => {
-    console.log("Error creating tenant:", error);
-    res.status(500).send("Error creating tenant");
+    if (error.message === "tenant_exists") {
+      res.status(409).send("Tenant already exists");
+    } else if (error.message === "admin_mail_exists") {
+      res.status(409).send("Admin mail already exists");
+    }
+    else{
+      console.error("Error creating tenant:", error);
+      res.status(500).send("Error creating tenant");
+    }
   });
 });
 
