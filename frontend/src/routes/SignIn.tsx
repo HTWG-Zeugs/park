@@ -23,7 +23,7 @@ const SignIn: React.FC = () => {
       const response = await axios.get(`${AUTHENTICATION_BACKEND}/tenant-id/${email}`);
       if (response.data){
         const { tenantId, tenantType } = response.data;
-        if (tenantType !== TENANT_TYPE) {
+        if (String(tenantType) !== String(TENANT_TYPE)) {
           setError(t("route_sign_in.invalid_tenant_type"));
           return false;
         }
@@ -36,6 +36,7 @@ const SignIn: React.FC = () => {
     }
 
     auth.tenantId = TENANT_ID;
+    console.log(`Using tenant id from environment variable: ${TENANT_ID}`);
     return true;
   }
 

@@ -88,7 +88,8 @@ variable "authentication_service_sa_roles" {
   type = list(string)
   default = [
     "roles/datastore.user",
-    "roles/iam.serviceAccountTokenCreator"
+    "roles/iam.serviceAccountTokenCreator",
+    "roles/identityplatform.admin"
   ]
 }
 
@@ -121,7 +122,8 @@ variable "infrastructure_management_sa_roles" {
   default = [
     "roles/datastore.user",
     "roles/iam.serviceAccountTokenCreator",
-    "roles/run.invoker"
+    "roles/run.invoker",
+    "roles/identityplatform.admin"
   ]
 }
 

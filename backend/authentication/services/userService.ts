@@ -165,4 +165,8 @@ export class UserService {
       throw new Error("User already exists");
     }
   }
+
+  async createUserByService(user: CreateUserRequestObject): Promise<void> {
+    await this.repo.createUser(user);      
+  }
 }

@@ -7,6 +7,7 @@ import { User } from "./models/user";
 import cors from "cors";
 import { CreateUserRequestObject } from "../../shared/CreateUserRequestObject";
 import { EditUserRequestObject } from "../../shared/EditUserRequestObject";
+import verifyAuthToken from "./middleware/validateOAuth";
 
 const express = require("express");
 const app = express();
@@ -55,6 +56,19 @@ app.post("/user", validateFirebaseIdToken, async (req, res) => {
   try {
     const userToCreate: CreateUserRequestObject = req.body;
     await userService.createUser(signedInUser, userToCreate);
+    res.status(200).send("User created");
+  } catch (e) {
+    res.status(500).send("Creating user failed: " + e);
+  }
+});
+
+/*
+  * Create a new user service to service
+*/
+app.post("/service/user", async (req, res) => {
+  try {
+    const userToCreate: CreateUserRequestObject = req.body;
+    await userService.createUserByService(userToCreate);
     res.status(200).send("User created");
   } catch (e) {
     res.status(500).send("Creating user failed: " + e);

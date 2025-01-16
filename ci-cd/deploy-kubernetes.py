@@ -29,7 +29,7 @@ class DeploymentInfo:
 
 
 def parse_args() -> CliArgs:
-  parser = argparse.ArgumentParser(description="Sync tenants with Terraform and Helm.")
+  parser = argparse.ArgumentParser()
   parser.add_argument(
     "--region",
     default="europe-west1",
@@ -43,7 +43,7 @@ def parse_args() -> CliArgs:
   parser.add_argument(
     "--gcs-bucket",
     required=True,
-    help="Name of the GCS bucket containing tenants.json"
+    help="Name of the GCS bucket containing enterprise-tenants.json"
   )
   parser.add_argument(
     "--is-github-actions",
@@ -111,14 +111,11 @@ def create_and_annotate_namespace(namespace: str):
     capture_output=True,
     text=True
   )
-  if result.returncode == 0:
-    print(f"Namespace '{namespace}' already exists. Skipping creation.")
-  else:
+  if result.returncode != 0:
     print(f"Creating namespace '{namespace}'...")
     cmd = ["kubectl", "create", "namespace", namespace]
     run_subprocess(cmd)
     
-
   annotation_key = "shared-gateway-access"
   annotation_value = "true"
   cmd = [
@@ -149,35 +146,37 @@ def run_subprocess(cmd: list, cwd: str = None):
     exit(1)
 
 # ------------------------------------------------------------------------------
-# 1. Read tenants.json from GCS
+# 1. Read enterprise-tenants.json from GCS
 # ------------------------------------------------------------------------------
-def read_tenants_from_gcs(bucket_name: str, file_name: str = "tenants.json"):
-    """
-    Reads the specified JSON file from a Google Cloud Storage bucket and returns
-    it as a list of tenant objects:
-      [
-        {
-          "tenantId": "...",
-          "dns": "..."
-        },
-        ...
-      ]
+def read_tenants_from_gcs(bucket_name: str, file_name: str) -> list:
+  """
+  Reads the specified JSON file from a GCS bucket and returns it as a list of
+  tenant objects, e.g.:
+    [
+      {
+        "tenantId": "...",
+        "dns": "..."
+      },
+      ...
+    ]
 
-    Returns an empty list if the file does not exist.
-    """
-    client = storage.Client()
-    bucket = client.bucket(bucket_name)
-    blob = bucket.blob(file_name)
+  Returns an empty list if the file does not exist.
+  """
+  print(f"Downloading '{file_name}' from bucket '{bucket_name}'...")
+  client = storage.Client()
+  bucket = client.bucket(bucket_name)
+  blob = bucket.blob(file_name)
 
-    # Check if the file exists in the bucket
-    if not blob.exists():
-        return []
+  # Check if the file exists in the bucket
+  if not blob.exists():
+      return []
 
-    data = blob.download_as_text(encoding="utf-8")
-    tenants = json.loads(data)
-    return tenants
+  data = blob.download_as_text(encoding="utf-8")
+  tenants = json.loads(data)
+  return tenants
 
-def read_deployment_info_from_gcs(bucket_name: str, file_name: str = "deployment.json") -> DeploymentInfo:
+
+def read_deployment_info_from_gcs(bucket_name: str, file_name: str) -> DeploymentInfo:
   """
   Reads deployment information from a Google Cloud Storage bucket.
   Returns a dictionary with the following keys:
@@ -197,7 +196,8 @@ def read_deployment_info_from_gcs(bucket_name: str, file_name: str = "deployment
   deployment_info = json.loads(data)
   return DeploymentInfo(**deployment_info)
 
-def write_deployment_info_to_gcs(bucket_name: str, deployment_info: DeploymentInfo, file_name: str = "deployment.json"):
+
+def write_deployment_info_to_gcs(bucket_name: str, deployment_info: DeploymentInfo, file_name: str):
   """
   Writes deployment information to a Google Cloud Storage bucket.
   """
@@ -238,8 +238,8 @@ def sync_k8s_deployments_with_tenants(enterprise_tenants, cliArgs: CliArgs):
     run_subprocess(cmd)
   
   # Deploy the infrastructure chart
+  print("Deploying infrastructure ...")
   create_and_annotate_namespace("infra-ns")
-  print("Deploying infrastructure chart...")
   cmd = [
       "helm", "upgrade", "--install" , "park-infra", "./helm/infrastructure",
       "-n", "infra-ns",
@@ -254,7 +254,7 @@ def sync_k8s_deployments_with_tenants(enterprise_tenants, cliArgs: CliArgs):
 
   delete_old_deployments(enterprise_tenants)
 
-  create_update_deployments(enterprise_tenants, cliArgs)
+  create_and_update_deployments(enterprise_tenants, cliArgs)
     
   print("Deployment sync complete.")
 
@@ -263,26 +263,36 @@ def delete_old_deployments(enterprise_tenants):
     namespaces.append(create_namespace_name("free"))
     namespaces.append(create_namespace_name("premium"))
 
-    print("Listing existing Helm releases in all namespaces...")
+    print("Deleting old deployments...")
     cmd = ["helm", "list", "--all-namespaces", "-o", "json"]
     stdout = run_subprocess(cmd)
 
     existing_releases = json.loads(stdout)
 
-    existing_release_namespaces = []
+    deployments_to_delete = []
+    namespaces_to_delete = []
     for release_info in existing_releases:
       release_name = release_info["name"]
       release_ns = release_info["namespace"]
-      if release_name.startswith(BACKEND_RELEASE_NAME) or release_name.startswith(FRONTEND_RELEASE_NAME):
-        existing_release_namespaces.append(release_ns)
+      if release_name.endswith(BACKEND_RELEASE_NAME) or release_name.endswith(FRONTEND_RELEASE_NAME):
+        if release_ns not in namespaces:
+          deployments_to_delete.append({ "deployment" : release_name, "namespace" : release_ns })
+          namespaces_to_delete.append(release_ns)
+    
+    # Remove duplicate namespaces
+    namespaces_to_delete = list(set(namespaces_to_delete))
 
-  # Delete namespaces for tenants that are no longer in the list
-    for release_ns in existing_release_namespaces:
-      if release_ns not in namespaces:
-        print(f"Deleting namespace '{release_ns}' because it's not in the tenants list...")
-        run_subprocess(["kubectl", "delete", "namespace", release_ns])
+    for deployment, ns in deployments_to_delete:
+      print(f"Deleting deployment '{deployment}'...")
+      cmd = ["helm", "uninstall", deployment, "-n", ns]
+      run_subprocess(cmd)
 
-def create_update_deployments(enterprise_tenants, cliArgs):
+    # Delete namespaces for tenants that are no longer in the list
+    for ns in namespaces_to_delete:
+      print(f"Deleting namespace '{release_ns}'...")
+      run_subprocess(["kubectl", "delete", "namespace", ns])
+
+def create_and_update_deployments(enterprise_tenants, cliArgs):
     deploy_environment(cliArgs, envinronment_name="free", subdomain="free", tenant_type="free")
     deploy_environment(cliArgs, envinronment_name="premium", subdomain="premium", tenant_type="premium")
 
@@ -290,50 +300,55 @@ def create_update_deployments(enterprise_tenants, cliArgs):
     for tenant in enterprise_tenants:
       tenant_id = tenant["tenantId"]
       subdomain = tenant["dns"]
-      deploy_environment(cliArgs, envinronment_name=tenant_id, subdomain=subdomain, tenant_id=tenant_id, tenant_type="enterprise")
+      deploy_environment(cliArgs, 
+                         envinronment_name=tenant_id, 
+                         subdomain=subdomain, 
+                         tenant_type="enterprise",
+                         tenant_id=tenant_id)
 
 def deploy_environment(cliArgs, envinronment_name, subdomain, tenant_type, tenant_id="NOT_SET", ):
     
-    namespace = create_namespace_name(envinronment_name)
-    release_name = create_deployment_name(envinronment_name, BACKEND_RELEASE_NAME)
-
-    create_and_annotate_namespace(namespace)
-    cmd = [
-        "helm", "upgrade", "--install", release_name, "./helm/backend",
-        "-n", namespace,
-        "--set", f"repository={cliArgs.repository}",
-        "--set", f"gitTag={cliArgs.git_tag}",
-        "--set", f"identityPlatForm.apiKey={cliArgs.identity_api_key}",
-        "--set", f"identityPlatForm.authDomain={cliArgs.identity_auth_domain}",
-        "--set", f"gc_project_id={cliArgs.gc_project_id}",
-        "--set", f"domain={cliArgs.domain_name}",
-        "--set", f"environment_name={envinronment_name}",
-        "--set", f"subdomain={subdomain}",
-        "--set", f"authenticationService.url=http://{cliArgs.domain_name}/auth",
-        "--set", f"infrastructureManagement.url={cliArgs.infra_url}"
-      ]
-    run_subprocess(cmd)
-    
-    release_name = create_deployment_name(envinronment_name, FRONTEND_RELEASE_NAME)
-    cmd = [
-        "helm", "upgrade", "--install", release_name, "./helm/frontend",
-        "-n", namespace,
-        "--set", f"repository={cliArgs.repository}",
-        "--set", f"gitTag={cliArgs.git_tag}",
-        "--set", f"identityPlatForm.apiKey={cliArgs.identity_api_key}",
-        "--set", f"identityPlatForm.authDomain={cliArgs.identity_auth_domain}",
-        "--set", f"gc_project_id={cliArgs.gc_project_id}",
-        "--set", f"frontend.env.authUrl=http://{cliArgs.domain_name}/auth",
-        "--set", f"frontend.env.infrastructureUrl={cliArgs.infra_url}",
-        "--set", f"frontend.env.propertyUrl=http://{subdomain}.{cliArgs.domain_name}/property",
-        "--set", f"frontend.env.parkingUrl=http://{subdomain}.{cliArgs.domain_name}/parking",
-        "--set", f"domain={cliArgs.domain_name}",
-        "--set", f"environment_name={envinronment_name}",
-        "--set", f"subdomain={subdomain}",
-        "--set", f"tenant_id={tenant_id}",
-        "--set", f"tenant_type={tenant_type}"
-      ]
-    run_subprocess(cmd)
+  namespace = create_namespace_name(envinronment_name)
+  release_name = create_deployment_name(envinronment_name, BACKEND_RELEASE_NAME)
+  print(f"Deploying backend in namespace '{namespace}'...")
+  create_and_annotate_namespace(namespace)
+  cmd = [
+    "helm", "upgrade", "--install", release_name, "./helm/backend",
+    "-n", namespace,
+    "--set", f"repository={cliArgs.repository}",
+    "--set", f"gitTag={cliArgs.git_tag}",
+    "--set", f"identityPlatForm.apiKey={cliArgs.identity_api_key}",
+    "--set", f"identityPlatForm.authDomain={cliArgs.identity_auth_domain}",
+    "--set", f"gc_project_id={cliArgs.gc_project_id}",
+    "--set", f"domain={cliArgs.domain_name}",
+    "--set", f"environment_name={envinronment_name}",
+    "--set", f"subdomain={subdomain}",
+    "--set", f"authenticationService.url=http://{cliArgs.domain_name}/auth",
+    "--set", f"infrastructureManagement.url={cliArgs.infra_url}"
+    ]
+  run_subprocess(cmd)
+  
+  print(f"Deploying frontend in namespace '{namespace}'...")
+  release_name = create_deployment_name(envinronment_name, FRONTEND_RELEASE_NAME)
+  cmd = [
+    "helm", "upgrade", "--install", release_name, "./helm/frontend",
+    "-n", namespace,
+    "--set", f"repository={cliArgs.repository}",
+    "--set", f"gitTag={cliArgs.git_tag}",
+    "--set", f"identityPlatForm.apiKey={cliArgs.identity_api_key}",
+    "--set", f"identityPlatForm.authDomain={cliArgs.identity_auth_domain}",
+    "--set", f"gc_project_id={cliArgs.gc_project_id}",
+    "--set", f"frontend.env.authUrl=http://{cliArgs.domain_name}/auth",
+    "--set", f"frontend.env.infrastructureUrl={cliArgs.infra_url}",
+    "--set", f"frontend.env.propertyUrl=http://{subdomain}.{cliArgs.domain_name}/property",
+    "--set", f"frontend.env.parkingUrl=http://{subdomain}.{cliArgs.domain_name}/parking",
+    "--set", f"domain={cliArgs.domain_name}",
+    "--set", f"environment_name={envinronment_name}",
+    "--set", f"subdomain={subdomain}",
+    "--set", f"tenant_id={tenant_id}",
+    "--set", f"tenant_type={tenant_type}"
+    ]
+  run_subprocess(cmd)
 
 
 # ------------------------------------------------------------------------------
@@ -342,13 +357,11 @@ def deploy_environment(cliArgs, envinronment_name, subdomain, tenant_type, tenan
 def main():
   args = parse_args()
   
-  # 1. Read all tenants from a single file "tenants.json" in GCS
-  tenants_data = read_tenants_from_gcs(
-      bucket_name=args.bucket_name,
-      file_name="tenants.json"
+  # 1. Read all tenants from a single file "enterprise-tenants.json" in GCS
+  enterprise_tenants = read_tenants_from_gcs(
+    bucket_name=args.bucket_name,
+    file_name="enterprise-tenants.json"
   )
-
-  enterprise_tenants = tenants_data.get("enterprise_tenants", [])
 
   if args.git_tag:
     # Update the deployment info in GCS
