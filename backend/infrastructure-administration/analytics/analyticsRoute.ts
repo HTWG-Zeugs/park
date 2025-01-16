@@ -300,6 +300,28 @@ router.put("/defects/status/:tenantId/:garageId", verifyAuthToken, async (req, r
   }
 });
 
+router.post("/defects/status/:tenantId/:garageId/:timestamp", verifyAuthToken, async (req, res) => {
+  // get defect status entry for timestamp or the last saved timestamp
+  try {
+    const tenantId: string = req.params.tenantId;
+    const garageId: string = req.params.garageId;
+    const timestamp: string = req.params.timestamp;
+    const defectStatus: DefectStatusRecord =
+      await repository.getDefectStatusRecord(
+        tenantId,
+        garageId,
+        new Date(timestamp)
+      );
+    res.status(200).send(defectStatus);
+  } catch (e) {
+    res
+      .status(500)
+      .send(
+        `Failed getting defect status for garage with id ${req.params.garageId}: ${e}`
+      );
+  }
+});
+
 router.get("/defects/status/:garageId/:timestamp", validateFirebaseIdToken, async (req, res) => {
   // get defect status entry for timestamp or the last saved timestamp
   try {

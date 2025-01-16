@@ -8,6 +8,9 @@ export class Defect {
   private _LastModifiedAt: Date;
   private _ReportingDate: Date;
   
+  TenantId: string;
+  GarageId: string;
+  GarageName: string;
   Object: string;
   Location: string;
   ShortDesc: string;
@@ -33,9 +36,10 @@ export class Defect {
     return this._LastModifiedAt;
   }
 
-  constructor(object: string, location: string) {
+  constructor(object: string, location: string, garageId: string) {
     const date = new Date();
     this._Id = crypto.randomUUID();
+    this.GarageId = garageId;
     this._ImageNames = [];
     this.Object = object;
     this.Location = location;
@@ -62,6 +66,7 @@ export class Defect {
   toState(): DefectState {
     return {
       Id: this.Id,
+      GarageId: this.GarageId,
       Object: this.Object,
       Location: this.Location,
       ShortDesc: this.ShortDesc,
@@ -76,9 +81,11 @@ export class Defect {
   static fromState(dto: DefectState): Defect {
     const defect = new Defect(
       dto.Object,
-      dto.Location
+      dto.Location,
+      dto.GarageId
     );
     defect._Id = dto.Id;
+    defect.GarageId = dto.GarageId;
     defect.ShortDesc = dto.ShortDesc;
     defect.DetailedDesc = dto.DetailedDesc;
     defect._Status = DefectReportStatus[dto.Status as keyof typeof DefectReportStatus]

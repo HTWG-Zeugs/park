@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { TextField, Typography, Paper } from "@mui/material";
+import { TextField, Typography, Paper, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import LoadingButton from "@mui/lab/LoadingButton";
 import SaveIcon from "@mui/icons-material/Save";
@@ -14,8 +14,12 @@ import Dropzone from "src/components/dropzone/Dropzone";
 import { ImageFile } from "src/models/ImageFile";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
+import { GarageResponseObject } from "shared/GarageResponseObject";
+import { GarageListItem, toGarageListItem } from "src/models/GarageListItem";
 
 const BACKEND_URL = import.meta.env.VITE_PROPERTY_MANAGEMENT_SERVICE_URL;
+const PROPERTY_MANAGEMENT_URL = import.meta.env.VITE_PROPERTY_MANAGEMENT_SERVICE_URL;
+
 dayjs.extend(utc);
 
 interface Map {
@@ -23,6 +27,7 @@ interface Map {
 }
 
 interface FormData {
+  garageId: string;
   object: string;
   location: string;
   shortDescription: string;
@@ -30,6 +35,7 @@ interface FormData {
 }
 
 interface FormErrors {
+  garageId: string;
   object: string;
   location: string;
   shortDescription: string;
@@ -45,7 +51,11 @@ export default function AddDefect() {
 
   const [saving, setSaving] = useState(false);
 
+  const [garages, setGarages] = useState<GarageListItem[]>([]);
+  const [selectedGarage, setSelectedGarage] = useState<GarageListItem>();
+
   const [formData, setFormData] = useState<FormData>({
+    garageId: selectedGarage?.Id ?? "",
     object: "",
     location: "",
     shortDescription: "",
@@ -53,6 +63,7 @@ export default function AddDefect() {
   });
 
   const [formErrors, setFormErrors] = useState<FormErrors>({
+    garageId: "",
     object: "",
     location: "",
     shortDescription: ""
@@ -61,6 +72,7 @@ export default function AddDefect() {
   const [images, setImages] = useState<ImageFile[]>([]);
 
   useEffect(() => {
+    fetchGarages()
     return () => {
       if (defectCreated.current) return;
       uploadedImages.current.forEach((image) => {
@@ -89,6 +101,18 @@ export default function AddDefect() {
     },
   };
 
+  const handleGarageChange = (event: SelectChangeEvent<string>) => {
+      console.log(event.target.value)
+      const garage = garages.find(garage => garage.Id === event.target.value);
+      if (garage) {
+        setSelectedGarage(garage)
+        setFormData({
+          ...formData,
+          ['garageId']: garage.Id,
+        });
+      }
+    }
+
   const handleChange = (e: { target: { name: string; value: string } }) => {
     const { name, value } = e.target;
     setFormData({
@@ -111,6 +135,7 @@ export default function AddDefect() {
 
   const validateAllFields = () => {
     const errors = {
+      garageId: "",
       object: "",
       location: "",
       shortDescription: "",
@@ -175,6 +200,31 @@ export default function AddDefect() {
     }
   }
 
+  const fetchGarages = useCallback(() => {
+    axiosAuthenticated
+      .get(`${PROPERTY_MANAGEMENT_URL}/garages/`)
+      .then((response) => {
+        if (!response.data) {
+          throw new Error("fetching garages failed!");
+        }
+        const responseData: GarageResponseObject[] = response.data;
+        const listItems: GarageListItem[] = responseData.map((d) =>
+          toGarageListItem(d)
+        );
+        if (listItems.length > 0) {
+          setGarages(listItems);
+          setSelectedGarage(listItems[0])
+          formData.garageId = listItems[0].Id
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to fetch data:", error);
+      })
+      .finally(() => {
+        //set loading to false
+      });
+    }, [t]);
+
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
@@ -197,6 +247,7 @@ export default function AddDefect() {
     // Continue with creating request object
 
     const request: CreateDefectRequestObject = {
+      GarageId: formData.garageId,
       Object: formData.object,
       Location: formData.location,
       ShortDesc: formData.shortDescription,
@@ -267,6 +318,19 @@ export default function AddDefect() {
                 <Typography variant="h6">
                   {t("route_add_defect.add_defect")}
                 </Typography>
+              </Grid>
+
+              <Grid>
+                <InputLabel id="garage-select-label">Garage</InputLabel>
+                <Select
+                  labelId="garage-select-label"
+                  id="garage-select"
+                  value={formData.garageId}
+                  label="Garage"
+                  error={!!formErrors.garageId}
+                  onChange={handleGarageChange}>
+                  { garages.map((garage, i) => <MenuItem key={i} value={garage.Id}>{garage.Name}</MenuItem>) }
+                </Select>
               </Grid>
 
               <Grid size={12}>

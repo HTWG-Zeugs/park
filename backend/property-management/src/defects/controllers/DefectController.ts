@@ -2,14 +2,20 @@ import { CreateDefectRequestObject } from "../../../../../shared/CreateDefectReq
 import { DefectResponseObject } from "../../../../../shared/DefectResponseObject";
 import { CreateDefectResponseObject } from "../../../../../shared/CreateDefectResponseObject";
 import { UpdateDefectRequestObject } from "../../../../../shared/UpdateDefectRequestObject";
+import { DefectStatusRecord } from "../../../../../shared/DefectStatusRecord"
 import type { ObjectStorageRepo } from "../infrastructure/ObjectStorageRepo";
 import { Defect } from "../models/defectAggregate/Defect";
 import { DefectReportStatus } from "../models/defectAggregate/DefectReportStatus";
 import { IDefectRepo } from "../models/IDefectRepo";
 import { Request, Response } from "express";
+import { getIdToken } from "../../middleware/ServiceCommunication";
+import axios, { AxiosResponse } from "axios";
+import { GarageRepository } from "../../garages/GarageRepo";
+import { firestore } from "../../firestore";
 
 export class DefectController {
   private Repository: IDefectRepo;
+  private garageRepo = new GarageRepository(firestore);
   private objectStorage: ObjectStorageRepo;
 
   constructor(repo: IDefectRepo, objectStorage: ObjectStorageRepo) {
@@ -17,7 +23,7 @@ export class DefectController {
     this.objectStorage = objectStorage;
   }
 
-  createDefect = (req: Request, res: Response) => {
+  createDefect = async (req: Request, res: Response) => {
     const defect: Defect = toDefect(req.body);
 
     const allImagesUploaded = checkUploadedImages(
@@ -29,17 +35,27 @@ export class DefectController {
       res.status(400).send("Not all images uploaded");
       return;
     }
+    
+    const garage = await this.garageRepo.getGarage(defect.GarageId);
+    const currentDefectStatus = await getRecentDefectStatus(garage.TenantId, garage.Id);
+    notifyAnalytics(garage.TenantId, garage.Id, 'defects/status', {
+      timestamp: new Date(),
+      open: currentDefectStatus.open + 1,
+      closed: currentDefectStatus.closed,
+      inWork: currentDefectStatus.inWork,
+      rejected: currentDefectStatus.rejected
+    } as DefectStatusRecord)
 
     this.Repository.addDefect(defect)
-      .then(() => {
+      .then(async () => {
         const response = toCreateDefectResponse(defect);
         res.status(200).send(response);
       })
-      .catch(() => {
+      .catch((e) => {
         res
           .status(500)
           .send(
-            "Unable to create defect from body: " + JSON.stringify(req.body)
+            `Unable to create defect from body: " + ${JSON.stringify(req.body)}, ${e}`
           );
       });
   };
@@ -57,6 +73,33 @@ export class DefectController {
     const request = req.body as UpdateDefectRequestObject;
     const status: DefectReportStatus =
       DefectReportStatus[request.Status as keyof typeof DefectReportStatus];
+
+    const garage = await this.garageRepo.getGarage(defect.GarageId);
+    const currentDefectStatus = await getRecentDefectStatus(garage.TenantId, garage.Id);
+    let defectStatusRecord: DefectStatusRecord = currentDefectStatus;
+    defectStatusRecord.timestamp = new Date();
+
+    if (defect.Status === DefectReportStatus.Open) {
+      defectStatusRecord.open--;
+    } else if (defect.Status === DefectReportStatus.Closed) {
+      defectStatusRecord.closed--;
+    } else if (defect.Status === DefectReportStatus.InWork) {
+      defectStatusRecord.inWork--;
+    } else if (defect.Status === DefectReportStatus.Rejected) {
+      defectStatusRecord.rejected--;
+    } 
+
+    if (status === DefectReportStatus.Open) {
+      defectStatusRecord.open++;
+    } else if (status === DefectReportStatus.Closed) {
+      defectStatusRecord.closed++;
+    } else if (status === DefectReportStatus.InWork) {
+      defectStatusRecord.inWork++;
+    } else if (status === DefectReportStatus.Rejected) {
+      defectStatusRecord.rejected++;
+    } 
+
+    notifyAnalytics(garage.TenantId, garage.Id, 'defects/status', defectStatusRecord)
 
     defect.setStatus(status);
     try {
@@ -79,7 +122,26 @@ export class DefectController {
         res.status(200).send("deleted");
         return;
       }
+
       await this.Repository.deleteDefect(id);
+
+      const garage = await this.garageRepo.getGarage(defect.GarageId);
+      const currentDefectStatus = await getRecentDefectStatus(garage.TenantId, garage.Id);
+      let defectStatusRecord: DefectStatusRecord = currentDefectStatus;
+      defectStatusRecord.timestamp = new Date();
+
+      if (defect.Status === DefectReportStatus.Open) {
+        defectStatusRecord.open--;
+      } else if (defect.Status === DefectReportStatus.Closed) {
+        defectStatusRecord.closed--;
+      } else if (defect.Status === DefectReportStatus.InWork) {
+        defectStatusRecord.inWork--;
+      } else if (defect.Status === DefectReportStatus.Rejected) {
+        defectStatusRecord.rejected--;
+      }
+
+      notifyAnalytics(garage.TenantId, garage.Id, 'defects/status', defectStatusRecord)
+
       await Promise.all(
         defect.ImageNames.map((imageName) =>
           this.objectStorage.deleteImage(imageName)
@@ -153,7 +215,7 @@ export class DefectController {
 }
 
 function toDefect(request: CreateDefectRequestObject): Defect {
-  const defect: Defect = new Defect(request.Object, request.Location);
+  const defect: Defect = new Defect(request.Object, request.Location, request.GarageId);
 
   defect.ShortDesc = request.ShortDesc;
   defect.DetailedDesc = request.DetailedDesc;
@@ -171,6 +233,7 @@ function toCreateDefectResponse(defect: Defect): CreateDefectResponseObject {
 function toGetDefectResponse(defect: Defect): DefectResponseObject {
   const response: DefectResponseObject = {
     Id: defect.Id,
+    GarageId: defect.GarageId,
     Object: defect.Object,
     Location: defect.Location,
     ShortDesc: defect.ShortDesc ?? "",
@@ -183,6 +246,7 @@ function toGetDefectResponse(defect: Defect): DefectResponseObject {
 
   return response;
 }
+
 function checkUploadedImages(
   ImageNames: readonly string[],
   objectStorage: ObjectStorageRepo
@@ -194,4 +258,46 @@ function checkUploadedImages(
     }
   }
   return true;
+}
+
+async function notifyAnalytics(tenantId: string, garageId: string, endpoint: string, record: any) {
+  try {
+    const token = await getIdToken();
+    let response: AxiosResponse;
+    let route: string;
+    let body: any;
+
+    if (typeof record === "number") {
+      route = `${process.env.INFRASTRUCTURE_MANAGEMENT_SERVICE_URL}/analytics/${endpoint}/${tenantId}/${garageId}/${record}`;
+      body = {}
+    } else {
+      route = `${process.env.INFRASTRUCTURE_MANAGEMENT_SERVICE_URL}/analytics/${endpoint}/${tenantId}/${garageId}`;
+      body = record;
+    }
+    
+    response = await axios.put(route, body, { headers: { Authorization: `Bearer ${token}` } });
+
+    if (response.status !== 200) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error calling API:', error);
+  }
+}
+
+async function getRecentDefectStatus(tenantId: string, garageId: string): Promise<DefectStatusRecord> {
+  const token = await getIdToken();
+    let response: AxiosResponse;
+
+    response = await axios.post(
+      `${process.env.INFRASTRUCTURE_MANAGEMENT_SERVICE_URL}/analytics/defects/status/${tenantId}/${garageId}/${new Date()}`,
+      {}, 
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    if (response.status !== 200) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+
+    return response.data as DefectStatusRecord
 }

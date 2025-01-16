@@ -1,5 +1,6 @@
 export type DefectResponseObject = {
   Id: string;
+  GarageId: string;
   Object: string;
   Location: string;
   ShortDesc: string;
