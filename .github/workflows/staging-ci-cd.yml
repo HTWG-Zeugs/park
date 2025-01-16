@@ -150,7 +150,7 @@ jobs:
             --allow-unauthenticated \
             --port=8083 \
             --service-account=${{ env.INFRA_SERVICE_ACCOUNT }} \
-            --set-env-vars "AUTHENTICATION_SERVICE_URL=https://auth.${{ env.DOMAIN }}" \
+            --set-env-vars "AUTHENTICATION_SERVICE_URL=https://authentication-service-${{ vars.STAGING_PROJECT_NUMBER }}.${{ vars.REGION }}.run.app" \
             --set-env-vars "ANALYTICS_DB_ID=${{ env.INFRA_DB_ID }}" \
             --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
             --set-env-vars "GITHUB_ACTION_TOKEN=${{ secrets.CD_TOKEN }}" \
@@ -171,7 +171,7 @@ jobs:
             --set-env-vars "IDENTITY_PLATFORM_API_KEY=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }}" \
             --set-env-vars "IDENTITY_PLATFORM_AUTH_DOMAIN=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }}" \
             --set-env-vars "PARK_IDENTITY_PLATFORM_PROJECT_ID=${{ vars.STAGING_PROJECT_ID }}" \
-            --set-env-vars "INFRASTRUCTURE_SERVICE_URL=https://infra.${{ env.DOMAIN }}" \
+            --set-env-vars "INFRASTRUCTURE_SERVICE_URL=https://infrastructure-administration-${{ vars.STAGING_PROJECT_NUMBER }}.${{ vars.REGION }}.run.app" \
             --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
             --set-custom-audiences "[ ${{ env.SERVICE_AUDIENCE }} ]"
 
@@ -184,7 +184,7 @@ jobs:
             --allow-unauthenticated \
             --port=80 \
             --service-account=${{ env.SIGNUP_FRONTEND_SERVICE_ACCOUNT }} \
-            --set-env-vars "PARK_AUTHENTICATION_URL=https://auth.${{ env.DOMAIN }}"
+            --set-env-vars "PARK_AUTHENTICATION_URL=https://authentication-service-${{ vars.STAGING_PROJECT_NUMBER }}.${{ vars.REGION }}.run.app"
 
       - name: Sync helm deployments
         working-directory: ./ci-cd
@@ -196,8 +196,8 @@ jobs:
           --repository ${{ env.GCR_REPO }} \
           --identity-api-key ${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }}  \
           --identity-auth-domain ${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
-          --infra-url https://infra.${{ env.DOMAIN }} \
-          --auth-url https://auth.${{ env.DOMAIN }} \
+          --infra-url https://infrastructure-administration-${{ vars.STAGING_PROJECT_NUMBER }}.${{ vars.REGION }}.run.app \
+          --auth-url https://authentication-service-${{ vars.STAGING_PROJECT_NUMBER }}.${{ vars.REGION }}.run.app \
           --domain ${{ env.DOMAIN }} \
           --git-tag ${{ env.TAG_ID}} \
           --region ${{ vars.REGION }}

@@ -138,7 +138,7 @@ jobs:
           --repository ${{ env.GCR_REPO }} \
           --identity-api-key ${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }}  \
           --identity-auth-domain ${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
-          --infra-url https://infra.${{ env.DOMAIN }} \
-          --auth-url https://auth.${{ env.DOMAIN }} \
+          --infra-url https://infrastructure-administration-${{ vars.STAGING_PROJECT_NUMBER }}.${{ vars.REGION }}.run.app \
+          --auth-url https://authentication-service-${{ vars.STAGING_PROJECT_NUMBER }}.${{ vars.REGION }}.run.app \
           --domain ${{ env.DOMAIN }} \
           --region ${{ vars.REGION }}
