@@ -150,17 +150,13 @@ jobs:
             --allow-unauthenticated \
             --port=8083 \
             --service-account=${{ env.INFRA_SERVICE_ACCOUNT }} \
-            --set-env-vars "AUTHENTICATION_SERVICE_URL=http://${{ env.DOMAIN }}/auth" \
+            --set-env-vars "AUTHENTICATION_SERVICE_URL=https://auth.${{ env.DOMAIN }}" \
             --set-env-vars "ANALYTICS_DB_ID=${{ env.INFRA_DB_ID }}" \
             --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
             --set-env-vars "GITHUB_ACTION_TOKEN=${{ secrets.CD_TOKEN }}" \
             --set-env-vars "GITHUB_TENANT_WORKFLOW_ID=staging-manage-enterprise-tenants.yml" \
             --set-env-vars "GITHUB_TENANT_WORKFLOW_BRANCH=dev" \
             --set-custom-audiences "[ ${{ env.SERVICE_AUDIENCE }} ]"
-
-      - name: Retrieve Infrastructure Service URL
-        run: |
-          echo "INFRASTRUCTURE_SERVICE_URL=$(gcloud run services describe infrastructure-administration --platform=managed --region=${{ vars.REGION }} --format 'value(status.url)')" >> $GITHUB_ENV
 
       - name: Deploy authentication-service to Cloud Run
         run: |
@@ -175,14 +171,10 @@ jobs:
             --set-env-vars "IDENTITY_PLATFORM_API_KEY=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }}" \
             --set-env-vars "IDENTITY_PLATFORM_AUTH_DOMAIN=${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }}" \
             --set-env-vars "PARK_IDENTITY_PLATFORM_PROJECT_ID=${{ vars.STAGING_PROJECT_ID }}" \
-            --set-env-vars "INFRASTRUCTURE_SERVICE_URL=$INFRASTRUCTURE_SERVICE_URL" \
+            --set-env-vars "INFRASTRUCTURE_SERVICE_URL=https://infra.${{ env.DOMAIN }}" \
             --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
             --set-custom-audiences "[ ${{ env.SERVICE_AUDIENCE }} ]"
 
-      - name: Retrieve Authentication Service URL
-        run: |
-          echo "AUTHENTICATION_SERVICE_URL=$(gcloud run services describe authentication-service --platform=managed --region=${{ vars.REGION }} --format 'value(status.url)')" >> $GITHUB_ENV
-      
       - name: Deploy signup frontend
         run: |
           gcloud run deploy signup-frontend \
@@ -192,7 +184,7 @@ jobs:
             --allow-unauthenticated \
             --port=80 \
             --service-account=${{ env.SIGNUP_FRONTEND_SERVICE_ACCOUNT }} \
-            --set-env-vars "PARK_AUTHENTICATION_URL=$AUTHENTICATION_SERVICE_URL"
+            --set-env-vars "PARK_AUTHENTICATION_URL=https://auth.${{ env.DOMAIN }}"
 
       - name: Sync helm deployments
         working-directory: ./ci-cd
@@ -204,8 +196,8 @@ jobs:
           --repository ${{ env.GCR_REPO }} \
           --identity-api-key ${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }}  \
           --identity-auth-domain ${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
-          --infra-url $INFRASTRUCTURE_SERVICE_URL \
-          --auth-url $AUTHENTICATION_SERVICE_URL \
+          --infra-url https://infra.${{ env.DOMAIN }} \
+          --auth-url https://auth.${{ env.DOMAIN }} \
           --domain ${{ env.DOMAIN }} \
           --git-tag ${{ env.TAG_ID}} \
           --region ${{ vars.REGION }}
