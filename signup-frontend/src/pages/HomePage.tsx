@@ -5,10 +5,9 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { List, ListItem } from '@mui/material';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const HomePage = () => {
-  const navigate = useNavigate();
   return (
     <Box sx={{ p: 4, backgroundColor: 'background.default' }}>
       <Typography variant="h1" align="center" gutterBottom color="text.primary">
