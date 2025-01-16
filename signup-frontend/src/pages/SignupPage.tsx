@@ -13,6 +13,7 @@ const SignupPage = () => {
   const [password, setPassword] = useState('');
   const [tenantName, setTenantName] = useState('');
   const [userName, setUserName] = useState('');
+  const [subdomain, setSubdomain] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +26,7 @@ const SignupPage = () => {
     const request : CreateTenantRequestObject = {
       name: tenantName,
       type: planId,
-      subdomain: tenantName,
+      subdomain: subdomain.toLowerCase(),
       adminMail: email,
       adminName: userName,
       adminPassword: password
@@ -48,7 +49,7 @@ const SignupPage = () => {
         {planId} Plan
       </Typography>
       <form onSubmit={handleSubmit}>
-      <TextField
+        <TextField
           label="Tenant Name"
           type="text"
           fullWidth
@@ -57,6 +58,17 @@ const SignupPage = () => {
           onChange={(e) => setTenantName(e.target.value)}
           required
         />
+        { planId === "enterprise" && 
+          <TextField
+            label="Subdomain"
+            type="text"
+            fullWidth
+            margin="normal"
+            value={subdomain}
+            onChange={(e) => setSubdomain(e.target.value)}
+            required
+          />
+        }
         <TextField
           label="User Name"
           type="text"
