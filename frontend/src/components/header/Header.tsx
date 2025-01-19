@@ -25,41 +25,44 @@ export default function Header() {
     null
   );
 
-  const AUTHENTICATION_SERVICE_URL = import.meta.env.VITE_AUTHENTICATION_SERVICE_URL;
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [language, setLanguage] = useState<string>("GB");
+  const [tenantType, setTenantType] = useState<string>("free");
+  const [userRole, setUserRole] = useState<number>(0);
+
+  const AUTHENTICATION_SERVICE_URL = import.meta.env
+    .VITE_AUTHENTICATION_SERVICE_URL;
 
   const { isAuthenticated, logout } = useAuth();
   const pages = [
     { text: <HomeIcon />, href: "/home" },
     { text: t("component_header.occupancy"), href: "/occupancy" },
   ];
-  
+
+  if (
+    isAuthenticated &&
+    (tenantType == "premium" || tenantType == "enterprise")
+  ) {
+    pages.push({ text: t("component_header.analytics"), href: "/analytics" });
+  }
+
   if (isAuthenticated) {
     pages.push(
-      { text: t("component_header.analytics"), href: "/analytics" },
       { text: t("component_header.garages"), href: "/garages" },
       { text: t("component_header.defects"), href: "/defects" },
       { text: t("component_header.demo_client"), href: "/demo-client" }
     );
   }
-  
-  const [userRole, setUserRole] = useState<number>(0);
-  
+
   if (
     isAuthenticated && // signed-in
     (userRole == UserRoleObject.tenant_admin || // has required role permission
       userRole == UserRoleObject.solution_admin)
   ) {
-    pages.push(
-      { text: t("component_header.users"), href: "/users" },
-    );
+    pages.push({ text: t("component_header.users"), href: "/users" });
   }
 
-  pages.push(
-    { text: t("component_header.contact"), href: "/contact" },
-  );
-
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [language, setLanguage] = useState<string>("GB");
+  pages.push({ text: t("component_header.contact"), href: "/contact" });
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -79,9 +82,10 @@ export default function Header() {
           .get(`${AUTHENTICATION_SERVICE_URL}/user/${auth.currentUser?.uid}`)
           .then((response) => {
             setUserRole(response.data.role);
+            setTenantType(response.data.tenantType);
           });
       } catch (error) {
-        console.error("Error getting user role: ", error);
+        console.error("Error getting user: ", error);
       }
     }
   }, [isAuthenticated]);
@@ -210,14 +214,17 @@ export default function Header() {
                 </Button>
               ))}
             </Box>
-            <Button
-              style={{ marginRight: "10px" }}
-              onClick={() => toggleLanguage()}
-              sx={{ color: "white", fontWeight: "bold" }}
-            >
-              <TranslateIcon style={{ marginRight: "5px" }} />
-              <Flag country={language} />
-            </Button>
+            {isAuthenticated &&
+            (tenantType == "premium" || tenantType == "enterprise") ? (
+              <Button
+                style={{ marginRight: "10px" }}
+                onClick={() => toggleLanguage()}
+                sx={{ color: "white", fontWeight: "bold" }}
+              >
+                <TranslateIcon style={{ marginRight: "5px" }} />
+                <Flag country={language} />
+              </Button>
+            ) : null}
             {isAuthenticated && userEmail && (
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <Typography sx={{ color: "white", mr: 2 }}>
