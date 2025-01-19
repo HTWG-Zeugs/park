@@ -85,7 +85,7 @@ jobs:
       - name: Login to Google Cloud
         uses: 'google-github-actions/auth@v2'
         with:
-          service_account: '${{ secrets.STAGING_GITHUB_SA }}'
+          service_account: 'github-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com'
           workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
       
       - uses: hashicorp/setup-terraform@v3
