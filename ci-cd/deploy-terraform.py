@@ -12,9 +12,10 @@ class CliArgs:
   bucket_name: str = ""
   gc_project_id: str = ""
   is_github_actions: bool = False
-  region: str = "europe-west1"
+  region: str = ""
   create_cluster: bool = False
-  domain_name: str = "park-app.tech"
+  domain_name: str = ""
+  environment: str = ""
 
 def parse_args() -> CliArgs:
   parser = argparse.ArgumentParser()
@@ -26,8 +27,7 @@ def parse_args() -> CliArgs:
   )
   parser.add_argument(
       "--region",
-      default="europe-west1",
-      help="Region for the cluster (default: europe-west1)."
+      required=True
   )
   parser.add_argument(
       "--project-id",
@@ -53,8 +53,14 @@ def parse_args() -> CliArgs:
   )
   parser.add_argument(
       "--domain-name",
-      default="park-app.tech",
-      help="Domain name used by Terraform (default: park-app.tech)."
+      required=True,
+      help="Domain name used by Terraform"
+  )
+  parser.add_argument(
+    "--environment",
+    required=True,
+    choices=["staging", "production"],
+    help="Environment to deploy to (staging or production)"
   )
 
   args = parser.parse_args()
@@ -66,7 +72,8 @@ def parse_args() -> CliArgs:
     is_github_actions=args.is_github_actions,
     region=args.region,
     create_cluster=args.create_cluster,
-    domain_name=args.domain_name
+    domain_name=args.domain_name,
+    environment=args.environment
   )
 
 def run_subprocess(cmd: list, cwd: str = None):
@@ -161,32 +168,32 @@ def generate_tfvars_json(
 # ------------------------------------------------------------------------------
 # Run terraform plan
 # ------------------------------------------------------------------------------
-def run_terraform_plan():
+def run_terraform_plan(cliArgs: CliArgs):
   """
-  Runs `terraform plan` in the ./terraform/staging directory. Prints stdout/stderr.
+  Runs `terraform plan`. Prints stdout/stderr.
   """
   print("Running terraform init...")
-  out = run_subprocess(["terraform", "init"], cwd="./terraform/staging")
+  out = run_subprocess(["terraform", "init"], cwd=f"./terraform/{cliArgs.environment}")
   print(out)
 
   print("Running 'terraform plan'...")
-  out = run_subprocess(["terraform", "plan"], cwd="./terraform/staging")
+  out = run_subprocess(["terraform", "plan"], cwd=f"./terraform/{cliArgs.environment}")
   print(out)
 
 # ------------------------------------------------------------------------------
 # Run terraform apply
 # ------------------------------------------------------------------------------
-def run_terraform_apply():
+def run_terraform_apply(cliArgs: CliArgs):
   """
-  Runs `terraform apply -auto-approve` in the ./terraform/staging directory.
+  Runs `terraform apply -auto-approve`.
   Prints stdout/stderr.
   """
   print("Running terraform init...")
-  out = run_subprocess(["terraform", "init"], cwd="./terraform/staging")
+  out = run_subprocess(["terraform", "init"], cwd=f"./terraform/{cliArgs.environment}")
   print(out)
 
   print("Running 'terraform apply'...")
-  out = run_subprocess(["terraform", "apply", "-auto-approve"], cwd="./terraform/staging")
+  out = run_subprocess(["terraform", "apply", "-auto-approve"], cwd=f"./terraform/{cliArgs.environment}")
   print(out)
 
 # ------------------------------------------------------------------------------
@@ -202,7 +209,7 @@ def main():
   )
 
   # 2. Generate .tfvars.json from the combined tenant lists
-  tfvars_file = "./terraform/staging/deployment.auto.tfvars.json"
+  tfvars_file = f"./terraform/{args.environment}/deployment.auto.tfvars.json"
   generate_tfvars_json(
     enterprise_tenants=enterprise_tenants,
     output_file=tfvars_file,
@@ -211,11 +218,11 @@ def main():
 
   # 3. If action is "plan", run terraform plan
   if args.action == "plan":
-    run_terraform_plan()
+    run_terraform_plan(cliArgs=args)
     return
 
   # 4. If action is "apply", run terraform apply
-  run_terraform_apply()
+  run_terraform_apply(cliArgs=args)
 
 if __name__ == "__main__":
   main()

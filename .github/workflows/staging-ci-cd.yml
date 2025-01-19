@@ -100,7 +100,8 @@ jobs:
           --project-id ${{ vars.STAGING_PROJECT_ID }} \
           --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
           --domain-name ${{ env.DOMAIN }} \
-          --region ${{ vars.REGION }}
+          --region ${{ vars.REGION }} \
+          --environment staging
 
   sync-services:
     runs-on: ubuntu-latest
