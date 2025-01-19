@@ -47,25 +47,6 @@ def parse_args() -> CliArgs:
     tenant_subdomain=args.tenant_subdomain
   )
 
-def run_subprocess(cmd: list, cwd: str = None):
-  """
-  Runs a subprocess command and returns the stdout/stderr.
-  """
-  try:
-    proc = subprocess.run(
-        cmd,
-        check=True,
-        capture_output=True,
-        text=True,
-        cwd=cwd
-    )
-    return proc.stdout
-  except subprocess.CalledProcessError as e:
-    print("Command failed!")
-    print("Return code:", e.returncode)
-    print(e.stderr)
-    exit(1)
-
 # ------------------------------------------------------------------------------
 # Read enterprise-tenants.json from GCS
 # ------------------------------------------------------------------------------

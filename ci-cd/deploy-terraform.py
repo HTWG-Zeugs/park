@@ -4,7 +4,7 @@ import json
 import subprocess
 import argparse
 from google.cloud import storage
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 
 @dataclass
 class CliArgs:
@@ -82,11 +82,11 @@ def run_subprocess(cmd: list, cwd: str = None):
   """
   try:
     proc = subprocess.run(
-        cmd,
-        check=True,
-        capture_output=True,
-        text=True,
-        cwd=cwd
+      cmd,
+      check=True,
+      capture_output=True,
+      text=True,
+      cwd=cwd
     )
     return proc.stdout
   except subprocess.CalledProcessError as e:
