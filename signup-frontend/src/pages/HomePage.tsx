@@ -29,10 +29,10 @@ const HomePage = () => {
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
           With our <strong>Free Plan</strong>, you can get started right away and enjoy the following features:
           <List>
-        <ListItem><strong>Create garages</strong>: Set up and manage multiple garages to keep your locations organized.</ListItem>
-        <ListItem><strong>Create users</strong>: Add team members and manage user access effortlessly.</ListItem>
-        <ListItem><strong>Create defects</strong>: Track and manage defects to ensure quick issue resolution.</ListItem>
-        <ListItem><strong>Create eMobility charging stations</strong>: Integrate electric vehicle charging stations and monitor their status across your locations.</ListItem>
+            <ListItem><strong>Create garages</strong>: Set up and manage multiple garages to keep your locations organized.</ListItem>
+            <ListItem><strong>Create users</strong>: Add team members and manage user access effortlessly.</ListItem>
+            <ListItem><strong>Create defects</strong>: Track and manage defects to ensure quick issue resolution.</ListItem>
+            <ListItem><strong>Create eMobility charging stations</strong>: Integrate electric vehicle charging stations and monitor their status across your locations.</ListItem>
           </List>
           The Free Plan gives you all the essential tools to manage your garages and charging stations efficiently! ⚡️
           </Typography>

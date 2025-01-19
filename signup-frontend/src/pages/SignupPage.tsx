@@ -16,6 +16,24 @@ const SignupPage = () => {
   const [subdomain, setSubdomain] = useState('');
   const [error, setError] = useState('');
 
+
+  const validateField = (field: string, value: string) => {
+    switch (field) {
+      case 'subdomain':
+        { 
+          const subdomainRegex = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+          return subdomainRegex.test(value) ? '' : 'Invalid subdomain format. Only lowercase letters, numbers, and hyphens are allowed.'; 
+        }
+      default:
+        return '';
+    }
+  };
+
+  const handleBlur = (field: string, value: string) => {
+    const errorMessage = validateField(field, value);
+    setError(errorMessage);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -40,7 +58,6 @@ const SignupPage = () => {
     .catch(function (error) {
       if (error.response && error.response.status === 409) {
         setError(error.response.data);
-        
       } else {
         console.error('Error', error.message);
         setError("Error creating tenant");
@@ -64,6 +81,7 @@ const SignupPage = () => {
           margin="normal"
           value={tenantName}
           onChange={(e) => setTenantName(e.target.value)}
+          onBlur={() => handleBlur('tenantName', tenantName)}
           required
         />
         { planId === "enterprise" && 
@@ -74,6 +92,7 @@ const SignupPage = () => {
             margin="normal"
             value={subdomain}
             onChange={(e) => setSubdomain(e.target.value)}
+            onBlur={() => handleBlur('subdomain', subdomain)}
             required
           />
         }
@@ -84,6 +103,7 @@ const SignupPage = () => {
           margin="normal"
           value={userName}
           onChange={(e) => setUserName(e.target.value)}
+          onBlur={() => handleBlur('userName', userName)}
           required
         />
         <TextField
@@ -93,6 +113,7 @@ const SignupPage = () => {
           margin="normal"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onBlur={() => handleBlur('email', email)}
           required
         />
         <TextField
@@ -102,6 +123,7 @@ const SignupPage = () => {
           margin="normal"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onBlur={() => handleBlur('password', password)}
           required
         />
         <Button
