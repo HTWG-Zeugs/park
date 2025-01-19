@@ -123,7 +123,7 @@ jobs:
         uses: 'google-github-actions/auth@v2'
         with:
           service_account: 'github-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com'
-          workload_identity_provider: '${{ vars.STAGING_PROJECT_ID }}-github'
+          workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
 
       - name: Set up Google Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v2'
