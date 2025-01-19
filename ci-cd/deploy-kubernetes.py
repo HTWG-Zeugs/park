@@ -139,11 +139,11 @@ def run_subprocess(cmd: list, cwd: str = None):
   """
   try:
     proc = subprocess.run(
-        cmd,
-        check=True,
-        capture_output=True,
-        text=True,
-        cwd=cwd
+      cmd,
+      check=True,
+      capture_output=True,
+      text=True,
+      cwd=cwd
     )
     return proc.stdout
   except subprocess.CalledProcessError as e:
