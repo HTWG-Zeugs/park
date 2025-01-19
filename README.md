@@ -32,7 +32,7 @@ Firestore local: https://firebase.google.com/docs/admin/setup?hl=de#initialize_t
 
 - Production: `cloud-park-app`
 - Staging Jonas: `tensile-spirit-438110-i2`
-- Staging Lukas: `park-staging-444913`
+- Staging Lukas: `<PROJECT_ID>`
 
 ### Important commands
 
@@ -68,3 +68,114 @@ Firestore local: https://firebase.google.com/docs/admin/setup?hl=de#initialize_t
   ]
   ```
   - Set the cors config: `gsutil cors set cors.json gs://$BUCKET_NAME`
+
+
+## Setup of infrastructure
+
+### Pre-requisites
+
+1. Install [Google Cloud SDK](https://cloud.google.com/sdk/docs/install)
+2. Install [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
+3. Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+4. Install GKE plugin for kubectl
+    ```bash
+    gcloud components install gke-gcloud-auth-plugin
+    ```
+
+### Best practices
+- Store Terraform state in a remote backend
+- One backend per environment
+- Use versioning for the state bucket
+  ```bash
+  gcloud storage buckets create gs://${{PROJECT_ID}}-terraform-state --public-access-prevention --versioning
+  ```
+- Host TF code in a Git repository
+- Use continuous integration and continuous deployment (CI/CD) pipelines
+- ONLY change state through CI/CD pipelines
+
+
+### Staging environment
+
+#### Google Project
+
+1. Created a new project in Google Cloud Platform
+   - Authenticate to project in gcloud console:
+     ```bash
+     gcloud config set project <PROJECT_ID>
+     gcloud auth application-default set-quota-project <PROJECT_ID>
+     ```
+2. Enabled billing
+3. Enable required APIs:
+   - iam.googleapis.com
+   - storage.googleapis.com
+   - compute.googleapis.com
+   - container.googleapis.com
+   - artifactregistry.googleapis.com
+   - cloudresourcemanager.googleapis.com
+   - serviceusage.googleapis.com
+   - identitytoolkit.googleapis.com
+   - run.googleapis.com
+   
+    ```bash
+    gcloud services enable iam.googleapis.com storage.googleapis.com compute.googleapis.com container.googleapis.com artifactregistry.googleapis.com cloudresourcemanager.googleapis.com serviceusage.googleapis.com identitytoolkit.googleapis.com run.googleapis.com
+    ```
+4. To get a list of enabled APIs:
+    ```bash
+    gcloud services list --enabled
+    ```
+5. Created a service account for Terraform
+    ```bash
+    gcloud iam service-accounts create terraform --display-name "Terraform service account"
+    ```
+6. Get the email address of the service account
+    ```bash
+    gcloud iam service-accounts list
+    ```
+    Output:
+    ```
+    NAME                                    EMAIL                                                  DISABLED
+    Compute Engine default service account  585856061049-compute@developer.gserviceaccount.com     False
+    Terraform service account               terraform@<PROJECT_ID>.iam.gserviceaccount.com  False
+    ```
+
+6. Delete the default service account
+    ```bash
+    gcloud iam service-accounts delete 585856061049-compute@developer.gserviceaccount.com
+    ```
+
+7. Grant the service account the necessary permissions
+    ```bash
+    gcloud projects add-iam-policy-binding <PROJECT_ID> --member="serviceAccount:terraform@<PROJECT_ID>.iam.gserviceaccount.com" --role="roles/editor"
+    gcloud projects add-iam-policy-binding <PROJECT_ID> --member="serviceAccount:terraform@<PROJECT_ID>.iam.gserviceaccount.com" --role="roles/datastore.owner"
+    gcloud projects add-iam-policy-binding <PROJECT_ID> --member="serviceAccount:terraform@<PROJECT_ID>.iam.gserviceaccount.com" --role="roles/resourcemanager.projectIamAdmin"
+    gcloud projects add-iam-policy-binding <PROJECT_ID> --member="serviceAccount:terraform@<PROJECT_ID>.iam.gserviceaccount.com" --role="roles/artifactregistry.admin"
+    gcloud projects add-iam-policy-binding <PROJECT_ID> --member="serviceAccount:terraform@<PROJECT_ID>.iam.gserviceaccount.com" --role="roles/iam.workloadIdentityPoolAdmin"
+    gcloud projects add-iam-policy-binding <PROJECT_ID> --member="serviceAccount:terraform@<PROJECT_ID>.iam.gserviceaccount.com" --role="roles/iam.serviceAccountAdmin"
+    gcloud projects add-iam-policy-binding <PROJECT_ID> --member="serviceAccount:terraform@<PROJECT_ID>.iam.gserviceaccount.com" --role="roles/serviceusage.serviceUsageAdmin"
+    ```
+
+8. Create a key for the service account
+    ```bash
+    gcloud iam service-accounts keys create terraform-key.json --iam-account=terraform@<PROJECT_ID>.iam.gserviceaccount.com
+    ```
+
+#### Terraform
+
+1. Create remote state
+    ```bash
+    gcloud storage buckets create gs://<PROJECT_ID>-terraform-state --public-access-prevention --versioning
+    ```
+2. Create a backend.tf file
+    ```
+    terraform {
+        backend "gcs" {
+            bucket  = "<PROJECT_ID>-terraform-state"
+              prefix  = "terraform/state"
+        }
+    }
+    ```
+
+3. Initialize Terraform
+    ```bash
+    terraform init
+    ```
