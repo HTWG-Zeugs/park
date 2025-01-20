@@ -245,6 +245,19 @@ def sync_k8s_deployments_with_tenants(enterprise_tenants, cliArgs: CliArgs):
   
   # Deploy the infrastructure chart
   print("Deploying infrastructure ...")
+  print("Deploying cert-manager ...")
+  cmd = [
+    "helm", "upgrade", "--install", "cert-manager", "jetstack/cert-manager",
+    "--namespace", "infra-ns",
+    "--set", "config.apiVersion=controller.config.cert-manager.io/v1alpha1",
+    "--set", "config.kind=ControllerConfiguration" 
+    "--set", "config.enableGatewayAPI=true",
+    "--set", "crds.enabled=true",
+    "--set", "global.leaderElection.namespace=infra-ns"
+    ]
+  run_subprocess(cmd)
+
+  print("Deploying gateway ...")
   create_and_annotate_namespace("infra-ns")
   cmd = [ 
     "helm", "upgrade", "--install" , "park-infra", "./helm/infrastructure", 
@@ -350,6 +363,7 @@ def deploy_environment(cliArgs, envinronment_name, subdomain, tenant_type, tenan
     "--set", f"tenant_type={tenant_type}"
     ]
   run_subprocess(cmd)
+
 
 
 # ------------------------------------------------------------------------------
