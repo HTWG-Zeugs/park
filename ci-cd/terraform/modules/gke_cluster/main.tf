@@ -91,6 +91,7 @@ resource "google_container_node_pool" "default_pool" {
       mode = "GKE_METADATA"
     }
     machine_type = "e2-medium"
+    disk_size_gb = 30
     labels = {
       env = "default"
     }
