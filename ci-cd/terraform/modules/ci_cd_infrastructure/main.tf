@@ -12,7 +12,7 @@ resource "google_service_account" "github_sa" {
 
 resource "google_iam_workload_identity_pool" "github_pool" {
   project                   = var.project_id
-  workload_identity_pool_id = "${var.project_id}-github-pool"
+  workload_identity_pool_id = "${var.project_id}-github"
   display_name              = "GitHub identity pool"
   disabled                  = false
 }
@@ -20,7 +20,7 @@ resource "google_iam_workload_identity_pool" "github_pool" {
 
 resource "google_iam_workload_identity_pool_provider" "github_identity_provider" {
   project                            = var.project_id
-  workload_identity_pool_id          = "park-staging-444913-github-pool"
+  workload_identity_pool_id          = google_iam_workload_identity_pool.github_pool.workload_identity_pool_id
   workload_identity_pool_provider_id = "github-repo-provider"
   display_name                       = "GitHub provider"
   disabled                           = false

@@ -12,7 +12,7 @@ permissions:
   pull-requests: write
 
 env:
-  DOMAIN: ${{ vars.STAGING_DOMAIN }}
+  TERRAFORM_PLAN_ENVIRONMENT: staging
 
 jobs:
   build:
@@ -72,9 +72,6 @@ jobs:
 
   plan-terraform:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -88,7 +85,7 @@ jobs:
       - name: Login to Google Cloud
         uses: 'google-github-actions/auth@v2'
         with:
-          service_account: '${{ secrets.STAGING_GITHUB_SA }}'
+          service_account: 'github-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com'
           workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
       
       - uses: hashicorp/setup-terraform@v3
@@ -101,5 +98,6 @@ jobs:
           --create-cluster \
           --project-id ${{ vars.STAGING_PROJECT_ID }} \
           --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
-          --domain-name ${{ env.DOMAIN }} \
-          --region ${{ vars.REGION }}
+          --domain-name ${{ vars.STAGING_DOMAIN }} \
+          --region ${{ vars.STAGING_REGION }} \
+          --environment ${{ env.TERRAFORM_PLAN_ENVIRONMENT }}

@@ -3,7 +3,7 @@ name: Staging CI/CD
 on:
   push:
     branches:
-      - dev
+      - main
 
 permissions:
   id-token: write 
@@ -11,8 +11,8 @@ permissions:
 
 env:
   TAG_ID: "${{ github.sha }}"
-  GCR_REPO: "${{ vars.STAGING_REGION }}-docker.pkg.dev/${{ vars.STAGING_PROJECT_ID }}/docker-repository"
-  CLUSTER: "${{ vars.STAGING_PROJECT_ID }}-gke"
+  GCR_REPO: "${{ vars.PRODUCTION_REGION }}-docker.pkg.dev/${{ vars.PRODUCTION_PROJECT_ID }}/docker-repository"
+  CLUSTER: "${{ vars.PRODUCTION_PROJECT_ID }}-gke"
 
 jobs:
   build-and-push-images:
@@ -37,14 +37,14 @@ jobs:
       - name: Login to Google Cloud
         uses: 'google-github-actions/auth@v2'
         with:
-          service_account: 'github-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com'
-          workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
+          service_account: 'github-sa@${{ vars.PRODUCTION_PROJECT_ID }}.iam.gserviceaccount.com'
+          workload_identity_provider: '${{ secrets.PRODUCTION_WORKLOAD_IDENTITY_PROVIDER }}'
 
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Configure Docker for Google Cloud
-        run: gcloud auth configure-docker ${{ vars.STAGING_REGION }}-docker.pkg.dev
+        run: gcloud auth configure-docker ${{ vars.PRODUCTION_REGION }}-docker.pkg.dev
 
       - name: Build Docker image
         run: |
@@ -75,8 +75,8 @@ jobs:
       - name: Login to Google Cloud
         uses: 'google-github-actions/auth@v2'
         with:
-          service_account: 'github-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com'
-          workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
+          service_account: 'github-sa@${{ vars.PRODUCTION_PROJECT_ID }}.iam.gserviceaccount.com'
+          workload_identity_provider: '${{ secrets.PRODUCTION_WORKLOAD_IDENTITY_PROVIDER }}'
 
       - name: Setup python
         uses: actions/setup-python@v5
@@ -96,22 +96,22 @@ jobs:
           --action apply \
           --is-github-actions \
           --create-cluster \
-          --project-id ${{ vars.STAGING_PROJECT_ID }} \
-          --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
-          --domain-name ${{ vars.STAGING_DOMAIN }} \
-          --region ${{ vars.STAGING_REGION }} \
-          --environment staging
+          --project-id ${{ vars.PRODUCTION_PROJECT_ID }} \
+          --gcs-bucket ${{ vars.PRODUCTION_STATE_BUCKET }} \
+          --domain-name ${{ vars.PRODUCTION_DOMAIN }} \
+          --region ${{ vars.PRODUCTION_REGION }} \
+          --environment production
 
   sync-services:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      INFRA_SERVICE_ACCOUNT: infra-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com
-      INFRA_DB_ID: "${{ vars.STAGING_PROJECT_ID }}-infra-management"
-      AUTH_SERVICE_ACCOUNT: auth-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com
-      AUTH_DB_ID: "${{ vars.STAGING_PROJECT_ID }}-auth"
+      INFRA_SERVICE_ACCOUNT: infra-sa@${{ vars.PRODUCTION_PROJECT_ID }}.iam.gserviceaccount.com
+      INFRA_DB_ID: "${{ vars.PRODUCTION_PROJECT_ID }}-infra-management"
+      AUTH_SERVICE_ACCOUNT: auth-sa@${{ vars.PRODUCTION_PROJECT_ID }}.iam.gserviceaccount.com
+      AUTH_DB_ID: "${{ vars.PRODUCTION_PROJECT_ID }}-auth"
       SERVICE_AUDIENCE: "infrastructure-administration-service"
-      SIGNUP_FRONTEND_SERVICE_ACCOUNT: sign-up-frontend-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com
+      SIGNUP_FRONTEND_SERVICE_ACCOUNT: sign-up-frontend-sa@${{ vars.PRODUCTION_PROJECT_ID }}.iam.gserviceaccount.com
     needs: 
       - build-and-push-images
       - sync-terraform
@@ -122,8 +122,8 @@ jobs:
       - name: Login to Google Cloud
         uses: 'google-github-actions/auth@v2'
         with:
-          service_account: 'github-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com'
-          workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
+          service_account: 'github-sa@${{ vars.PRODUCTION_PROJECT_ID }}.iam.gserviceaccount.com'
+          workload_identity_provider: '${{ vars.PRODUCTION_PROJECT_ID }}-github'
 
       - name: Set up Google Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v2'
@@ -132,7 +132,7 @@ jobs:
         uses: 'google-github-actions/get-gke-credentials@v2'
         with:
           cluster_name: ${{ env.CLUSTER }}
-          location: ${{ vars.STAGING_REGION }}
+          location: ${{ vars.PRODUCTION_REGION }}
       
       - name: Setup python
         uses: actions/setup-python@v5
@@ -146,15 +146,15 @@ jobs:
           gcloud run deploy infrastructure-administration \
             --image=${{ env.GCR_REPO }}/infrastructure-administration:${{env.TAG_ID}} \
             --platform=managed \
-            --region=${{ vars.STAGING_REGION }} \
+            --region=${{ vars.PRODUCTION_REGION }} \
             --allow-unauthenticated \
             --port=8083 \
             --service-account=${{ env.INFRA_SERVICE_ACCOUNT }} \
-            --set-env-vars "AUTHENTICATION_SERVICE_URL=https://authentication-service-${{ vars.STAGING_PROJECT_NUMBER }}.${{ vars.STAGING_REGION }}.run.app" \
+            --set-env-vars "AUTHENTICATION_SERVICE_URL=https://authentication-service-${{ vars.PRODUCTION_PROJECT_NUMBER }}.${{ vars.PRODUCTION_REGION }}.run.app" \
             --set-env-vars "ANALYTICS_DB_ID=${{ env.INFRA_DB_ID }}" \
             --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
             --set-env-vars "GITHUB_ACTION_TOKEN=${{ secrets.CD_TOKEN }}" \
-            --set-env-vars "GITHUB_TENANT_WORKFLOW_ID=staging-manage-enterprise-tenants.yml" \
+            --set-env-vars "GITHUB_TENANT_WORKFLOW_ID=production-manage-enterprise-tenants.yml" \
             --set-env-vars "GITHUB_TENANT_WORKFLOW_BRANCH=dev" \
             --set-custom-audiences "[ ${{ env.SERVICE_AUDIENCE }} ]"
 
@@ -163,15 +163,15 @@ jobs:
           gcloud run deploy authentication-service \
             --image=${{ env.GCR_REPO }}/authentication-service:${{env.TAG_ID}} \
             --platform=managed \
-            --region=${{ vars.STAGING_REGION }} \
+            --region=${{ vars.PRODUCTION_REGION }} \
             --allow-unauthenticated \
             --port=8082 \
             --service-account=${{ env.AUTH_SERVICE_ACCOUNT }} \
             --set-env-vars "FIRESTORE_DB_ID=${{ env.AUTH_DB_ID }}" \
-            --set-env-vars "IDENTITY_PLATFORM_API_KEY=${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }}" \
-            --set-env-vars "IDENTITY_PLATFORM_AUTH_DOMAIN=${{ vars.STAGING_PROJECT_ID }}.firebaseapp.com" \
-            --set-env-vars "PARK_IDENTITY_PLATFORM_PROJECT_ID=${{ vars.STAGING_PROJECT_ID }}" \
-            --set-env-vars "INFRASTRUCTURE_SERVICE_URL=https://infrastructure-administration-${{ vars.STAGING_PROJECT_NUMBER }}.${{ vars.STAGING_REGION }}.run.app" \
+            --set-env-vars "IDENTITY_PLATFORM_API_KEY=${{ secrets.PRODUCTION_IDENTITY_PLATFORM_API_KEY }}" \
+            --set-env-vars "IDENTITY_PLATFORM_AUTH_DOMAIN=${{ vars.PRODUCTION_PROJECT_ID }}.firebaseapp.com" \
+            --set-env-vars "PARK_IDENTITY_PLATFORM_PROJECT_ID=${{ vars.PRODUCTION_PROJECT_ID }}" \
+            --set-env-vars "INFRASTRUCTURE_SERVICE_URL=https://infrastructure-administration-${{ vars.PRODUCTION_PROJECT_NUMBER }}.${{ vars.PRODUCTION_REGION }}.run.app" \
             --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
             --set-custom-audiences "[ ${{ env.SERVICE_AUDIENCE }} ]"
 
@@ -180,24 +180,24 @@ jobs:
           gcloud run deploy signup-frontend \
             --image=${{ env.GCR_REPO }}/signup-frontend:${{env.TAG_ID}} \
             --platform=managed \
-            --region=${{ vars.STAGING_REGION }} \
+            --region=${{ vars.PRODUCTION_REGION }} \
             --allow-unauthenticated \
             --port=80 \
             --service-account=${{ env.SIGNUP_FRONTEND_SERVICE_ACCOUNT }} \
-            --set-env-vars "PARK_AUTHENTICATION_URL=https://authentication-service-${{ vars.STAGING_PROJECT_NUMBER }}.${{ vars.STAGING_REGION }}.run.app"
+            --set-env-vars "PARK_AUTHENTICATION_URL=https://authentication-service-${{ vars.PRODUCTION_PROJECT_NUMBER }}.${{ vars.PRODUCTION_REGION }}.run.app"
 
       - name: Sync helm deployments
         working-directory: ./ci-cd
         run: |
           python -u deploy-kubernetes.py \
           --is-github-actions \
-          --project-id ${{ vars.STAGING_PROJECT_ID }} \
-          --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
+          --project-id ${{ vars.PRODUCTION_PROJECT_ID }} \
+          --gcs-bucket ${{ vars.PRODUCTION_STATE_BUCKET }} \
           --repository ${{ env.GCR_REPO }} \
-          --identity-api-key ${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }}  \
-          --identity-auth-domain ${{ vars.STAGING_PROJECT_ID }}.firebaseapp.com \
-          --infra-url https://infrastructure-administration-${{ vars.STAGING_PROJECT_NUMBER }}.${{ vars.STAGING_REGION }}.run.app \
-          --auth-url https://authentication-service-${{ vars.STAGING_PROJECT_NUMBER }}.${{ vars.STAGING_REGION }}.run.app \
-          --domain ${{ vars.STAGING_DOMAIN }} \
+          --identity-api-key ${{ secrets.PRODUCTION_IDENTITY_PLATFORM_API_KEY }}  \
+          --identity-auth-domain ${{ vars.PRODUCTION_PROJECT_ID }}.firebaseapp.com \
+          --infra-url https://infrastructure-administration-${{ vars.PRODUCTION_PROJECT_NUMBER }}.${{ vars.PRODUCTION_REGION }}.run.app \
+          --auth-url https://authentication-service-${{ vars.PRODUCTION_PROJECT_NUMBER }}.${{ vars.PRODUCTION_REGION }}.run.app \
+          --domain ${{ vars.PRODUCTION_DOMAIN }} \
           --git-tag ${{ env.TAG_ID}} \
-          --region ${{ vars.STAGING_REGION }}
+          --region ${{ vars.PRODUCTION_REGION }}

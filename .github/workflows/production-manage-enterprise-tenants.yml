@@ -16,8 +16,8 @@ permissions:
   contents: read 
   
 env:
-  GCR_REPO: "${{ vars.STAGING_REGION }}-docker.pkg.dev/${{ vars.STAGING_PROJECT_ID }}/docker-repository"
-  CLUSTER: "${{ vars.STAGING_PROJECT_ID }}-gke"
+  GCR_REPO: "${{ vars.PRODUCTION_REGION }}-docker.pkg.dev/${{ vars.PRODUCTION_PROJECT_ID }}/docker-repository"
+  CLUSTER: "${{ vars.PRODUCTION_PROJECT_ID }}-gke"
 
 jobs:
   manage-tenant:
@@ -33,7 +33,7 @@ jobs:
         uses: 'google-github-actions/auth@v2'
         with:
           service_account: 'github-sa@${{ vars.PRODUCTION_PROJECT_ID }}.iam.gserviceaccount.com'
-          workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
+          workload_identity_provider: '${{ secrets.PRODUCTION_WORKLOAD_IDENTITY_PROVIDER }}'
 
       - name: Setup python
         uses: actions/setup-python@v5
@@ -51,7 +51,7 @@ jobs:
         run: |
           python -u manage_enterprise_tenants.py \
           --action ${{ inputs.action }} \
-          --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
+          --gcs-bucket ${{ vars.PRODUCTION_STATE_BUCKET }} \
           --tenant-id ${{ inputs.tenant_id }} \
           --tenant-subdomain ${{ inputs.tenant_subdomain }}
     
@@ -69,7 +69,7 @@ jobs:
         uses: 'google-github-actions/auth@v2'
         with:
           service_account: 'github-sa@${{ vars.PRODUCTION_PROJECT_ID }}.iam.gserviceaccount.com'
-          workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
+          workload_identity_provider: '${{ secrets.PRODUCTION_WORKLOAD_IDENTITY_PROVIDER }}'
 
       - name: Setup python
         uses: actions/setup-python@v5
@@ -89,11 +89,11 @@ jobs:
           --action apply \
           --is-github-actions \
           --create-cluster \
-          --project-id ${{ vars.STAGING_PROJECT_ID }} \
-          --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
-          --domain-name ${{ vars.STAGING_DOMAIN }} \
-          --region ${{ vars.STAGING_REGION }} \
-          --environment staging
+          --project-id ${{ vars.PRODUCTION_PROJECT_ID }} \
+          --gcs-bucket ${{ vars.PRODUCTION_STATE_BUCKET }} \
+          --domain-name ${{ vars.PRODUCTION_DOMAIN }} \
+          --region ${{ vars.PRODUCTION_REGION }} \
+          --environment production
 
   sync-services:
     runs-on: ubuntu-latest
@@ -110,7 +110,7 @@ jobs:
         uses: 'google-github-actions/auth@v2'
         with:
           service_account: 'github-sa@${{ vars.PRODUCTION_PROJECT_ID }}.iam.gserviceaccount.com'
-          workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
+          workload_identity_provider: '${{ secrets.PRODUCTION_WORKLOAD_IDENTITY_PROVIDER }}'
 
       - name: Set up Google Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v2'
@@ -119,7 +119,7 @@ jobs:
         uses: 'google-github-actions/get-gke-credentials@v2'
         with:
           cluster_name: ${{ env.CLUSTER }}
-          location: ${{ vars.STAGING_REGION }}
+          location: ${{ vars.PRODUCTION_REGION }}
       
       - name: Setup python
         uses: actions/setup-python@v5
@@ -133,12 +133,12 @@ jobs:
         run: |
           python -u deploy-kubernetes.py \
           --is-github-actions \
-          --project-id ${{ vars.STAGING_PROJECT_ID }} \
-          --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
+          --project-id ${{ vars.PRODUCTION_PROJECT_ID }} \
+          --gcs-bucket ${{ vars.PRODUCTION_STATE_BUCKET }} \
           --repository ${{ env.GCR_REPO }} \
-          --identity-api-key ${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }}  \
-          --identity-auth-domain ${{ vars.STAGING_IDENTITY_PLATFORM_AUTH_DOMAIN }} \
-          --infra-url https://infrastructure-administration-${{ vars.STAGING_PROJECT_NUMBER }}.${{ vars.STAGING_REGION }}.run.app \
-          --auth-url https://authentication-service-${{ vars.STAGING_PROJECT_NUMBER }}.${{ vars.STAGING_REGION }}.run.app \
-          --domain ${{ vars.STAGING_DOMAIN }} \
-          --region ${{ vars.STAGING_REGION }}
+          --identity-api-key ${{ secrets.PRODUCTION_IDENTITY_PLATFORM_API_KEY }}  \
+          --identity-auth-domain ${{ vars.PRODUCTION_PROJECT_ID }}.firebaseapp.com \
+          --infra-url https://infrastructure-administration-${{ vars.PRODUCTION_PROJECT_NUMBER }}.${{ vars.PRODUCTION_REGION }}.run.app \
+          --auth-url https://authentication-service-${{ vars.PRODUCTION_PROJECT_NUMBER }}.${{ vars.PRODUCTION_REGION }}.run.app \
+          --domain ${{ vars.PRODUCTION_DOMAIN }} \
+          --region ${{ vars.PRODUCTION_REGION }}
