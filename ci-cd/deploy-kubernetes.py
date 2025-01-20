@@ -28,7 +28,6 @@ class CliArgs:
 class DeploymentInfo:
   git_tag: str = ""
 
-
 def parse_args() -> CliArgs:
   parser = argparse.ArgumentParser()
   parser.add_argument(
@@ -304,8 +303,7 @@ def create_and_update_deployments(enterprise_tenants, cliArgs):
                          tenant_type="enterprise",
                          tenant_id=tenant_id)
 
-def deploy_environment(cliArgs, envinronment_name, subdomain, tenant_type, tenant_id="NOT_SET", ):
-    
+def deploy_environment(cliArgs, envinronment_name, subdomain, tenant_type, tenant_id="NOT_SET"):    
   namespace = create_namespace_name(envinronment_name)
   release_name = create_deployment_name(envinronment_name, BACKEND_RELEASE_NAME)
   print(f"Deploying backend in namespace '{namespace}'...")
@@ -322,7 +320,8 @@ def deploy_environment(cliArgs, envinronment_name, subdomain, tenant_type, tenan
     "--set", f"environment_name={envinronment_name}",
     "--set", f"subdomain={subdomain}",
     "--set", f"authenticationService.url={cliArgs.auth_url}",
-    "--set", f"infrastructureManagement.url={cliArgs.infra_url}"
+    "--set", f"infrastructureManagement.url={cliArgs.infra_url}",
+    "--set", f"tenant_type={tenant_type}"
     ]
   run_subprocess(cmd)
   

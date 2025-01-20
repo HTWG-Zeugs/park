@@ -154,7 +154,7 @@ jobs:
             --set-env-vars "ANALYTICS_DB_ID=${{ env.INFRA_DB_ID }}" \
             --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
             --set-env-vars "GITHUB_ACTION_TOKEN=${{ secrets.CD_TOKEN }}" \
-            --set-env-vars "GITHUB_TENANT_WORKFLOW_ID=staging-manage-enterprise-tenants.yml" \
+            --set-env-vars "GITHUB_TENANT_WORKFLOW_ID=staging-enterprise-tenants-list.yml" \
             --set-env-vars "GITHUB_TENANT_WORKFLOW_BRANCH=dev" \
             --set-custom-audiences "[ ${{ env.SERVICE_AUDIENCE }} ]"
 

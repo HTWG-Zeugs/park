@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: namespace-resource-quota
+spec:
+  hard:
+    requests.cpu: {{ index .Values.resources .Values.tenant_type "requests" "cpu" }}
+    requests.memory: {{ index .Values.resources .Values.tenant_type "requests" "memory" }}
+    limits.cpu: {{ index .Values.resources .Values.tenant_type "limits" "cpu" }}
+    limits.memory: {{ index .Values.resources .Values.tenant_type "limits" "memory" }}
