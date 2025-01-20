@@ -197,7 +197,7 @@ jobs:
           kubectl create secret tls api-gateway-cert \
             --cert=tls.crt \
             --key=tls.key \
-            --namespace=infra-ns --dry-run=client -o yaml | kubectl apply -f
+            --namespace=infra-ns --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Sync helm deployments
         working-directory: ./ci-cd
