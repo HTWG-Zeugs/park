@@ -1,0 +1,23 @@
+% Section author command
+\makeatletter
+\newcommand{\sectionautor}[1]{
+    {
+        \linespread{1.1}
+        \large
+        \scshape
+        Autor: #1
+        \vspace{12pt}
+    }
+    \@afterheading
+}
+\makeatother
+
+% Author declarations
+\newcommand{\authorlukasb}{Lukas Benner}
+\newcommand{\authorjonas}{Jonas Elsper}
+\newcommand{\authorlukase}{Lukas Epple}
+
+% Referenzen zu Items
+\newcounter{itemcounter}[section]
+\newcommand{\itm}[1]{\item[/#1/\refstepcounter{itemcounter}\label{itm-#1}]}
+\newcommand{\refitm}[1]{\hyperref[itm-#1]{/#1/}}

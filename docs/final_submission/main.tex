@@ -1,0 +1,26 @@
+\documentclass[a4paper, 12pt]{article}
+
+\input{packages.tex}
+
+\renewcommand{\glossarysection}[2][]{}
+\makeglossaries
+
+\input{commands.tex}
+
+\begin{document}
+\begin{sloppypar}
+
+\input{titelseite.tex}
+
+\setcounter{section}{-1}
+\tableofcontents
+\setcounter{page}{2}
+\newpage
+
+\input{sections/01-introduction.tex}
+\goodbreak
+
+\goodbreak
+
+\end{sloppypar}
+\end{document}
