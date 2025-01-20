@@ -210,7 +210,6 @@ jobs:
             --set projectId=${{ vars.STAGING_PROJECT_ID }} \
             --set domain=${{ vars.STAGING_DOMAIN }}
       
-
       - name: Sync helm deployments
         working-directory: ./ci-cd
         run: |
