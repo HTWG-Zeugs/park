@@ -109,29 +109,6 @@ def create_namespace_name(environment_name: str):
 def create_deployment_name(environment_name: str, deployment_name: str):
    return f"{environment_name}-{deployment_name}"
 
-def create_and_annotate_namespace(namespace: str):
-
-  # Check if the namespace already exists
-  result = subprocess.run(
-    ["kubectl", "get", "namespace", namespace],
-    capture_output=True,
-    text=True
-  )
-  if result.returncode != 0:
-    print(f"Creating namespace '{namespace}'...")
-    cmd = ["kubectl", "create", "namespace", namespace]
-    run_subprocess(cmd)
-    
-  annotation_key = "shared-gateway-access"
-  annotation_value = "true"
-  cmd = [
-      "kubectl", "annotate",
-      "namespace", namespace,
-      f"{annotation_key}={annotation_value}",
-      "--overwrite"
-    ]
-  run_subprocess(cmd)
-
 def run_subprocess(cmd: list, cwd: str = None):
   """
   Runs a subprocess command and returns the stdout/stderr.
@@ -243,29 +220,6 @@ def sync_k8s_deployments_with_tenants(enterprise_tenants, cliArgs: CliArgs):
       ]
     run_subprocess(cmd)
   
-  # Deploy the infrastructure chart
-  print("Deploying infrastructure ...")
-  print("Deploying cert-manager ...")
-  cmd = [
-    "helm", "upgrade", "--install", "cert-manager", "jetstack/cert-manager",
-    "--namespace", "infra-ns",
-    "--set", "config.apiVersion=controller.config.cert-manager.io/v1alpha1",
-    "--set", "config.kind=ControllerConfiguration" 
-    "--set", "config.enableGatewayAPI=true",
-    "--set", "crds.enabled=true",
-    "--set", "global.leaderElection.namespace=infra-ns"
-    ]
-  run_subprocess(cmd)
-
-  print("Deploying gateway ...")
-  create_and_annotate_namespace("infra-ns")
-  cmd = [ 
-    "helm", "upgrade", "--install" , "park-infra", "./helm/infrastructure", 
-    "-n", "infra-ns",
-    "--set", f"domain={cliArgs.domain_name}"
-    ]
-  run_subprocess(cmd)
-
   delete_old_deployments(enterprise_tenants)
 
   create_and_update_deployments(enterprise_tenants, cliArgs)
@@ -324,10 +278,10 @@ def deploy_environment(cliArgs, envinronment_name, subdomain, tenant_type, tenan
   namespace = create_namespace_name(envinronment_name)
   release_name = create_deployment_name(envinronment_name, BACKEND_RELEASE_NAME)
   print(f"Deploying backend in namespace '{namespace}'...")
-  create_and_annotate_namespace(namespace)
   cmd = [
     "helm", "upgrade", "--install", release_name, "./helm/backend",
     "-n", namespace,
+    "--create-namespace",
     "--set", f"repository={cliArgs.repository}",
     "--set", f"gitTag={cliArgs.git_tag}",
     "--set", f"identityPlatForm.apiKey={cliArgs.identity_api_key}",

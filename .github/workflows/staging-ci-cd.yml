@@ -189,15 +189,25 @@ jobs:
             --service-account=${{ env.SIGNUP_FRONTEND_SERVICE_ACCOUNT }} \
             --set-env-vars "PARK_AUTHENTICATION_URL=https://authentication-service-${{ vars.STAGING_PROJECT_NUMBER }}.${{ vars.STAGING_REGION }}.run.app"
 
-      - name: Create Kubernetes TLS Secret
+      - name: Deploy cert manager
         run: |
-          echo "${{ secrets.CERT_FILE }}" > tls.crt
-          echo "${{ secrets.CERT_KEY }}" > tls.key
+          helm upgrade --install cert-manager jetstack/cert-manager \
+            -n infra-ns \
+            --create-namespace \
+            --repo https://charts.jetstack.io \
+            --version v1.16.2 \
+            --set config.apiVersion=controller.config.cert-manager.io/v1alpha1 \
+            --set config.kind=ControllerConfiguration \
+            --set config.enableGatewayAPI=true \
+            --set crds.enabled=true \
+            --set global.leaderElection.namespace=infra-ns
 
-          kubectl create secret tls api-gateway-cert \
-            --cert=tls.crt \
-            --key=tls.key \
-            --namespace=infra-ns --dry-run=client -o yaml | kubectl apply -f -
+      - name: Deploy gateway
+        run: |
+          helm upgrade --install park-infra ./ci-cd/helm/infrastructure \
+            -n infra-ns \
+            --set domain=${{ vars.STAGING_DOMAIN }}
+      
 
       - name: Sync helm deployments
         working-directory: ./ci-cd
