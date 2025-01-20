@@ -200,6 +200,8 @@ jobs:
             --set config.enableGatewayAPI=true \
             --set crds.enabled=true \
             --set global.leaderElection.namespace=infra-ns
+      - run: |
+          kubectl annotate serviceaccount -n infra-ns cert-manager iam.gke.io/gcp-service-account=cert-manager@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com
 
       - name: Deploy gateway
         run: |
