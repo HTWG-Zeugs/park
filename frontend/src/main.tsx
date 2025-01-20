@@ -18,6 +18,7 @@ import EditUser from "./routes/EditUser";
 import "firebase/auth";
 import "src/common/i18n/i18n.ts";
 import ProtectedRoute from "src/routes/ProtectedRoutes";
+import TenantSpecificRoute from "src/routes/TenantTypeSpecificRoute";
 import PrivateRoute from "src/routes/PrivateRoute";
 import { AuthProvider } from "src/services/AuthContext";
 import EditGarage from "./routes/EditGarage";
@@ -33,37 +34,41 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: "home", element: <Home /> },
-      { path: "occupancy", element: <Occupancy />}, //TODO: Add protected route
-      { path: "demo-client", element: <DemoClient />}, //TODO: Add protected route
+      { path: "occupancy", element: <Occupancy /> },
+      { path: "demo-client", element: <DemoClient /> },
       { path: "sign-in", element: <SignIn /> },
       { path: "sign-up", element: <SignUp /> },
-      { 
-        path: "analytics", 
-        element: 
-        <ProtectedRoute>
-          <Analytics/>
-        </ProtectedRoute>
+      {
+        path: "analytics",
+        element: (
+          <TenantSpecificRoute>
+            <Analytics />
+          </TenantSpecificRoute>
+        ),
       },
-      { 
-        path: "users", 
-        element: 
-        <PrivateRoute>
-          <Users /> 
-        </PrivateRoute>
+      {
+        path: "users",
+        element: (
+          <PrivateRoute>
+            <Users />
+          </PrivateRoute>
+        ),
       },
-      { 
+      {
         path: "users/add",
-        element: 
-        <ProtectedRoute>
-          <AddUsers />
-        </ProtectedRoute>
+        element: (
+          <ProtectedRoute>
+            <AddUsers />
+          </ProtectedRoute>
+        ),
       },
-      { 
-        path: "users/edit", 
-        element:
-        <ProtectedRoute>
-          <EditUser />
-        </ProtectedRoute> 
+      {
+        path: "users/edit",
+        element: (
+          <ProtectedRoute>
+            <EditUser />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "defects",

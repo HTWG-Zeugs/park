@@ -18,18 +18,19 @@ const SignIn: React.FC = () => {
   const TENANT_TYPE = import.meta.env.VITE_TENANT_TYPE;
   const TENANT_ID = import.meta.env.VITE_TENANT_ID;
 
-  async function setTenantId(email: string) : Promise<boolean> {
+  async function setTenantId(email: string): Promise<boolean> {
     if (String(TENANT_ID) === String("NOT_SET")) {
-      const response = await axios.get(`${AUTHENTICATION_BACKEND}/tenant-id/${email}`);
-      if (response.data){
+      const response = await axios.get(
+        `${AUTHENTICATION_BACKEND}/tenant-id/${email}`
+      );
+      if (response.data) {
         const { tenantId, tenantType } = response.data;
         if (String(tenantType) !== String(TENANT_TYPE)) {
           setError(t("route_sign_in.invalid_tenant_type"));
           return false;
         }
         auth.tenantId = tenantId;
-      }
-      else {
+      } else {
         console.error(`Failed to fetch tenant id for user: ${email}`);
       }
       return true;
@@ -46,8 +47,7 @@ const SignIn: React.FC = () => {
     setMessage(null);
 
     try {
-      if (!await setTenantId(email))
-        return;
+      if (!(await setTenantId(email))) return;
 
       const userCredential = await auth.signInWithEmailAndPassword(
         email,
@@ -84,9 +84,8 @@ const SignIn: React.FC = () => {
     }
 
     try {
-      if (!await setTenantId(email))
-        return;
-      
+      if (!(await setTenantId(email))) return;
+
       await auth.sendPasswordResetEmail(email);
       setMessage(t("route_sign_in.password_reset_email_sent"));
     } catch {
