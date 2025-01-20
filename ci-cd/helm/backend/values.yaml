@@ -23,24 +23,24 @@ resources:
   free:
     requests:
       cpu: "500m"
-      memory: "512Mi"
+      memory: "1Gi"
     limits:
       cpu: "1"
-      memory: "1Gi"
+      memory: "3Gi"
   premium:
     requests:
       cpu: "500m"
-      memory: "512Mi"
+      memory: "1Gi"
     limits:
       cpu: "2"
-      memory: "2Gi"
+      memory: "3Gi"
   enterprise:
     requests:
       cpu: "1"
       memory: "1Gi"
     limits:
       cpu: "2"
-      memory: "2Gi"
+      memory: "4Gi"
 
 authenticationService:
   url: ""

@@ -93,10 +93,7 @@ Firestore local: https://firebase.google.com/docs/admin/setup?hl=de#initialize_t
 - Use continuous integration and continuous deployment (CI/CD) pipelines
 - ONLY change state through CI/CD pipelines
 
-
-### Staging environment
-
-#### Google Project
+### Google Project
 
 1. Created a new project in Google Cloud Platform
    - Authenticate to project in gcloud console:
@@ -161,7 +158,7 @@ Firestore local: https://firebase.google.com/docs/admin/setup?hl=de#initialize_t
     gcloud iam service-accounts keys create terraform-key.json --iam-account=terraform@<PROJECT_ID>.iam.gserviceaccount.com
     ```
 
-#### Terraform
+### Terraform
 
 1. Create remote state
     ```bash
@@ -181,3 +178,12 @@ Firestore local: https://firebase.google.com/docs/admin/setup?hl=de#initialize_t
     ```bash
     terraform init
     ```
+
+### Setup a self signed certificate
+
+1. Create a self signed certificate
+    ```bash
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt
+    ```
+2. Create a secret in GitHub and add the certificate and key as secrets
+    - `CERT_FILE` and `CERT_KEY`
