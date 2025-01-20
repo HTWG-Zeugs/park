@@ -183,7 +183,5 @@ Firestore local: https://firebase.google.com/docs/admin/setup?hl=de#initialize_t
 
 1. Create a self signed certificate
     ```bash
-    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt
+    openssl genrsa 4096 > account.key
     ```
-2. Create a secret in GitHub and add the certificate and key as secrets
-    - `CERT_FILE` and `CERT_KEY`
