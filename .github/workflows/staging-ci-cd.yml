@@ -195,8 +195,6 @@ jobs:
           helm upgrade --install cert-manager jetstack/cert-manager \
             -n infra-ns \
             --create-namespace \
-            --repo https://charts.jetstack.io \
-            --version v1.16.2 \
             --set config.apiVersion=controller.config.cert-manager.io/v1alpha1 \
             --set config.kind=ControllerConfiguration \
             --set config.enableGatewayAPI=true \
