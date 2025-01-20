@@ -1,0 +1,273 @@
+name: CI/CD (Reusable)
+
+on:
+  # This makes the workflow reusable via "workflow_call"
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+      project_id:
+        type: string
+        required: true
+      project_number:
+        type: string
+        required: true
+      region:
+        type: string
+        required: true
+      domain:
+        type: string
+        required: true
+      state_bucket:
+        type: string
+        required: true
+
+    secrets:
+      # Adjust or add more secrets depending on your actual usage
+      workload_identity_provider:
+        required: true
+      identity_platform_api_key:
+        required: true
+      cd_token:
+        required: true
+      GITHUB_TOKEN:
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  # -------------------------------------------------------------------------
+  # 1) BUILD AND PUSH IMAGES
+  # -------------------------------------------------------------------------
+  build-and-push-images:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service:
+          - { name: "property-management", dockerfile: "./property-management.Dockerfile" }
+          - { name: "parking-management", dockerfile: "./parking-management.Dockerfile" }
+          - { name: "authentication-service", dockerfile: "./authentication-service.Dockerfile" }
+          - { name: "infrastructure-administration", dockerfile: "./infrastructure-administration.Dockerfile" }
+          - { name: "frontend", dockerfile: "./frontend.Dockerfile" }
+          - { name: "signup-frontend", dockerfile: "./signup-frontend.Dockerfile" }
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TAG_ID: ${{ github.sha }}
+      GCR_REPO: "${{ inputs.region }}-docker.pkg.dev/${{ inputs.project_id }}/docker-repository"
+      CLUSTER: "${{ inputs.project_id }}-gke"
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          service_account: "github-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
+          workload_identity_provider: ${{ secrets.workload_identity_provider }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Google Cloud
+        run: gcloud auth configure-docker ${{ inputs.region }}-docker.pkg.dev
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -f ${{ matrix.service.dockerfile }} \
+            . \
+            -t ${{ matrix.service.name }}:${{ env.TAG_ID }} \
+            --no-cache \
+            --platform linux/amd64
+
+      - name: Tag Docker image
+        run: |
+          docker tag ${{ matrix.service.name }}:${{ env.TAG_ID }} ${{ env.GCR_REPO }}/${{ matrix.service.name }}:${{ env.TAG_ID }}
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ env.GCR_REPO }}/${{ matrix.service.name }}:${{ env.TAG_ID }}
+
+  # -------------------------------------------------------------------------
+  # 2) SYNC TERRAFORM
+  # -------------------------------------------------------------------------
+  sync-terraform:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    needs: [build-and-push-images]
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          service_account: "github-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
+          workload_identity_provider: ${{ secrets.workload_identity_provider }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+          cache: "pip"
+      - run: pip install -r ci-cd/requirements.txt
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform apply
+        working-directory: ./ci-cd
+        run: |
+          python -u deploy-terraform.py \
+            --action apply \
+            --is-github-actions \
+            --create-cluster \
+            --project-id ${{ inputs.project_id }} \
+            --gcs-bucket ${{ inputs.state_bucket }} \
+            --domain-name ${{ inputs.domain }} \
+            --region ${{ inputs.region }} \
+            --environment ${{ inputs.environment }}
+
+  # -------------------------------------------------------------------------
+  # 3) SYNC SERVICES
+  # -------------------------------------------------------------------------
+  sync-services:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      SERVICE_AUDIENCE: "infrastructure-administration-service"
+      INFRA_SERVICE_ACCOUNT: "infra-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
+      AUTH_SERVICE_ACCOUNT: "auth-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
+      SIGNUP_FRONTEND_SERVICE_ACCOUNT: "sign-up-frontend-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
+    needs: [sync-terraform]
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          service_account: "github-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
+          workload_identity_provider: ${{ secrets.workload_identity_provider }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: "${{ inputs.project_id }}-gke"
+          location: ${{ inputs.region }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+          cache: "pip"
+      - run: pip install -r ci-cd/requirements.txt
+
+      # Example: Deploy infrastructure-administration to Cloud Run
+      - name: Deploy infrastructure-administration
+        run: |
+          gcloud run deploy infrastructure-administration \
+            --image=${{ env.GCR_REPO }}/infrastructure-administration:${{ env.TAG_ID }} \
+            --platform=managed \
+            --region=${{ inputs.region }} \
+            --allow-unauthenticated \
+            --port=8083 \
+            --service-account=${{ env.INFRA_SERVICE_ACCOUNT }} \
+            --set-env-vars "AUTHENTICATION_SERVICE_URL=https://authentication-service-${{ inputs.project_number }}.${{ inputs.region }}.run.app" \
+            --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
+            --set-env-vars "GITHUB_ACTION_TOKEN=${{ secrets.cd_token }}" \
+            --set-env-vars "GITHUB_TENANT_WORKFLOW_ID=${{ inputs.environment }}-enterprise-tenants-list.yml" \
+            --set-env-vars "GITHUB_TENANT_WORKFLOW_BRANCH=dev" \
+            --set-custom-audiences "[ ${{ env.SERVICE_AUDIENCE }} ]"
+
+      # Example: Deploy authentication-service to Cloud Run
+      - name: Deploy authentication-service
+        run: |
+          gcloud run deploy authentication-service \
+            --image=${{ env.GCR_REPO }}/authentication-service:${{ env.TAG_ID }} \
+            --platform=managed \
+            --region=${{ inputs.region }} \
+            --allow-unauthenticated \
+            --port=8082 \
+            --service-account=${{ env.AUTH_SERVICE_ACCOUNT }} \
+            --set-env-vars "IDENTITY_PLATFORM_API_KEY=${{ secrets.identity_platform_api_key }}" \
+            --set-env-vars "IDENTITY_PLATFORM_AUTH_DOMAIN=${{ inputs.project_id }}.firebaseapp.com" \
+            --set-env-vars "PARK_IDENTITY_PLATFORM_PROJECT_ID=${{ inputs.project_id }}" \
+            --set-env-vars "INFRASTRUCTURE_SERVICE_URL=https://infrastructure-administration-${{ inputs.project_number }}.${{ inputs.region }}.run.app" \
+            --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
+            --set-custom-audiences "[ ${{ env.SERVICE_AUDIENCE }} ]"
+
+      # Example: Deploy signup-frontend
+      - name: Deploy signup-frontend
+        run: |
+          gcloud run deploy signup-frontend \
+            --image=${{ env.GCR_REPO }}/signup-frontend:${{ env.TAG_ID }} \
+            --platform=managed \
+            --region=${{ inputs.region }} \
+            --allow-unauthenticated \
+            --port=80 \
+            --service-account=${{ env.SIGNUP_FRONTEND_SERVICE_ACCOUNT }} \
+            --set-env-vars "PARK_AUTHENTICATION_URL=https://authentication-service-${{ inputs.project_number }}.${{ inputs.region }}.run.app"
+
+      # Example: Deploy cert-manager via Helm
+      - name: Add Jetstack Helm repo
+        run: helm repo add jetstack https://charts.jetstack.io --force-update
+
+      - name: Install / upgrade cert-manager
+        run: |
+          helm upgrade --install cert-manager jetstack/cert-manager \
+            -n infra-ns \
+            --create-namespace \
+            --set config.apiVersion=controller.config.cert-manager.io/v1alpha1 \
+            --set config.kind=ControllerConfiguration \
+            --set config.enableGatewayAPI=true \
+            --set crds.enabled=true \
+            --set global.leaderElection.namespace=infra-ns
+
+      - name: Annotate ServiceAccount for cert-manager
+        run: |
+          kubectl annotate serviceaccount \
+            -n infra-ns \
+            cert-manager iam.gke.io/gcp-service-account=cert-manager@${{ inputs.project_id }}.iam.gserviceaccount.com
+
+      # Example: Deploy gateway
+      - name: Deploy gateway
+        run: |
+          helm upgrade --install park-infra ./ci-cd/helm/infrastructure \
+            -n infra-ns \
+            --set projectId=${{ inputs.project_id }} \
+            --set domain=${{ inputs.domain }}
+
+      # Example: Sync Helm deployments
+      - name: Sync helm deployments
+        working-directory: ./ci-cd
+        run: |
+          python -u deploy-kubernetes.py \
+            --is-github-actions \
+            --project-id ${{ inputs.project_id }} \
+            --gcs-bucket ${{ inputs.state_bucket }} \
+            --repository "${{ env.GCR_REPO }}" \
+            --identity-api-key ${{ secrets.identity_platform_api_key }} \
+            --identity-auth-domain ${{ inputs.project_id }}.firebaseapp.com \
+            --infra-url https://infrastructure-administration-${{ inputs.project_number }}.${{ inputs.region }}.run.app \
+            --auth-url https://authentication-service-${{ inputs.project_number }}.${{ inputs.region }}.run.app \
+            --domain ${{ inputs.domain }} \
+            --git-tag ${{ env.TAG_ID }} \
+            --region ${{ inputs.region }}
