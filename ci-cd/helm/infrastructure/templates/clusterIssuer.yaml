@@ -10,10 +10,6 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
-    - http01:
-        gatewayHTTPRoute:
-          parentRefs:
-          - group: gateway.networking.k8s.io
-            kind: Gateway
-            name: {{ .Values.gateway.name }}
-            namespace: {{ .Release.Namespace }}
+      - dns01:
+        cloudDNS:
+          project: {{ .Values.projectId }}

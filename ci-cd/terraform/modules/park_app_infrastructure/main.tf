@@ -146,3 +146,30 @@ resource "google_project_iam_member" "sign_up_frontend_sa_iam_member" {
   role    = each.value
   member = "serviceAccount:${google_service_account.sign_up_frontend_sa.email}"
 }
+
+resource "google_service_account" "cert_manager_sa" {
+  account_id   = "cert-manager"
+  project      = var.project_id
+  display_name = "Cert Manager Service Account"
+}
+
+resource "google_service_account_iam_member" "cert_manager_sa_iam" {
+  service_account_id = google_service_account.cert_manager_sa.id
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[infra-ns/cert-manager]"
+}
+
+variable "cert_manager_sa_roles" {
+  type = list(string)
+  default = [
+    "roles/dns.admin",
+    "roles/iam.serviceAccountTokenCreator"
+  ]
+}
+
+resource "google_project_iam_member" "cert_manager_sa_iam_member" {	
+  for_each = { for value in var.cert_manager_sa_roles : value => value }
+  project = var.project_id
+  role    = each.value
+  member = "serviceAccount:${google_service_account.cert_manager_sa.email}"
+}

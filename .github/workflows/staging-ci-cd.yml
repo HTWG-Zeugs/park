@@ -205,6 +205,7 @@ jobs:
         run: |
           helm upgrade --install park-infra ./ci-cd/helm/infrastructure \
             -n infra-ns \
+            --set projectId=${{ vars.STAGING_PROJECT_ID }} \
             --set domain=${{ vars.STAGING_DOMAIN }}
       
 
