@@ -13,7 +13,7 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-      hostname: {{ .Values.domain }}
+      hostname: "*.{{ .Values.domain }}"
       tls:
         mode: Terminate
         certificateRefs:
