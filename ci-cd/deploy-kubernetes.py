@@ -246,7 +246,11 @@ def sync_k8s_deployments_with_tenants(enterprise_tenants, cliArgs: CliArgs):
   # Deploy the infrastructure chart
   print("Deploying infrastructure ...")
   create_and_annotate_namespace("infra-ns")
-  cmd = [ "helm", "upgrade", "--install" , "park-infra", "./helm/infrastructure", "-n", "infra-ns" ]
+  cmd = [ 
+    "helm", "upgrade", "--install" , "park-infra", "./helm/infrastructure", 
+    "-n", "infra-ns",
+    "--set", f"domain={cliArgs.domain_name}"
+    ]
   run_subprocess(cmd)
 
   delete_old_deployments(enterprise_tenants)

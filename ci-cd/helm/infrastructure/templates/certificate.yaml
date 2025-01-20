@@ -1,0 +1,8 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: park-certificate
+  namespace: {{ .Release.Namespace}}
+spec:
+  domains:
+    - "*.{{ .Values.domain}}"
