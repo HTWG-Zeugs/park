@@ -55,7 +55,7 @@ variable "github_sa_roles" {
   default = [
     "roles/editor",
     "roles/container.clusterViewer",
-    "roles/container.developer",
+    "roles/container.admin",
     "roles/datastore.owner",
     "roles/resourcemanager.projectIamAdmin",
     "roles/artifactregistry.admin",
