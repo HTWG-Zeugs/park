@@ -32,7 +32,7 @@ spec:
             - name: PORT
               value: "{{ .Values.propertyManagement.service.port }}"
             - name: PARKING_MANAGEMENT_BACKEND_URL
-              value: "http://{{ .Values.subdomain }}.{{ .Values.domain }}{{ .Values.parkingManagement.route.prefix}}"
+              value: "https://{{ .Values.subdomain }}.{{ .Values.domain }}{{ .Values.parkingManagement.route.prefix}}"
             - name: AUTHENTICATION_SERVICE_URL
               value: "{{ .Values.authenticationService.url }}"
             - name: INFRASTRUCTURE_MANAGEMENT_SERVICE_URL
