@@ -186,6 +186,16 @@ jobs:
             --service-account=${{ env.SIGNUP_FRONTEND_SERVICE_ACCOUNT }} \
             --set-env-vars "PARK_AUTHENTICATION_URL=https://authentication-service-${{ vars.PRODUCTION_PROJECT_NUMBER }}.${{ vars.PRODUCTION_REGION }}.run.app"
 
+      - name: Create Kubernetes TLS Secret
+        run: |
+          echo "${{ secrets.CERT_FILE }}" > tls.crt
+          echo "${{ secrets.CERT_KEY }}" > tls.key
+
+          kubectl create secret tls api-gateway-cert \
+            --cert=tls.crt \
+            --key=tls.key \
+            --namespace=infra-ns --dry-run=client -o yaml | kubectl apply -f
+
       - name: Sync helm deployments
         working-directory: ./ci-cd
         run: |
