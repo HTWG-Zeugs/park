@@ -116,9 +116,10 @@ Firestore local: https://firebase.google.com/docs/admin/setup?hl=de#initialize_t
    - identitytoolkit.googleapis.com
    - run.googleapis.com
    - firestore.googleapis.com
+   - certificatemanager.googleapis.com
    
     ```bash
-    gcloud services enable iam.googleapis.com storage.googleapis.com compute.googleapis.com container.googleapis.com artifactregistry.googleapis.com cloudresourcemanager.googleapis.com serviceusage.googleapis.com identitytoolkit.googleapis.com run.googleapis.com firestore.googleapis.com
+    gcloud services enable iam.googleapis.com storage.googleapis.com compute.googleapis.com container.googleapis.com artifactregistry.googleapis.com cloudresourcemanager.googleapis.com serviceusage.googleapis.com identitytoolkit.googleapis.com run.googleapis.com firestore.googleapis.com certificatemanager.googleapis.com
     ```
 4. To get a list of enabled APIs:
     ```bash
