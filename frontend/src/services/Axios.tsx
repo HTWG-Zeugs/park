@@ -1,4 +1,5 @@
 import axios from "axios";
+import https from "https";
 
 const PROPERTY_MANAGEMENT_BACKEND = import.meta.env.VITE_PROPERTY_MANAGEMENT_SERVICE_URL;
 const INFRASTRUCTURE_MANAGEMENT_BACKEND = import.meta.env.VITE_INFRASTRUCTURE_MANAGEMENT_SERVICE_URL;
@@ -17,7 +18,11 @@ if (INFRASTRUCTURE_MANAGEMENT_BACKEND === undefined)
 if (AUTHENTICATION_BACKEND === undefined)
     throw new Error("Backend URL of Authentication service is not defined");
 
-const axiosAuthenticated = axios.create();
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false,
+});
+
+const axiosAuthenticated = axios.create({httpsAgent: httpsAgent});
 
 axiosAuthenticated.interceptors.request.use(
     (config) => {

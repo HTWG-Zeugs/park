@@ -1,7 +1,12 @@
 import { Garage } from "./models/Garage";
 import { GarageDto } from "./../../../shared/garageDto";
 import axios from "axios";
+import https from "https";
 import {getIdToken} from "./../middleware/ServiceCommunication";
+
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false,
+});
 
 export class GarageEventsNotifier {
   constructor(private readonly parkingManagementEndpoint: string) {}
@@ -15,6 +20,7 @@ export class GarageEventsNotifier {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        httpsAgent: httpsAgent,
       })
       .then((response) => {
         console.log("Notified parking management about new garage");
