@@ -35,6 +35,13 @@ spec:
               value: "{{ .Values.infrastructureAdministration.audience }}"
             - name: PORT
               value: "{{ .Values.parkingManagement.service.port }}"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
           livenessProbe:
             httpGet:
               path: {{ .Values.parkingManagement.healthCheck.endpoint }}
