@@ -11,5 +11,5 @@ spec:
       name: letsencrypt-staging
     solvers:
       - dns01:
-        cloudDNS:
-          project: {{ .Values.projectId }}
+          cloudDNS:
+            project: {{ .Values.projectId }}
