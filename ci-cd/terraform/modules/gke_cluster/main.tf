@@ -83,7 +83,6 @@ resource "google_container_node_pool" "default_pool" {
   count = var.create_cluster ? 1 : 0
   cluster    = google_container_cluster.primary[0].name
   location   = var.region
-  node_count = 2
 
   node_config {
     service_account = google_service_account.node_sa.email
@@ -103,7 +102,7 @@ resource "google_container_node_pool" "default_pool" {
   }
 
   autoscaling {
-    min_node_count = 1
-    max_node_count = 1
+    min_node_count = 0
+    max_node_count = 2
   }
 }
