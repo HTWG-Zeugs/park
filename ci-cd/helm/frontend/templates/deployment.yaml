@@ -45,6 +45,13 @@ spec:
               value: {{ .Values.tenant_id }}
             - name: PARK_TENANT_TYPE
               value: {{ .Values.tenant_type }}
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "256m"
+              memory: "512Mi"
           livenessProbe:
             httpGet:
               path: {{ .Values.frontend.healthCheck.endpoint }}
