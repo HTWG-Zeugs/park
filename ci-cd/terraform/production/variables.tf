@@ -5,7 +5,7 @@ variable is_github_actions {
 
 variable region {
   type    = string
-  default = "europe-west1"
+  default = "us-west1"
 }
 
 variable project_id {
@@ -22,6 +22,7 @@ variable create_cluster {
   default = true
 }
 
-variable enterprise_tenants{
-  type   = list(map(string))
+variable git_tag {
+  type    = string
+  default = ""
 }

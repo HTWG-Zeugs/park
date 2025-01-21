@@ -32,7 +32,7 @@ data "google_client_config" "provider" {}
 
 data "google_storage_bucket_object_content" "deployment_info" {
   name   = "deployment.json"
-  bucket = "park-staging-444913-terraform-state"
+  bucket = "${var.project_id}-terraform-state"
 }
 
 locals {
@@ -122,7 +122,7 @@ module "premium_tenants_env" {
 
 data "google_storage_bucket_object_content" "enterprise_tenants" {
   name   = "enterprise-tenants.json"
-  bucket = "park-staging-444913-terraform-state"
+  bucket = "${var.project_id}-terraform-state"
 }
 locals {
   enterprise_tenants = can(jsondecode(data.google_storage_bucket_object_content.enterprise_tenants.content)) ? jsondecode(data.google_storage_bucket_object_content.enterprise_tenants.content) : []
