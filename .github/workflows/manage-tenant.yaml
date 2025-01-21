@@ -98,17 +98,8 @@ jobs:
           service_account: "github-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
           workload_identity_provider: ${{ secrets.workload_identity_provider }}
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
-          cache: "pip"
-      - run: pip install -r ci-cd/requirements.txt
-
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
-
-      - uses: hashicorp/setup-terraform@v3
 
       - uses: hashicorp/setup-terraform@v3
       - name: Terraform apply
@@ -121,6 +112,4 @@ jobs:
             -var="region=${{ inputs.region }}" \
             -var="domain_name=${{ inputs.domain }}" \
             -var="create_cluster=true" \
-            -var="git_tag=${{ env.TAG_ID }}" \
-            -var="identity_api_key=${{ secrets.identity_platform_api_key }}" \
-            -var="identity_auth_domain=${{ inputs.project_id }}.firebaseapp.com"
+            -var="git_tag=${{ env.TAG_ID }}"

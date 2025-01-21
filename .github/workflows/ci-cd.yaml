@@ -126,13 +126,6 @@ jobs:
           cluster_name: "${{ inputs.project_id }}-gke"
           location: ${{ inputs.region }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
-          cache: "pip"
-      - run: pip install -r ci-cd/requirements.txt
-
       # Example: Deploy infrastructure-administration to Cloud Run
       - name: Deploy infrastructure-administration
         run: |
@@ -193,4 +186,3 @@ jobs:
             -var="domain_name=${{ inputs.domain }}" \
             -var="create_cluster=true" \
             -var="git_tag=${{ env.TAG_ID }}"
-            
