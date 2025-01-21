@@ -12,6 +12,7 @@ permissions:
   pull-requests: write
 
 env:
+  TAG_ID: ${{ github.sha }}
   TERRAFORM_PLAN_ENVIRONMENT: staging
 
 jobs:
@@ -76,12 +77,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-          cache: 'pip'
-      - run: pip install -r ci-cd/requirements.txt
-
       - name: Login to Google Cloud
         uses: 'google-github-actions/auth@v2'
         with:
@@ -90,14 +85,12 @@ jobs:
       
       - uses: hashicorp/setup-terraform@v3
       - name: Run Terraform plan
-        working-directory: ./ci-cd
+        working-directory: ./ci-cd/terraform/${{ env.TERRAFORM_PLAN_ENVIRONMENT}}
         run: |
-          python -u deploy-terraform.py \
-          --action plan \
-          --is-github-actions \
-          --create-cluster \
-          --project-id ${{ vars.STAGING_PROJECT_ID }} \
-          --gcs-bucket ${{ vars.STAGING_STATE_BUCKET }} \
-          --domain-name ${{ vars.STAGING_DOMAIN }} \
-          --region ${{ vars.STAGING_REGION }} \
-          --environment ${{ env.TERRAFORM_PLAN_ENVIRONMENT }}
+          terraform init
+          terraform plan \
+            -var="is_github_actions=true" \
+            -var="project_id=${{ vars.STAGING_PROJECT_ID }}" \
+            -var="region=${{ vars.STAGING_REGION }}" \
+            -var="domain_name=${{ vars.STAGING_DOMAIN }}" \
+            -var="create_cluster=true"

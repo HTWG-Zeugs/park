@@ -22,6 +22,7 @@ variable create_cluster {
   default = true
 }
 
-variable enterprise_tenants{
-  type   = list(map(string))
+variable git_tag {
+  type    = string
+  default = ""
 }

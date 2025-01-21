@@ -13,13 +13,35 @@ provider "google" {
   region      = var.region
 }
 
-data "google_project" "project" {}
+provider "kubernetes" {
+  host                   = "https://${module.gke_cluster.cluster_endpoint}"
+  cluster_ca_certificate = base64decode(module.gke_cluster.cluster_ca_certificate)
+  token                  = data.google_client_config.provider.access_token
+}
 
-module "ci_cd_infrastructure" {
-  source = "../modules/ci_cd_infrastructure"
-  region = var.region
-  project_id = var.project_id
-  github_org = "HTWG-Zeugs"
+provider "helm" {
+  kubernetes {
+    host                   = "https://${module.gke_cluster.cluster_endpoint}"
+    cluster_ca_certificate = base64decode(module.gke_cluster.cluster_ca_certificate)
+    token                  = data.google_client_config.provider.access_token
+  }
+}
+
+data "google_project" "project" {}
+data "google_client_config" "provider" {}
+
+data "google_storage_bucket_object_content" "deployment_info" {
+  name   = "deployment.json"
+  bucket = "${var.project_id}-terraform-state"
+}
+
+locals {
+  git_tag = var.git_tag != "" ? var.git_tag : can(jsondecode(data.google_storage_bucket_object_content.deployment_info.content)) ? jsondecode(data.google_storage_bucket_object_content.deployment_info.content).git_tag : ""
+}
+
+locals {
+  repository = "${var.region}-docker.pkg.dev/${var.project_id}/docker-repository"
+  identity_auth_domain = "${ var.project_id}.firebaseapp.com"
 }
 
 module "gke_cluster" {
@@ -29,7 +51,15 @@ module "gke_cluster" {
   create_cluster = var.create_cluster
 }
 
+module "ci_cd_infrastructure" {
+  source = "../modules/ci_cd_infrastructure"
+  region = var.region
+  project_id = var.project_id
+  github_org = "HTWG-Zeugs"
+}
+
 module "park_app_infrastructure" {
+  depends_on = [ module.gke_cluster ]
   source = "../modules/park_app_infrastructure"
   region = var.region
   project_id = var.project_id
@@ -41,6 +71,7 @@ module "park_app_infrastructure" {
 }
 
 module "free_tenants_env" {
+  depends_on = [ module.gke_cluster, module.park_app_infrastructure ]
   source = "../modules/environments"
   region = var.region
   project_id = var.project_id
@@ -51,11 +82,21 @@ module "free_tenants_env" {
   dns_zone_domain_name = module.park_app_infrastructure.dns_zone_domain_name
 
   environment_name = "free"
+  domain = var.domain_name
   subdomain = "free"
   app_namespace = "free-ns"
+  repository = local.repository
+  git_tag = local.git_tag
+  identity_api_key = module.park_app_infrastructure.identity_platform_api_key
+  identity_auth_domain = local.identity_auth_domain
+  infra_url = "https://infrastructure-administration-${ data.google_project.project.number }.${ var.region }.run.app"
+  auth_url = "https://authentication-service-${ data.google_project.project.number }.${ var.region }.run.app"
+  tenant_type = "free"
+  tenant_id = "NOT_SET"
 }
 
 module "premium_tenants_env" {
+  depends_on = [ module.gke_cluster, module.park_app_infrastructure ]
   source = "../modules/environments"
   region = var.region
   project_id = var.project_id
@@ -66,13 +107,30 @@ module "premium_tenants_env" {
   dns_zone_domain_name = module.park_app_infrastructure.dns_zone_domain_name
 
   environment_name = "premium"
+  domain = var.domain_name
   subdomain = "premium"
   app_namespace = "premium-ns"
+  repository = local.repository
+  git_tag = local.git_tag
+  identity_api_key = module.park_app_infrastructure.identity_platform_api_key
+  identity_auth_domain = local.identity_auth_domain
+  infra_url = "https://infrastructure-administration-${ data.google_project.project.number }.${ var.region }.run.app"
+  auth_url = "https://authentication-service-${ data.google_project.project.number }.${ var.region }.run.app"
+  tenant_type = "premium"
+  tenant_id = "NOT_SET"
+}
+
+data "google_storage_bucket_object_content" "enterprise_tenants" {
+  name   = "enterprise-tenants.json"
+  bucket = "${var.project_id}-terraform-state"
+}
+locals {
+  enterprise_tenants = can(jsondecode(data.google_storage_bucket_object_content.enterprise_tenants.content)) ? jsondecode(data.google_storage_bucket_object_content.enterprise_tenants.content) : []
 }
 
 module "per_enterprise_tenant" {
-  for_each = { for tenant in var.enterprise_tenants : tenant.id => tenant }
-
+  depends_on = [ module.gke_cluster, module.park_app_infrastructure ]
+  for_each = { for tenant in local.enterprise_tenants : tenant.tenantId => tenant }
   source = "../modules/environments"
   region = var.region
   project_id = var.project_id
@@ -82,9 +140,18 @@ module "per_enterprise_tenant" {
   dns_zone_name = module.park_app_infrastructure.dns_zone_name
   dns_zone_domain_name = module.park_app_infrastructure.dns_zone_domain_name
 
-  environment_name = each.value.id
-  subdomain = each.value.domain
-  app_namespace = "${each.value.id}-ns"
+  environment_name = each.value.tenantId
+  domain = var.domain_name
+  subdomain = each.value.dns
+  app_namespace = "${each.value.tenantId}-ns"
+  repository = local.repository
+  git_tag = local.git_tag
+  identity_api_key = module.park_app_infrastructure.identity_platform_api_key
+  identity_auth_domain = local.identity_auth_domain
+  infra_url = "https://infrastructure-administration-${ data.google_project.project.number }.${ var.region }.run.app"
+  auth_url = "https://authentication-service-${ data.google_project.project.number }.${ var.region }.run.app"
+  tenant_type = "enterprise"
+  tenant_id = each.value.tenantId
 }
 
 output "github_sa_email" {
@@ -93,8 +160,4 @@ output "github_sa_email" {
 
 output "workload_identity_pool_provider_name" {
   value = module.ci_cd_infrastructure.workload_identity_pool_provider_name
-}
-
-output "gateway_ip" {
-  value = module.park_app_infrastructure.gateway_ip
 }
