@@ -14,6 +14,9 @@ on:
 jobs:
   manage-tenant-production:
     uses: ./.github/workflows/manage-tenant.yaml
+    permissions:
+      id-token: write
+      contents: read
     with:
       # Pass environment-specific inputs
       environment: "production"

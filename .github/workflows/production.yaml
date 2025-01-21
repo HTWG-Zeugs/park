@@ -7,6 +7,9 @@ on:
 jobs:
   ci-cd:
     uses: ./.github/workflows/ci-cd.yaml
+    permissions:
+      id-token: write
+      contents: read
     with:
       environment: "production"
       project_id: ${{ vars.PRODUCTION_PROJECT_ID }}

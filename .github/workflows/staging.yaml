@@ -10,6 +10,9 @@ on:
 jobs:
   ci-cd:
     uses: ./.github/workflows/ci-cd.yaml
+    permissions:
+      id-token: write
+      contents: read
     with:
       environment: "staging"
       project_id: ${{ vars.STAGING_PROJECT_ID }}
