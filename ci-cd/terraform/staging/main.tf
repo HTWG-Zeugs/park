@@ -30,6 +30,8 @@ module "gke_cluster" {
 }
 
 module "park_app_infrastructure" {
+  depends_on = [ module.gke_cluster ]
+  count = var.create_cluster ? 1 : 0
   source = "../modules/park_app_infrastructure"
   region = var.region
   project_id = var.project_id
@@ -41,6 +43,8 @@ module "park_app_infrastructure" {
 }
 
 module "free_tenants_env" {
+  depends_on = [ module.gke_cluster ]
+  count = var.create_cluster ? 1 : 0
   source = "../modules/environments"
   region = var.region
   project_id = var.project_id
@@ -56,6 +60,8 @@ module "free_tenants_env" {
 }
 
 module "premium_tenants_env" {
+  depends_on = [ module.gke_cluster ]
+  count = var.create_cluster ? 1 : 0
   source = "../modules/environments"
   region = var.region
   project_id = var.project_id
@@ -71,8 +77,8 @@ module "premium_tenants_env" {
 }
 
 module "per_enterprise_tenant" {
-  for_each = { for tenant in var.enterprise_tenants : tenant.id => tenant }
-
+  depends_on = [ module.gke_cluster ]
+  for_each = var.create_cluster ? { for tenant in var.enterprise_tenants : tenant.id => tenant } : {}
   source = "../modules/environments"
   region = var.region
   project_id = var.project_id
