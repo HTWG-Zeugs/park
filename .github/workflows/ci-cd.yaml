@@ -145,6 +145,8 @@ jobs:
       SERVICE_AUDIENCE: "infrastructure-administration-service"
       INFRA_SERVICE_ACCOUNT: "infra-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
       AUTH_SERVICE_ACCOUNT: "auth-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
+      INFRA_DB_ID: "${{ inputs.project_id }}-infra-management"
+      AUTH_DB_ID: "${{ inputs.project_id }}-auth"
       SIGNUP_FRONTEND_SERVICE_ACCOUNT: "sign-up-frontend-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
     needs: [sync-terraform]
 
@@ -185,6 +187,7 @@ jobs:
             --port=8083 \
             --service-account=${{ env.INFRA_SERVICE_ACCOUNT }} \
             --set-env-vars "AUTHENTICATION_SERVICE_URL=https://authentication-service-${{ inputs.project_number }}.${{ inputs.region }}.run.app" \
+            --set-env-vars "ANALYTICS_DB_ID=${{ env.INFRA_DB_ID }}" \
             --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
             --set-env-vars "GITHUB_ACTION_TOKEN=${{ secrets.cd_token }}" \
             --set-env-vars "GITHUB_TENANT_WORKFLOW_ID=${{ inputs.environment }}-enterprise-tenants-list.yaml" \
@@ -201,6 +204,7 @@ jobs:
             --allow-unauthenticated \
             --port=8082 \
             --service-account=${{ env.AUTH_SERVICE_ACCOUNT }} \
+            --set-env-vars "FIRESTORE_DB_ID=${{ env.AUTH_DB_ID }}" \
             --set-env-vars "IDENTITY_PLATFORM_API_KEY=${{ secrets.identity_platform_api_key }}" \
             --set-env-vars "IDENTITY_PLATFORM_AUTH_DOMAIN=${{ inputs.project_id }}.firebaseapp.com" \
             --set-env-vars "PARK_IDENTITY_PLATFORM_PROJECT_ID=${{ inputs.project_id }}" \
