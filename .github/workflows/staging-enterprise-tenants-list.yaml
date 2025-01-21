@@ -13,7 +13,7 @@ on:
 
 jobs:
   manage-tenant-staging:
-    uses: ./.github/workflows/manage-tenant.yml
+    uses: ./.github/workflows/manage-tenant.yaml
     with:
       # Pass in environment-specific settings
       environment: "staging"
@@ -29,6 +29,5 @@ jobs:
       tenant_subdomain: ${{ github.event.inputs.tenant_subdomain }}
 
     secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       workload_identity_provider: ${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}
       identity_platform_api_key: ${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }}

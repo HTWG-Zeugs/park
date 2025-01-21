@@ -6,7 +6,7 @@ on:
 
 jobs:
   ci-cd:
-    uses: ./.github/workflows/ci-cd.yml
+    uses: ./.github/workflows/ci-cd.yaml
     with:
       environment: "production"
       project_id: ${{ vars.PRODUCTION_PROJECT_ID }}
@@ -14,10 +14,8 @@ jobs:
       region: ${{ vars.PRODUCTION_REGION }}
       domain: ${{ vars.PRODUCTION_DOMAIN }}
       state_bucket: ${{ vars.PRODUCTION_STATE_BUCKET }}
-      # usw.
 
     secrets:
       workload_identity_provider: ${{ secrets.PRODUCTION_WORKLOAD_IDENTITY_PROVIDER }}
       identity_platform_api_key: ${{ secrets.PRODUCTION_IDENTITY_PLATFORM_API_KEY }}
       cd_token: ${{ secrets.CD_TOKEN }}
-      # ggf. weitere secrets

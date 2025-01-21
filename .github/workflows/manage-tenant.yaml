@@ -39,8 +39,6 @@ on:
 
     # 3) Secrets
     secrets:
-      GITHUB_TOKEN:
-        required: true
       workload_identity_provider:
         required: true
       identity_platform_api_key:
@@ -56,8 +54,6 @@ env:
 jobs:
   manage-tenant:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -131,7 +127,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: sync-terraform
     env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       SERVICE_AUDIENCE: "infrastructure-administration-service"
 
     steps:
