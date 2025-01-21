@@ -14,14 +14,14 @@ provider "google" {
 }
 
 provider "kubernetes" {
-  host                   = module.gke_cluster.cluster_endpoint
+  host                   = "https://${module.gke_cluster.cluster_endpoint}"
   cluster_ca_certificate = base64decode(module.gke_cluster.cluster_ca_certificate)
   token                  = data.google_client_config.provider.access_token
 }
 
 provider "helm" {
   kubernetes {
-    host                   = module.gke_cluster.cluster_endpoint
+    host                   = "https://${module.gke_cluster.cluster_endpoint}"
     cluster_ca_certificate = base64decode(module.gke_cluster.cluster_ca_certificate)
     token                  = data.google_client_config.provider.access_token
   }
@@ -30,8 +30,18 @@ provider "helm" {
 data "google_project" "project" {}
 data "google_client_config" "provider" {}
 
+data "google_storage_bucket_object_content" "deployment_info" {
+  name   = "deployment.json"
+  bucket = "park-staging-444913-terraform-state"
+}
+
+locals {
+  git_tag = var.git_tag != "" ? var.git_tag : can(jsondecode(data.google_storage_bucket_object_content.deployment_info.content)) ? jsondecode(data.google_storage_bucket_object_content.deployment_info.content).git_tag : ""
+}
+
 locals {
   repository = "${var.region}-docker.pkg.dev/${var.project_id}/docker-repository"
+  identity_auth_domain = "${ var.project_id}.firebaseapp.com"
 }
 
 module "gke_cluster" {
@@ -46,7 +56,6 @@ module "ci_cd_infrastructure" {
   region = var.region
   project_id = var.project_id
   github_org = "HTWG-Zeugs"
-  domain = var.domain_name
 }
 
 module "park_app_infrastructure" {
@@ -77,9 +86,9 @@ module "free_tenants_env" {
   subdomain = "free"
   app_namespace = "free-ns"
   repository = local.repository
-  git_tag = var.git_tag
-  identity_api_key = var.identity_api_key
-  identity_auth_domain = var.identity_auth_domain
+  git_tag = local.git_tag
+  identity_api_key = module.park_app_infrastructure.identity_platform_api_key
+  identity_auth_domain = local.identity_auth_domain
   infra_url = "https://infrastructure-administration-${ data.google_project.project.number }.${ var.region }.run.app"
   auth_url = "https://authentication-service-${ data.google_project.project.number }.${ var.region }.run.app"
   tenant_type = "free"
@@ -102,21 +111,21 @@ module "premium_tenants_env" {
   subdomain = "premium"
   app_namespace = "premium-ns"
   repository = local.repository
-  git_tag = var.git_tag
-  identity_api_key = var.identity_api_key
-  identity_auth_domain = var.identity_auth_domain
+  git_tag = local.git_tag
+  identity_api_key = module.park_app_infrastructure.identity_platform_api_key
+  identity_auth_domain = local.identity_auth_domain
   infra_url = "https://infrastructure-administration-${ data.google_project.project.number }.${ var.region }.run.app"
   auth_url = "https://authentication-service-${ data.google_project.project.number }.${ var.region }.run.app"
   tenant_type = "premium"
   tenant_id = "NOT_SET"
 }
 
-data "google_storage_bucket_object" "enterprise_tenants" {
+data "google_storage_bucket_object_content" "enterprise_tenants" {
   name   = "enterprise-tenants.json"
   bucket = "park-staging-444913-terraform-state"
 }
 locals {
-  enterprise_tenants = can(jsondecode(data.google_storage_bucket_object.enterprise_tenants.content)) ? jsondecode(data.google_storage_bucket_object.enterprise_tenants.content) : []
+  enterprise_tenants = can(jsondecode(data.google_storage_bucket_object_content.enterprise_tenants.content)) ? jsondecode(data.google_storage_bucket_object_content.enterprise_tenants.content) : []
 }
 
 module "per_enterprise_tenant" {
@@ -136,9 +145,9 @@ module "per_enterprise_tenant" {
   subdomain = each.value.dns
   app_namespace = "${each.value.tenantId}-ns"
   repository = local.repository
-  git_tag = var.git_tag
-  identity_api_key = var.identity_api_key
-  identity_auth_domain = var.identity_auth_domain
+  git_tag = local.git_tag
+  identity_api_key = module.park_app_infrastructure.identity_platform_api_key
+  identity_auth_domain = local.identity_auth_domain
   infra_url = "https://infrastructure-administration-${ data.google_project.project.number }.${ var.region }.run.app"
   auth_url = "https://authentication-service-${ data.google_project.project.number }.${ var.region }.run.app"
   tenant_type = "enterprise"

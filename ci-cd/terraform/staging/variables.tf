@@ -24,12 +24,5 @@ variable create_cluster {
 
 variable git_tag {
   type    = string
-}
-
-variable identity_api_key {
-  type    = string
-}
-
-variable identity_auth_domain {
-  type    = string
+  default = ""
 }

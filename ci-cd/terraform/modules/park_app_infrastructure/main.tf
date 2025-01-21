@@ -23,8 +23,12 @@ resource "google_identity_platform_config" "identity_platform" {
   }
 }
 
-output "identity_platform" {
-  value = google_identity_platform_config.identity_platform
+output "identity_platform_api_key" {
+  value = google_identity_platform_config.identity_platform.client[0].api_key
+}
+
+output "identity_platform_domain" {
+  value = google_identity_platform_config.identity_platform.client[0].firebase_subdomain
 }
 
 
@@ -172,4 +176,71 @@ resource "google_project_iam_member" "cert_manager_sa_iam_member" {
   project = var.project_id
   role    = each.value
   member = "serviceAccount:${google_service_account.cert_manager_sa.email}"
+}
+
+resource "kubernetes_namespace" "infra" {
+  metadata {
+    name = "infra-ns"
+    annotations = {
+      "iam.gke.io/gcp-service-account" : "cert-manager@${ var.project_id }.iam.gserviceaccount.com"
+    }
+  }
+}
+
+resource "helm_release" "cert_manager" {
+  depends_on = [ kubernetes_namespace.infra ]
+  name       = "cert-manager"
+  repository = "https://charts.jetstack.io"
+  chart      = "cert-manager"
+  namespace = kubernetes_namespace.infra.metadata.0.name
+  create_namespace = false
+  
+  set {
+    name  = "config.apiVersion"
+    value = "controller.config.cert-manager.io/v1alpha1"
+  }
+  set {
+    name  = "config.kind"
+    value = "ControllerConfiguration"
+  }
+  set {
+    name  = "config.enableGatewayAPI"
+    value = true
+  }
+  set {
+    name  = "crds.enabled"
+    value = true
+  }
+  set {
+    name  = "global.leaderElection.namespace"
+    value = "infra-ns"
+  }
+}
+
+resource "kubernetes_annotations" "cert_manager_sa_annotations" {
+  api_version = "v1"
+  kind        = "ServiceAccount"
+  metadata {
+    name = "cert-manager"
+    namespace = "infra-ns"
+  }
+  annotations = {
+    "iam.gke.io/gcp-service-account" : "cert-manager@${ var.project_id }.iam.gserviceaccount.com"
+  }
+}
+
+resource "helm_release" "infrastructure" {
+  depends_on = [ kubernetes_namespace.infra ]
+  name  = "park-infra"
+  chart = "../../helm/infrastructure"
+  namespace = kubernetes_namespace.infra.metadata.0.name
+  create_namespace = false
+  set {
+    name  = "projectId"
+    value = var.project_id
+  }
+  set {
+    name  = "domain"
+    value = var.domain_name
+  }
 }

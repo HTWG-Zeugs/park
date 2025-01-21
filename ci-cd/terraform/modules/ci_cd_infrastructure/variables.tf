@@ -12,7 +12,3 @@ variable github_org {
   type    = string
   default = ""
 }
-
-variable domain {
-  type    = string
-}

@@ -130,8 +130,6 @@ resource "google_dns_record_set" "tenant_dns_record" {
 }
 
 
-### Helm chart for the tenant
-
 resource "kubernetes_namespace" "tenant" {
   metadata {
     name = "${var.environment_name}-ns"
@@ -141,7 +139,7 @@ resource "kubernetes_namespace" "tenant" {
 resource "helm_release" "backend" {
   depends_on = [ kubernetes_namespace.tenant ]
   name      = "${var.environment_name}-park-backend"
-  chart      = "../../../helm/backend"
+  chart      = "../../helm/backend"
   version    = var.git_tag
   namespace  = kubernetes_namespace.tenant.metadata.0.name
   create_namespace = false
@@ -193,8 +191,9 @@ resource "helm_release" "backend" {
 }
 
 resource "helm_release" "frontend" {
+  depends_on = [ kubernetes_namespace.tenant ]
   name      = "${var.environment_name}-park-frontend"
-  chart      = "../../../helm/backend"
+  chart      = "../../helm/frontend"
   namespace  = kubernetes_namespace.tenant.metadata.0.name
   create_namespace = false
   
