@@ -38,6 +38,12 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  TAG_ID: ${{ github.sha }}
+  GCR_REPO: "${{ inputs.region }}-docker.pkg.dev/${{ inputs.project_id }}/docker-repository"
+  CLUSTER: "${{ inputs.project_id }}-gke"
+
 jobs:
   # -------------------------------------------------------------------------
   # 1) BUILD AND PUSH IMAGES
@@ -54,12 +60,6 @@ jobs:
           - { name: "infrastructure-administration", dockerfile: "./infrastructure-administration.Dockerfile" }
           - { name: "frontend", dockerfile: "./frontend.Dockerfile" }
           - { name: "signup-frontend", dockerfile: "./signup-frontend.Dockerfile" }
-
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      TAG_ID: ${{ github.sha }}
-      GCR_REPO: "${{ inputs.region }}-docker.pkg.dev/${{ inputs.project_id }}/docker-repository"
-      CLUSTER: "${{ inputs.project_id }}-gke"
 
     steps:
       - name: Check out source
