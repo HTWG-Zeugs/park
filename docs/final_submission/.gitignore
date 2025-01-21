@@ -192,10 +192,11 @@ hs_err_pid*
 *.xmpdata
 
 # Allow images with pdf ending
-!img/*.pdf
+!resources/*.pdf
 .DS_Store
 *.bib.sav.tmp
 build/
 examples/
 *.zip
 *.hd
+*.bkp
