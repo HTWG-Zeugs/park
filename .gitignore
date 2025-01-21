@@ -1,4 +1,5 @@
 terraform-key.json
+*.drawio.bkp
 
 /certs/*
 # Created by https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,macos,linux,windows,terraform,node
