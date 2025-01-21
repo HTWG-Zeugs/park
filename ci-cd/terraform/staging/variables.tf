@@ -22,6 +22,14 @@ variable create_cluster {
   default = true
 }
 
-variable enterprise_tenants{
-  type   = list(map(string))
+variable git_tag {
+  type    = string
+}
+
+variable identity_api_key {
+  type    = string
+}
+
+variable identity_auth_domain {
+  type    = string
 }

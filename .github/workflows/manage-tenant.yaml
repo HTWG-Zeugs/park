@@ -110,18 +110,20 @@ jobs:
 
       - uses: hashicorp/setup-terraform@v3
 
-      - name: Run terraform apply
-        working-directory: ./ci-cd
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform apply
+        working-directory: ./ci-cd/terraform/${{ inputs.environment }}
         run: |
-          python -u deploy-terraform.py \
-            --action apply \
-            --is-github-actions \
-            --create-cluster \
-            --project-id ${{ inputs.project_id }} \
-            --gcs-bucket ${{ inputs.state_bucket }} \
-            --domain-name ${{ inputs.domain }} \
-            --region ${{ inputs.region }} \
-            --environment ${{ inputs.environment }}
+          terraform init
+          terraform apply -auto-approve \
+            -var="is_github_actions=true" \
+            -var="project_id=${{ inputs.project_id }}" \
+            -var="region=${{ inputs.region }}" \
+            -var="domain_name=${{ inputs.domain }}" \
+            -var="create_cluster=true"
+            -var="git_tag=${{ env.TAG_ID }}"
+            -var="identity_api_key=${{ secrets.identity_platform_api_key }}"
+            -var="identity_auth_domain=${{ inputs.project_id }}.firebaseapp.com"
 
   sync-services:
     runs-on: ubuntu-latest

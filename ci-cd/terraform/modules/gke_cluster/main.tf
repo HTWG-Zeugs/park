@@ -106,3 +106,11 @@ resource "google_container_node_pool" "default_pool" {
     max_node_count = 2
   }
 }
+
+output "cluster_endpoint" {
+  value = google_container_cluster.primary[0].endpoint
+}
+
+output "cluster_ca_certificate" {
+  value = google_container_cluster.primary[0].master_auth[0].cluster_ca_certificate
+}

@@ -95,49 +95,7 @@ jobs:
           docker push ${{ env.GCR_REPO }}/${{ matrix.service.name }}:${{ env.TAG_ID }}
 
   # -------------------------------------------------------------------------
-  # 2) SYNC TERRAFORM
-  # -------------------------------------------------------------------------
-  sync-terraform:
-    runs-on: ubuntu-latest
-    needs: [build-and-push-images]
-
-    steps:
-      - name: Check out source
-        uses: actions/checkout@v4
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          service_account: "github-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
-          workload_identity_provider: ${{ secrets.workload_identity_provider }}
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
-          cache: "pip"
-      - run: pip install -r ci-cd/requirements.txt
-
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-
-      - uses: hashicorp/setup-terraform@v3
-
-      - name: Terraform apply
-        working-directory: ./ci-cd
-        run: |
-          python -u deploy-terraform.py \
-            --action apply \
-            --is-github-actions \
-            --create-cluster \
-            --project-id ${{ inputs.project_id }} \
-            --gcs-bucket ${{ inputs.state_bucket }} \
-            --domain-name ${{ inputs.domain }} \
-            --region ${{ inputs.region }} \
-            --environment ${{ inputs.environment }}
-
-  # -------------------------------------------------------------------------
-  # 3) SYNC SERVICES
+  # 2) SYNC SERVICES
   # -------------------------------------------------------------------------
   sync-services:
     runs-on: ubuntu-latest
@@ -148,7 +106,6 @@ jobs:
       INFRA_DB_ID: "${{ inputs.project_id }}-infra-management"
       AUTH_DB_ID: "${{ inputs.project_id }}-auth"
       SIGNUP_FRONTEND_SERVICE_ACCOUNT: "sign-up-frontend-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
-    needs: [sync-terraform]
 
     steps:
       - name: Check out source
@@ -223,49 +180,19 @@ jobs:
             --port=80 \
             --service-account=${{ env.SIGNUP_FRONTEND_SERVICE_ACCOUNT }} \
             --set-env-vars "PARK_AUTHENTICATION_URL=https://authentication-service-${{ inputs.project_number }}.${{ inputs.region }}.run.app"
-
-      # Example: Deploy cert-manager via Helm
-      - name: Add Jetstack Helm repo
-        run: helm repo add jetstack https://charts.jetstack.io --force-update
-
-      - name: Install / upgrade cert-manager
+      
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform apply
+        working-directory: ./ci-cd/terraform/${{ inputs.environment }}
         run: |
-          helm upgrade --install cert-manager jetstack/cert-manager \
-            -n infra-ns \
-            --create-namespace \
-            --set config.apiVersion=controller.config.cert-manager.io/v1alpha1 \
-            --set config.kind=ControllerConfiguration \
-            --set config.enableGatewayAPI=true \
-            --set crds.enabled=true \
-            --set global.leaderElection.namespace=infra-ns
-
-      - name: Annotate ServiceAccount for cert-manager
-        run: |
-          kubectl annotate serviceaccount \
-            -n infra-ns \
-            cert-manager iam.gke.io/gcp-service-account=cert-manager@${{ inputs.project_id }}.iam.gserviceaccount.com
-
-      # Example: Deploy gateway
-      - name: Deploy gateway
-        run: |
-          helm upgrade --install park-infra ./ci-cd/helm/infrastructure \
-            -n infra-ns \
-            --set projectId=${{ inputs.project_id }} \
-            --set domain=${{ inputs.domain }}
-
-      # Example: Sync Helm deployments
-      - name: Sync helm deployments
-        working-directory: ./ci-cd
-        run: |
-          python -u deploy-kubernetes.py \
-            --is-github-actions \
-            --project-id ${{ inputs.project_id }} \
-            --gcs-bucket ${{ inputs.state_bucket }} \
-            --repository "${{ env.GCR_REPO }}" \
-            --identity-api-key ${{ secrets.identity_platform_api_key }} \
-            --identity-auth-domain ${{ inputs.project_id }}.firebaseapp.com \
-            --infra-url https://infrastructure-administration-${{ inputs.project_number }}.${{ inputs.region }}.run.app \
-            --auth-url https://authentication-service-${{ inputs.project_number }}.${{ inputs.region }}.run.app \
-            --domain ${{ inputs.domain }} \
-            --git-tag ${{ env.TAG_ID }} \
-            --region ${{ inputs.region }}
+          terraform init
+          terraform apply -auto-approve \
+            -var="is_github_actions=true" \
+            -var="project_id=${{ inputs.project_id }}" \
+            -var="region=${{ inputs.region }}" \
+            -var="domain_name=${{ inputs.domain }}" \
+            -var="create_cluster=true"
+            -var="git_tag=${{ env.TAG_ID }}"
+            -var="identity_api_key=${{ secrets.identity_platform_api_key }}"
+            -var="identity_auth_domain=${{ inputs.project_id }}.firebaseapp.com"
+            

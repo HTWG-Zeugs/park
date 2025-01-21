@@ -1,3 +1,5 @@
+
+
 resource "google_artifact_registry_repository" "docker_repository" {
   project       = var.project_id
   location      = var.region
@@ -80,4 +82,57 @@ output "github_sa_email" {
 
 output "workload_identity_pool_provider_name" {
   value = google_iam_workload_identity_pool_provider.github_identity_provider.name
+}
+
+resource "kubernetes_namespace" "infra" {
+  metadata {
+    name = "infra-ns"
+    annotations = {
+      "iam.gke.io/gcp-service-account" : "cert-manager@${ var.project_id }.iam.gserviceaccount.com"
+    }
+  }
+}
+
+resource "helm_release" "cert_manager" {
+  name       = "cert-manager"
+  repository = "https://charts.jetstack.io"
+  chart      = "cert-manager"
+  namespace = kubernetes_namespace.infra.metadata.0.name
+  create_namespace = false
+  
+  set {
+    name  = "config.apiVersion"
+    value = "controller.config.cert-manager.io/v1alpha1"
+  }
+  set {
+    name  = "config.kind"
+    value = "ControllerConfiguration"
+  }
+  set {
+    name  = "config.enableGatewayAPI"
+    value = true
+  }
+  set {
+    name  = "crds.enabled"
+    value = true
+  }
+  set {
+    name  = "global.leaderElection.namespace"
+    value = "infra-ns"
+  }
+}
+
+resource "helm_release" "infrastructure" {
+  name  = "park-infra"
+  chart = "../../../helm/infrastructure"
+  namespace = kubernetes_namespace.infra.metadata.0.name
+  create_namespace = false
+  set {
+    name  = "projectId"
+    value = var.project_id
+  }
+  set {
+    name  = "domain"
+    value = var.domain
+  }
 }

@@ -27,9 +27,47 @@ variable environment_name {
   type    = string
 }
 
+variable domain {
+  type    = string
+}
+
 variable subdomain {
   type    = string
 }
+
+variable repository {
+  type    = string
+}
+
+variable git_tag {
+  type    = string
+}
+
+variable identity_api_key {
+  type    = string
+}
+
+variable identity_auth_domain {
+  type    = string
+}
+
+variable infra_url {
+  type    = string
+}
+
+variable auth_url {
+  type    = string
+}
+
+variable tenant_id {
+  type    = string
+  default = null
+}
+
+variable tenant_type {
+  type    = string
+}
+
 
 
 variable app_namespace {
