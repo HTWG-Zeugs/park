@@ -48,9 +48,6 @@ permissions:
   id-token: write
   contents: read
 
-env:
-  TAG_ID: ${{ github.sha }}
-
 jobs:
   manage-tenant:
     runs-on: ubuntu-latest
@@ -111,5 +108,4 @@ jobs:
             -var="project_id=${{ inputs.project_id }}" \
             -var="region=${{ inputs.region }}" \
             -var="domain_name=${{ inputs.domain }}" \
-            -var="create_cluster=true" \
-            -var="git_tag=${{ env.TAG_ID }}"
+            -var="create_cluster=true"
