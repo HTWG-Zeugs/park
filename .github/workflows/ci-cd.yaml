@@ -187,3 +187,11 @@ jobs:
             -var="domain_name=${{ inputs.domain }}" \
             -var="create_cluster=true" \
             -var="git_tag=${{ env.TAG_ID }}"
+      
+      - name: Create deployment.json with current Git tag
+        run: |
+          echo "{\"git_tag\": \"${{ env.TAG_ID }}\"}" > deployment.json
+      
+      - name: Upload deployment.json to GCP bucket
+        run: |
+          gsutil cp deployment.json gs://${{ inputs.state_bucket }}/deployment.json
