@@ -98,6 +98,7 @@ jobs:
   # 2) SYNC SERVICES
   # -------------------------------------------------------------------------
   sync-services:
+    needs: build-and-push-images
     runs-on: ubuntu-latest
     env:
       SERVICE_AUDIENCE: "infrastructure-administration-service"
