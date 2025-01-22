@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: parking-management
+  labels:
+    app: park-{{ .Release.Namespace }}
+    component: parking-management
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: park-{{ .Release.Namespace }}
+      component: parking-management
+  template:
+    metadata:
+      labels:
+        app: park-{{ .Release.Namespace }}
+        component: parking-management
+    spec:
+      serviceAccountName: park-sa
+      containers:
+        - name: parking-management
+          image: "{{ .Values.repository }}/{{.Values.parkingManagement.image.name}}:{{ .Values.gitTag }}"
+          imagePullPolicy: {{ .Values.parkingManagement.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.parkingManagement.service.port }}
+          env:
+            - name: FIRESTORE_DB_ID
+              value: "{{ .Values.gc_project_id }}-park-ma-{{ .Values.environment_name }}"
+            - name: AUTHENTICATION_SERVICE_URL
+              value: "{{ .Values.authenticationService.url }}"
+            - name: INFRASTRUCTURE_MANAGEMENT_SERVICE_URL
+              value: "{{ .Values.infrastructureManagement.url }}"
+            - name: INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE
+              value: "{{ .Values.infrastructureAdministration.audience }}"
+            - name: PORT
+              value: "{{ .Values.parkingManagement.service.port }}"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.parkingManagement.healthCheck.endpoint }}
+              port: {{ .Values.parkingManagement.service.port }}
+            initialDelaySeconds: {{ .Values.parkingManagement.healthCheck.initialDelaySeconds }}
+            periodSeconds: {{ .Values.parkingManagement.healthCheck.periodSeconds }}

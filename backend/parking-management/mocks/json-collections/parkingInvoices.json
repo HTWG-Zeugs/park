@@ -1,0 +1,10 @@
+[
+    {
+        "id": "1d3a6fd6e0f542a0e7cd3ff64f80bf33438759d5",
+        "ticketId": "6df541559918a808c2402bba5012f6c60b27661c",
+        "entryTimestamp": "2024-11-30T11:17:01.555Z",
+        "exitTimestamp": "2024-11-30T12:10:05.555Z",
+        "paymentTimestamp": "2024-11-30T12:10:05.555Z",
+        "total": 6
+    }
+]

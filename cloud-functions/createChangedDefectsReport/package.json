@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "@google-cloud/functions-framework": "^3.0.0",
+    "@google-cloud/storage": "^7.13.0",
+    "firebase-admin": "^13.0.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  },
+  "scripts": {
+    "dev": "cross-env GOOGLE_APPLICATION_CREDENTIALS=./../../certs/service-account-credentials.json FIRESTORE_DB_ID=(default) GCS_BUCKET_ID=defect-reports-staging npx functions-framework --target=createChangedDefectsReport [--signature-type=http]"
+  }
+}

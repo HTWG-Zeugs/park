@@ -1,0 +1,272 @@
+{
+  "common": {
+    "yes": "Ja",
+    "no": "Nein",
+    "save_button": "Speichern"
+  },
+  "mui": {
+    "noRows": "Keine Zeilen verfügbar",
+    "noResults": "Keine Ergebnisse gefunden",
+    "export": "Exportieren",
+    "density": "Dichte",
+    "density_label": "Zeilenabstand",
+    "density_compact": "Kompakt",
+    "density_standard": "Standard",
+    "density_comfortable": "Komfortabel",
+    "manage_columns": "Spalten verwalten",
+    "rows_per_page": "Zeilen pro Seite:",
+    "rows_selected": "{{count}} Zeile ausgewählt",
+    "total_rows": "Gesamtanzahl Zeilen",
+    "visible_rows": "{{visibleCount}} von {{totalCount}} Zeilen sichtbar",
+    "sort_asc": "Aufsteigend sortieren",
+    "sort_desc": "Absteigend sortieren",
+    "filter": "Filtern",
+    "hide_column": "Spalte ausblenden",
+    "show_columns": "Spalten anzeigen",
+    "unsort": "Sortierung entfernen"
+  },
+
+  "component_contact": {
+    "headline": "Kontakt",
+    "p1_1": "Dieses Projekt wurde im Rahmen des",
+    "p1_strong": "Cloud Application Development",
+    "p1_2": " Kurses an der HTWG Konstanz entwickelt.",
+    "p2_1": "Wenn Sie Fragen oder Anregungen haben, wenden Sie sich bitte an uns:",
+    "li1_name": "Lukas Benner:",
+    "li1_mail": "lukas.benner@htwg-konstanz.de",
+    "li2_name": "Lukas Epple:",
+    "li2_mail": "lukas.epple@htwg-konstanz.de",
+    "li3_name": "Jonas Elsper:",
+    "li3_mail": "jonas.elsper@htwg-konstanz.de"
+  },
+  "component_defectList": {
+    "add_defect": "Mangel hinzufügen",
+    "error_fetching_data": "Keine Daten empfangen",
+    "table": {
+      "column_id": "ID",
+      "column_object": "Objekt",
+      "column_location": "Standort",
+      "column_short_desc": "Kurzbeschreibung",
+      "column_detailed_desc": "Detaillierte Beschreibung",
+      "column_reporting_date": "Gemeldet am",
+      "column_last_modified": "Zuletzt geändert am",
+      "column_status": "Status",
+      "column_actions": "Aktionen"
+    },
+    "actions": {
+      "delete": "Löschen",
+      "details": "Details"
+    }
+  },
+  "component_userList": {
+    "add_user": "Benutzer erstellen",
+    "error_fetching_data": "Keine Daten empfangen",
+    "table": {
+      "column_user_id": "Benutzer ID",
+      "column_name": "Name",
+      "column_mail": "Mail",
+      "column_role": "Rolle",
+      "column_tenant_id": "Mandanten ID",
+      "column_actions": "Aktionen"
+    },
+    "roles": {
+      "solution_admin": "Solution Admin",
+      "tenant_admin": "Mandanten Admin",
+      "operational_manager": "Betriebsmitarbeitender",
+      "customer": "Kunde",
+      "third_party": "Drittanbieter"
+    },
+    "actions": {
+      "edit_user": "Benutzer bearbeiten",
+      "delete": "Löschen"
+    }
+  },
+  "component_dropzone": {
+    "drop_files_here": "Bilder hierher ziehen und ablegen oder klicken, um Bilder auszuwählen"
+  },
+  "component_header": {
+    "occupancy": "Belegungsstatus",
+    "garages": "Garagen",
+    "defects": "Mängel",
+    "contact": "Kontakt",
+    "sign_out": "Abmelden",
+    "sign_in": "Anmelden",
+    "users": "Benutzer",
+    "analytics": "Analysen",
+    "demo_client": "Demo"
+  },
+  "component_sign_in": {
+    "title": "Anmelden",
+    "email": "E-Mail:",
+    "password": "Passwort:",
+    "sign_in": "Anmelden",
+    "sign_up": "Registrieren",
+    "forgot_password": "Passwort vergessen?"
+  },
+  "route_add_defect": {
+    "upload_failed": "Hochladen fehlgeschlagen",
+    "add_defect": "Mangel hinzufügen",
+    "grid_object": "Objekt *",
+    "grid_location": "Standort *",
+    "grid_short_desc": "Kurzbeschreibung",
+    "grid_detailed_desc": "Detaillierte Beschreibung",
+    "grid_status": "Status *"
+  },
+  "route_add_user": {
+    "add_user": "Nutzer hinzufügen",
+    "grid_name": "Benutzername *",
+    "grid_mail": "E-Mail *",
+    "grid_role": "Rolle *",
+    "role_select": {
+      "solution_admin": "Solution Admin",
+      "tenant_admin": "Mandanten Admin",
+      "operational_manager": "Betriebsmitarbeitender",
+      "customer": "Kunde",
+      "third_party": "Drittanbieter"
+    },
+    "grid_password": "Passwort *",
+    "save_button": "Speichern"
+  },
+  "route_defect_details": {
+    "img_not_available": "Bild nicht verfügbar",
+    "defect_details": "Mängeldetails",
+    "object": "Objekt",
+    "location": "Standort",
+    "short_desc": "Kurzbeschreibung",
+    "detailed_desc": "Detaillierte Beschreibung",
+    "status": "Status",
+    "reported_at": "Gemeldet am",
+    "last_modified_at": "Zuletzt geändert am"
+  },
+  "route_edit_user": {
+    "user_details": "Benutzer Details",
+    "name": "Name",
+    "mail": "E-Mail",
+    "tenant_id": "Mandanten ID",
+    "user_id": "Benutzer ID",
+    "role": "Rolle",
+    "save_button": "Speichern"
+  },
+  "component_garageList": {
+    "buttons": {
+      "add_garage": "Parkhaus hinzufügen"
+    },
+    "table": {
+      "column_id": "Id",
+      "column_name": "Name",
+      "column_last_modified": "Zuletzt geändert am",
+      "column_actions": "Aktionen"
+    },
+    "actions": {
+      "edit": "Bearbeiten",
+      "delete": "Löschen"
+    }
+  },
+  "route_add_garage": {
+    "add_garage": "Neues Parkhaus anlegen",
+    "edit_garage": "Garage bearbeiten",
+    "name": "Name",
+    "open": "Geöffnet",
+    "closed": "Geschlossen",
+    "number_parking_spots": "Anzahl Parkplätze",
+    "price_per_hour": "Preis pro Stunde",
+    "opening_time": "Öffnungszeit",
+    "closing_time": "Schließzeit",
+    "charging_stations": {
+      "title": "Ladestationen",
+      "station": "Ladestation",
+      "name": "Name",
+      "charging_speed": "Ladegeschwindigkeit",
+      "price": "Preis pro KWh"
+    },
+    "errors": {
+      "name_required": "Name ist erforderlich",
+      "number_parking_spots_positive": "Anzahl der Parkplätze muss eine positive Zahl sein",
+      "price_per_hour_positive": "Preis pro Stunde muss eine positive Zahl sein",
+      "opening_time_invalid": "Öffnungszeit ist ungültig",
+      "closing_time_invalid": "Schließzeit ist ungültig",
+      "closing_after_opening": "Schließzeit muss nach der Öffnungszeit liegen",
+      "charging_speed_positive": "Ladegeschwindigkeit muss eine positive Zahl sein",
+      "price_per_kwh_positive": "Preis pro KWh muss eine positive Zahl sein"
+    }
+  },
+  "route_edit_garage": {
+    "edit_garage": "Parkhaus bearbeiten"
+  },
+  "route_home": {
+    "title": "Park",
+    "intro": "Wir streben die Entwicklung einer Software-as-a-Service (SaaS)-Anwendung an, die zur Verwaltung von Parkeinrichtungen für Kommunen und Unternehmen konzipiert ist. Die Anwendung wird eine umfassende Palette an Funktionen bieten, um den Parkbetrieb zu optimieren, die Benutzererfahrung zu verbessern und die Verwaltung der Parkinfrastruktur zu vereinfachen.",
+    "objectivesTitle": "Hauptziele:",
+    "objectives": {
+      "integration": {
+        "title": "Integration mit Parkausstattung",
+        "description": "Die Anwendung wird mit Parkflächen- und Garagenausrüstung interagieren, um eine automatisierte Ein- und Ausfahrt von Fahrzeugen zu ermöglichen. Dies schließt die Verifizierung von Zahlungen ein, um einen reibungslosen und effizienten Fahrzeugzugang zu gewährleisten."
+      },
+      "management": {
+        "title": "Verwaltung der Parkinfrastruktur",
+        "description": "Die Anwendung ermöglicht die Verwaltung von Parkimmobilien, einschließlich: Bestandsverfolgung von Ausrüstung und Ressourcen. Planung und Nachverfolgung von Wartungsaufgaben. Erkennung, Verwaltung und Meldung von Defekten, um die Betriebseffizienz aufrechtzuerhalten."
+      },
+      "analytics": {
+        "title": "Analysen und Berichte",
+        "description": "Die Anwendung wird detaillierte Analyse- und Berichterstattungsfunktionen bieten, um Einblicke in die Parkauslastung, die finanzielle Leistung und operative Kennzahlen zu geben, sodass Stakeholder datenbasierte Entscheidungen treffen können."
+      },
+      "charging": {
+        "title": "Verwaltung der E-Ladeinfrastruktur",
+        "description": "Die Plattform unterstützt die Verwaltung von Ladestationen für Elektrofahrzeuge (EV), einschließlich Überwachung, Wartung und Berichterstattung über die Ladeinfrastruktur."
+      },
+      "deployment": {
+        "title": "Globale Bereitstellung",
+        "description": "Die SaaS-Anwendung wird für globale Skalierbarkeit entwickelt, sodass sie in verschiedenen geografischen Regionen bereitgestellt werden kann und unterschiedliche regulatorische Anforderungen, Währungen und Sprachen unterstützt."
+      }
+    }
+  },
+  "route_occupancy": {
+    "title": "Belegungsstatus",
+    "parking_spaces": "Parkplätze",
+    "charging_spaces": "Ladestationen"
+  },
+  "component_occupancy_grid": {
+    "total": "Gesamt",
+    "occupied": "Belegt"
+  },
+  "route_protected_route": {
+    "loading": "Laden..."
+  },
+  "route_sign_in": {
+    "user_is_null": "Anmeldung fehlgeschlagen. Benutzer ist null.",
+    "user_not_found": "Kein Konto mit dieser E-Mail-Adresse gefunden.",
+    "wrong_password": "Falsches Passwort.",
+    "sign_in_failed": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "email_required": "Bitte geben Sie Ihre E-Mail-Adresse ein.",
+    "password_reset_email_sent": "Eine E-Mail zum Zurücksetzen des Passworts wurde gesendet.",
+    "password_reset_failed": "Passwort-Zurücksetzung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "invalid_tenant_type": "Dieser Benutzer darf sich bei dieser Anwendung nicht anmelden."
+  },
+  "route_sign_up": {
+    "passwords_do_not_match": "Passwörter stimmen nicht überein.",
+    "user_is_null": "Registrierung fehlgeschlagen. Benutzer ist null.",
+    "email_already_exists": "Diese E-Mail-Adresse wird bereits verwendet.",
+    "invalid_email": "Ungültige E-Mail-Adresse.",
+    "weak_password": "Passwort ist zu schwach.",
+    "sign_up_failed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "title": "Registrieren",
+    "email": "E-Mail:",
+    "password": "Passwort:",
+    "confirm_password": "Passwort bestätigen:",
+    "sign_up_button": "Registrieren"
+  },
+  "route_analytics": {
+    "title": "Analysen",
+    "turnover": "Umsatz",
+    "mean_parking_duration": "Durchschnittliche Parkdauer",
+    "total_kwh_charged": "Gesamt geladene KWh",
+    "parking_occupancy": "Belegung Parkplätze",
+    "charging_occupancy": "Belegung Ladestationen",
+    "defect_status": "Mängel Status",
+    "last_30_days": "letzte 30 Tage",
+    "open": "offen",
+    "in_work": "in arbeit",
+    "closed": "geschlossen",
+    "rejected": "abgewiesen"
+  }
+}

@@ -1,0 +1,39 @@
+replicaCount: 1
+
+repository: ""
+gitTag: ""
+
+gc_project_id: "PROJECT_ID"
+
+identityPlatForm:
+  apiKey: "API_KEY"
+  authDomain: "AUTH_DOMAIN"
+
+gateway:
+  name: "park-external-http"
+  namespace: "infra-ns"
+
+domain: null
+subdomain: null
+environment_name: null
+tenant_id: null
+tenant_type: null
+
+frontend:
+  image:
+    name: "frontend"
+    pullPolicy: IfNotPresent
+  service:
+    port: 80
+  route:
+    prefix: "/"
+  env:
+    authUrl: ""
+    propertyUrl: ""
+    parkingUrl: ""
+    infrastructureUrl: ""
+  healthCheck:
+    endpoint: "/livez"
+    initialDelaySeconds: 3
+    periodSeconds: 5
+    timeoutSeconds: 3

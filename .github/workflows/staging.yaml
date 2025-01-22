@@ -1,0 +1,27 @@
+name: Staging CI/CD
+
+on:
+  push:
+    branches: [ "dev" ]
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+
+jobs:
+  ci-cd:
+    uses: ./.github/workflows/ci-cd.yaml
+    permissions:
+      id-token: write
+      contents: read
+    with:
+      environment: "staging"
+      project_id: ${{ vars.STAGING_PROJECT_ID }}
+      project_number: ${{ vars.STAGING_PROJECT_NUMBER }}
+      region: ${{ vars.STAGING_REGION }}
+      domain: ${{ vars.STAGING_DOMAIN }}
+      state_bucket: ${{ vars.STAGING_STATE_BUCKET }}
+
+    secrets:
+      workload_identity_provider: ${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}
+      identity_platform_api_key: ${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }}
+      cd_token: ${{ secrets.CD_TOKEN }}

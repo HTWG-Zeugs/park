@@ -1,0 +1,78 @@
+replicaCount: 1
+
+repository: ""
+gitTag: ""
+
+gc_project_id: "PROJECT_ID"
+
+identityPlatForm:
+  apiKey: "API_KEY"
+  authDomain: "AUTH_DOMAIN"
+
+gateway:
+  name: "park-external-http"
+  namespace: "infra-ns"
+
+domain: null
+subdomain: null
+environment_name: null
+tenant_id: null
+tenant_type: null
+
+resources:
+  free:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "2"
+      memory: "3Gi"
+  premium:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "2"
+      memory: "3Gi"
+  enterprise:
+    requests:
+      cpu: "1"
+      memory: "1Gi"
+    limits:
+      cpu: "2"
+      memory: "4Gi"
+
+authenticationService:
+  url: ""
+infrastructureManagement:
+  url: ""
+infrastructureAdministration:
+  audience: "infrastructure-administration-service"
+
+propertyManagement:
+  image:
+    name: "property-management"
+    pullPolicy: IfNotPresent
+  service:
+    port: 8080
+  route:
+    prefix: "/property"
+  healthCheck:
+    endpoint: "/livez"
+    initialDelaySeconds: 3
+    periodSeconds: 5
+    timeoutSeconds: 3
+
+parkingManagement:
+  image:
+    name: "parking-management"
+    pullPolicy: IfNotPresent
+  service:
+    port: 8081
+  route:
+    prefix: "/parking"
+  healthCheck:
+    endpoint: "/livez"
+    initialDelaySeconds: 3
+    periodSeconds: 5
+    timeoutSeconds: 3

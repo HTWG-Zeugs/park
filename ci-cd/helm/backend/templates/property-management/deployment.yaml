@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: property-management
+  labels:
+    app: park-{{ .Release.Namespace }}
+    component: property-management
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: park-{{ .Release.Namespace }}
+      component: property-management
+  template:
+    metadata:
+      labels:
+        app: park-{{ .Release.Namespace }}
+        component: property-management
+    spec:
+      serviceAccountName: prop-sa
+      containers:
+        - name: property-management
+          image: "{{ .Values.repository }}/{{.Values.propertyManagement.image.name}}:{{ .Values.gitTag }}"
+          imagePullPolicy: {{ .Values.propertyManagement.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.propertyManagement.service.port }}
+          env:
+            - name: FIRESTORE_DB_ID
+              value: "{{ .Values.gc_project_id }}-prop-ma-{{ .Values.environment_name }}"
+            - name: GCS_BUCKET_ID
+              value: "{{ .Values.gc_project_id }}-prop-ma-{{ .Values.environment_name }}"
+            - name: PORT
+              value: "{{ .Values.propertyManagement.service.port }}"
+            - name: PARKING_MANAGEMENT_BACKEND_URL
+              value: "https://{{ .Values.subdomain }}.{{ .Values.domain }}{{ .Values.parkingManagement.route.prefix}}"
+            - name: AUTHENTICATION_SERVICE_URL
+              value: "{{ .Values.authenticationService.url }}"
+            - name: INFRASTRUCTURE_MANAGEMENT_SERVICE_URL
+              value: "{{ .Values.infrastructureManagement.url }}"
+            - name: INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE
+              value: "{{ .Values.infrastructureAdministration.audience }}"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "512Mi"
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.propertyManagement.healthCheck.endpoint }}
+              port: {{ .Values.propertyManagement.service.port }}
+            initialDelaySeconds: {{ .Values.propertyManagement.healthCheck.initialDelaySeconds }}
+            periodSeconds: {{ .Values.propertyManagement.healthCheck.periodSeconds }}

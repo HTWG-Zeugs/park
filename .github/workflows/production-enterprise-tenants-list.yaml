@@ -1,0 +1,36 @@
+name: Manage enterprise tenant (Production)
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'add or remove'
+        required: true
+      tenant_id:
+        required: true
+      tenant_subdomain:
+        required: true
+
+jobs:
+  manage-tenant-production:
+    uses: ./.github/workflows/manage-tenant.yaml
+    permissions:
+      id-token: write
+      contents: read
+    with:
+      # Pass environment-specific inputs
+      environment: "production"
+      project_id: ${{ vars.PRODUCTION_PROJECT_ID }}
+      project_number: ${{ vars.PRODUCTION_PROJECT_NUMBER }}
+      region: ${{ vars.PRODUCTION_REGION }}
+      domain: ${{ vars.PRODUCTION_DOMAIN }}
+      state_bucket: ${{ vars.PRODUCTION_STATE_BUCKET }}
+
+      # Forward the user inputs from workflow_dispatch
+      tenant_action: ${{ github.event.inputs.action }}
+      tenant_id: ${{ github.event.inputs.tenant_id }}
+      tenant_subdomain: ${{ github.event.inputs.tenant_subdomain }}
+
+    secrets:
+      workload_identity_provider: ${{ secrets.PRODUCTION_WORKLOAD_IDENTITY_PROVIDER }}
+      identity_platform_api_key: ${{ secrets.PRODUCTION_IDENTITY_PLATFORM_API_KEY }}
