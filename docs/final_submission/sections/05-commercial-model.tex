@@ -76,3 +76,36 @@ Eine Kostenstruktur pro Benutzer entfällt in diesem Plan, was ihn für Unterneh
 Diese Preisgestaltung bietet die notwendige Flexibilität und Skalierbarkeit, um sowohl kleine als auch große Benutzergruppen effizient zu bedienen.
 
 \subsection{Cost Model}
+Das interne Kostenmodell basiert auf einer effizienten Ressourcennutzung und differenziert zwischen den Anforderungen der verschiedenen Tenant Types. Die Aufteilung der Ressourcen erfolgt wie folgt:
+
+\begin{itemize}
+    \item \textbf{Free Plan:} Alle Mandanten teilen sich einen Kubernetes-Namespace, eine gemeinsame Firestore-Datenbank und einen gemeinsamen Cloud Storage.
+    \item \textbf{Premium Plan:} Mandanten teilen sich ebenfalls einen Kubernetes-Namespace, jedoch mit höheren Ressourcenallokationen, sowie eine gemeinsame Firestore-Datenbank und einen gemeinsamen Cloud Storage.
+    \item \textbf{Enterprise Plan:} Jeder Mandant erhält einen eigenen Kubernetes-Namespace, eine eigene Firestore-Datenbank und einen eigenen Cloud Storage, um maximale Isolation und Leistung zu gewährleisten.
+    \item \textbf{Geteilte Services:} Drei zentrale Services, die auf Google Cloud Run ausgeführt werden, werden von allen Mandanten gemeinsam genutzt, unabhängig vom Plan.
+\end{itemize}
+
+\begin{table}[h!]
+\centering
+\caption{Ressourcennutzung und Kostenschätzung pro Monat}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Ressource}               & \textbf{Free Plan} & \textbf{Premium Plan} & \textbf{Enterprise (pro Mandant)} \\ \hline
+Kubernetes Namespace             & 50 €/Monat         & 150 €/Monat           & 40 €/Monat                        \\ \hline
+Firestore-Datenbank              & 30 €/Monat         & 100 €/Monat           & 10 €/Monat                        \\ \hline
+Cloud Storage                    & 20 €/Monat         & 50 €/Monat            & 6 €/Monat                         \\ \hline
+Cloud Run (geteilt)              & 100 €/Monat        & 200 €/Monat           & 40 €/Monat (anteilig)              \\ \hline
+\textbf{Gesamtkosten (Schätzung)} & 200 €/Monat        & 500 €/Monat           & 96 €/Monat                        \\ \hline
+\end{tabular}
+\label{tab:costmodel}
+\end{table}
+
+In Tabelle \ref{tab:costmodel} werden die geschätzten Kosten für die verschiedenen Pläne dargestellt. Dabei wurden die ursprünglichen Kosten für den Enterprise Plan durch fünf geteilt, um die Verteilung der Ausgaben für einzelne Mandanten zu berücksichtigen. Die wichtigsten Punkte sind:
+
+\begin{itemize}
+    \item \textbf{Free Plan:} Die Gesamtkosten belaufen sich auf geschätzte 200 €/Monat durch die gemeinsame Nutzung von Ressourcen.
+    \item \textbf{Premium Plan:} Durch höhere Anforderungen betragen die Kosten für alle Premium-Mandanten zusammen etwa 500 €/Monat.
+    \item \textbf{Enterprise Plan:} Jeder Enterprise-Mandant verursacht individuelle Kosten von rund 96 €/Monat. Dies ist bedingt durch die exklusive Zuweisung von Ressourcen wie Kubernetes-Namespace, Firestore-Datenbank und Cloud Storage.
+\end{itemize}
+
+Dieses Kostenmodell bietet eine klare Grundlage für die wirtschaftliche Planung und Skalierung der Plattform.
