@@ -133,6 +133,9 @@ resource "kubernetes_namespace" "tenant" {
   metadata {
     name = "${var.environment_name}-ns"
   }
+  timeouts {
+    delete = "10m"
+  }
 }
 
 resource "helm_release" "backend" {
