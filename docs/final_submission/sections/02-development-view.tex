@@ -1,3 +1,48 @@
-\section{
-    Development View
-}
+\section{Development View}
+
+\subsection{Source code organization}
+Welcher Repoansatz, wie ist das Repository organisiert?
+
+
+\begin{figure}[ht]
+    \begin{verbatim}
+        park
+        |-- backend
+        |   |-- authentication
+        |   |   |-- ...
+        |   |-- infrastructure-administration
+        |   |   |-- ...
+        |   |-- parking-management
+        |   |   |-- ...
+        |   |-- property-management
+        |   |   |-- ...
+        |   |-- shared
+        |-- certs
+        |-- ci-cd
+        |   |-- helm
+        |   |   |-- ...
+        |   |-- terraform
+        |       |-- ...
+        |-- cloud-functions
+        |-- docs
+        |   |-- ...
+        |-- frontend
+        |   |-- ...
+        |-- shared
+        |-- signup-frontend
+        |-- ...
+    \end{verbatim}
+    \caption{Repository Structure}
+    \label{fig:repo-structure}
+\end{figure}
+
+\subsection{Components}
+Aus welchen Komponenten besteht die Applikation?
+
+\subsection{Libraries}
+Welche Libraries wurden verwendet? (Für IAM, Firestore, Object Storage,...)
+React, ...?
+
+\subsection{APIs}
+
+Analytics Api, Parking Management, Property Mangement, Authentication als erweiterung zu der Schnittstelle der Identity Platform
