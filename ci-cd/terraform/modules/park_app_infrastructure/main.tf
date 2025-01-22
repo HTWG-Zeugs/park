@@ -218,6 +218,7 @@ resource "helm_release" "cert_manager" {
 }
 
 resource "kubernetes_annotations" "cert_manager_sa_annotations" {
+  depends_on = [ helm_release.cert_manager ]
   api_version = "v1"
   kind        = "ServiceAccount"
   metadata {
