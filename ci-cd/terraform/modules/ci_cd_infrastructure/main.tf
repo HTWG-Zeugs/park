@@ -71,6 +71,7 @@ variable "github_sa_roles" {
     "roles/artifactregistry.admin",
     "roles/iam.workloadIdentityPoolAdmin",
     "roles/iam.serviceAccountAdmin",
+    "roles/iam.serviceAccountUser",
     "roles/serviceusage.serviceUsageAdmin",
     "roles/run.admin",
     "roles/storage.objectAdmin",
