@@ -54,6 +54,8 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+        with:
+            ref: ${{ inputs.environment == 'production' && 'main' || 'dev' }}
 
       - name: Login to Google Cloud
         uses: google-github-actions/auth@v2
@@ -124,7 +126,7 @@ jobs:
 
       - name: Fetch enterprise-tenants.json or default to []
         run: |
-          BUCKET_NAME="${{ vars.STAGING_PROJECT_ID }}-terraform-state"
+          BUCKET_NAME="${{ inputs.project_id }}-terraform-state"
           OBJECT_PATH="enterprise-tenants.json"
 
           # Default empty JSON array
