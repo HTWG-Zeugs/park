@@ -120,7 +120,7 @@ jobs:
         uses: google-github-actions/upload-cloud-storage@v2
         with:
           path: ${{ matrix.service.path }}/${{ matrix.service.zip }}
-          destination: gs://${{ inputs.project_id }}-gcf-source/${{ matrix.service.zip }}
+          destination: ${{ inputs.project_id }}-gcf-source
 
   # -------------------------------------------------------------------------
   # 2) SYNC SERVICES
