@@ -90,27 +90,20 @@ resource "google_service_account" "cloud_build_sa" {
   display_name = "Cloud Build Service Account"
 }
 
-resource "google_project_iam_member" "cloud_build_sa-iam-member" {
-  project = var.project_id
-  role    = "roles/cloudbuild.builds.builder"
-  member = "serviceAccount:${google_service_account.cloud_build_sa.email}"
+variable "cloud_build_sa_roles" {
+  type = list(string)
+  default = [
+    "roles/cloudbuild.builds.builder",
+    "roles/logging.logWriter",
+    "roles/artifactregistry.writer",
+    "roles/storage.objectViewer"
+  ]
 }
 
-resource "google_project_iam_member" "cloud_build_sa-iam-member" {
+resource "google_project_iam_member" "cloud_build_sa_iam_member" {
+  for_each = { for value in var.cloud_build_sa_roles : value => value }
   project = var.project_id
-  role    = "roles/logging.logWriter"
-  member = "serviceAccount:${google_service_account.cloud_build_sa.email}"
-}
-
-resource "google_project_iam_member" "cloud_build_sa-iam-member" {
-  project = var.project_id
-  role    = "roles/artifactregistry.writer"
-  member = "serviceAccount:${google_service_account.cloud_build_sa.email}"
-}
-
-resource "google_project_iam_member" "cloud_build_sa-iam-member" {
-  project = var.project_id
-  role    = "roles/storage.objectViewer"
+  role    = each.value
   member = "serviceAccount:${google_service_account.cloud_build_sa.email}"
 }
 
