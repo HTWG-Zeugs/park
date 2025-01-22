@@ -8,7 +8,7 @@ resource "google_storage_bucket" "defect_reports_bucket" {
 resource "google_service_account" "defect_report_sa" {
   account_id   = "${var.environment_name}-${var.defect_report_sa}"
   project      = var.project_id
-  display_name = "Frontend Service Account"
+  display_name = "Defect Report Cloud Function Service Account"
 }
 
 resource "google_cloudfunctions2_function_iam_member" "invoker" {
@@ -41,6 +41,7 @@ resource "google_cloudfunctions2_function" "defect_report" {
         object = "createChangedDefectsReport.zip"
       }
     }
+    service_account = "cloud-build-sa@${var.project_id}.iam.gserviceaccount.com"
   }
   service_config {
     max_instance_count  = 1

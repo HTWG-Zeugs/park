@@ -85,6 +85,16 @@ resource "google_project_iam_member" "github-sa-iam-member" {
   member = "serviceAccount:${google_service_account.github_sa.email}"
 }
 
+resource "google_service_account" "cloud_build_sa" {
+  account_id   = "cloud-build-sa"
+  display_name = "Cloud Build Service Account"
+}
+
+resource "google_project_iam_member" "cloud_build_sa-iam-member" {
+  project = var.project_id
+  role    = "roles/cloudbuild.builds.builder"
+  member = "serviceAccount:${google_service_account.cloud_build_sa.email}"
+}
 
 output "github_sa_email" {
   value = google_service_account.github_sa.email
