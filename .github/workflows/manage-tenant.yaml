@@ -80,7 +80,7 @@ jobs:
             --tenant-id ${{ inputs.tenant_id }} \
             --tenant-subdomain ${{ inputs.tenant_subdomain }}
 
-  sync-terraform:
+  sync-services:
     runs-on: ubuntu-latest
     needs: manage-tenant
     steps:
@@ -108,7 +108,7 @@ jobs:
           fi
 
           # If the file exists, read it into a variable
-          CONTENT=$(gsutil cat "gs://${BUCKET_NAME}/${OBJECT_PATH}")
+          CONTENT=$(gsutil cat "gs://${BUCKET_NAME}/${OBJECT_PATH}" | jq -c .)
           
           # Parse git_tag using jq (assuming your file has a structure like { "git_tag": "somevalue" })
           GIT_TAG=$(echo "$CONTENT" | jq -r .git_tag)
@@ -124,24 +124,22 @@ jobs:
 
       - name: Fetch enterprise-tenants.json or default to []
         run: |
-          BUCKET_NAME="${{ secrets.GCP_PROJECT_ID }}-terraform-state"
+          BUCKET_NAME="${{ vars.STAGING_PROJECT_ID }}-terraform-state"
           OBJECT_PATH="enterprise-tenants.json"
-          
-          # Default
+
+          # Default empty JSON array
           CONTENT="[]"
 
-          # If the file exists, read its contents; otherwise use default "[]"
+          # Check if file exists in GCS
           if gsutil -q stat "gs://${BUCKET_NAME}/${OBJECT_PATH}"; then
-            echo "✔ enterprise-tenants.json found; fetching from GCS..."
-            CONTENT=$(gsutil cat "gs://${BUCKET_NAME}/${OBJECT_PATH}")
-            
-            # Optionally, verify that it is valid JSON 
-            echo "$CONTENT" | jq empty 2>/dev/null || CONTENT="[]"
+              echo "✔ enterprise-tenants.json found; fetching from GCS..."
+              CONTENT=$(gsutil cat "gs://${BUCKET_NAME}/${OBJECT_PATH}" | jq -c . || echo "[]")
           else
-            echo "✖ enterprise-tenants.json not found. Using empty array."
+              echo "✖ enterprise-tenants.json not found. Using empty array."
           fi
 
-          echo "ENTERPRISE_TENANTS_JSON=$CONTENT" >> $GITHUB_ENV
+          # Safely set as a single-line JSON environment variable
+          echo "ENTERPRISE_TENANTS_JSON=$(echo $CONTENT | jq -c .)" >> $GITHUB_ENV
 
       - uses: hashicorp/setup-terraform@v3
       - name: Terraform apply

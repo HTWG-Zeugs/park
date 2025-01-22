@@ -2,7 +2,7 @@ terraform {
   required_version = ">= 1.0.0"
   required_providers {
     google = {
-      source  = "hashicorp/google"
+      source = "hashicorp/google"
     }
   }
 }
@@ -14,14 +14,14 @@ provider "google" {
 }
 
 module "gke_cluster" {
-  source = "../modules/gke_cluster"
-  region = var.region
+  source     = "../modules/gke_cluster"
+  region     = var.region
   project_id = var.project_id
 }
 
 module "ci_cd_infrastructure" {
-  source = "../modules/ci_cd_infrastructure"
-  region = var.region
+  source     = "../modules/ci_cd_infrastructure"
+  region     = var.region
   project_id = var.project_id
   github_org = "HTWG-Zeugs"
 }
