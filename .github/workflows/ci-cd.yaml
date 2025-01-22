@@ -42,12 +42,43 @@ env:
   CLUSTER: "${{ inputs.project_id }}-gke"
 
 jobs:
+  sync-infrastructure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          service_account: "github-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
+          workload_identity_provider: ${{ secrets.workload_identity_provider }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: "${{ inputs.project_id }}-gke"
+          location: ${{ inputs.region }}
+      
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform apply
+        working-directory: ./ci-cd/terraform/${{ inputs.environment }}-infra
+        run: |
+          terraform init
+          terraform apply -auto-approve \
+            -var="is_github_actions=true" \
+            -var="project_id=${{ inputs.project_id }}" \
+            -var="region=${{ inputs.region }}"
+
   # -------------------------------------------------------------------------
   # 1) BUILD AND PUSH IMAGES
   # -------------------------------------------------------------------------
   build-and-push-images:
     runs-on: ubuntu-latest
-
+    needs: sync-infrastructure
     strategy:
       matrix:
         service:
@@ -96,6 +127,7 @@ jobs:
 
   package-cloud-functions:
     runs-on: ubuntu-latest
+    needs: sync-infrastructure
     strategy:
       matrix:
         service:
@@ -126,7 +158,7 @@ jobs:
   # 2) SYNC SERVICES
   # -------------------------------------------------------------------------
   sync-services:
-    needs: build-and-push-images
+    needs: [build-and-push-images, package-cloud-functions]
     runs-on: ubuntu-latest
     env:
       SERVICE_AUDIENCE: "infrastructure-administration-service"
@@ -202,6 +234,25 @@ jobs:
             --port=80 \
             --service-account=${{ env.SIGNUP_FRONTEND_SERVICE_ACCOUNT }} \
             --set-env-vars "PARK_AUTHENTICATION_URL=https://authentication-service-${{ inputs.project_number }}.${{ inputs.region }}.run.app"
+
+      - name: Fetch enterprise-tenants.json or default to []
+        run: |
+          BUCKET_NAME="${{ vars.STAGING_PROJECT_ID }}-terraform-state"
+          OBJECT_PATH="enterprise-tenants.json"
+
+          # Default empty JSON array
+          CONTENT="[]"
+
+          # Check if file exists in GCS
+          if gsutil -q stat "gs://${BUCKET_NAME}/${OBJECT_PATH}"; then
+              echo "✔ enterprise-tenants.json found; fetching from GCS..."
+              CONTENT=$(gsutil cat "gs://${BUCKET_NAME}/${OBJECT_PATH}" | jq -c . || echo "[]")
+          else
+              echo "✖ enterprise-tenants.json not found. Using empty array."
+          fi
+
+          # Safely set as a single-line JSON environment variable
+          echo "ENTERPRISE_TENANTS_JSON=$(echo $CONTENT | jq -c .)" >> $GITHUB_ENV
       
       - uses: hashicorp/setup-terraform@v3
       - name: Terraform apply
@@ -214,7 +265,8 @@ jobs:
             -var="region=${{ inputs.region }}" \
             -var="domain_name=${{ inputs.domain }}" \
             -var="create_cluster=true" \
-            -var="git_tag=${{ env.TAG_ID }}"
+            -var="git_tag=${{ env.TAG_ID }}" \
+            -var="enterprise_tenants_json=$ENTERPRISE_TENANTS_JSON"
       
       - name: Create deployment.json with current Git tag
         run: |

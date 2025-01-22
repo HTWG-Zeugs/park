@@ -94,5 +94,5 @@ variable frontend_sa {
 variable defect_report_sa {
   description = "The service account to use for the defect report cloud function"
   type        = string
-  default     = "defect-report-sa"
+  default     = "df-r-sa"
 }

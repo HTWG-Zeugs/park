@@ -7,8 +7,3 @@ variable project_id {
   type    = string
   default = ""
 }
-
-variable create_cluster {
-  type    = bool
-  default = true
-}
