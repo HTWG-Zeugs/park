@@ -30,15 +30,6 @@ provider "helm" {
 data "google_project" "project" {}
 data "google_client_config" "provider" {}
 
-data "google_storage_bucket_object_content" "deployment_info" {
-  name   = "deployment.json"
-  bucket = "${var.project_id}-terraform-state"
-}
-
-locals {
-  git_tag = var.git_tag != "" ? var.git_tag : can(jsondecode(data.google_storage_bucket_object_content.deployment_info.content)) ? jsondecode(data.google_storage_bucket_object_content.deployment_info.content).git_tag : ""
-}
-
 locals {
   repository = "${var.region}-docker.pkg.dev/${var.project_id}/docker-repository"
   identity_auth_domain = "${ var.project_id}.firebaseapp.com"
@@ -86,7 +77,7 @@ module "free_tenants_env" {
   subdomain = "free"
   app_namespace = "free-ns"
   repository = local.repository
-  git_tag = local.git_tag
+  git_tag = var.git_tag
   identity_api_key = module.park_app_infrastructure.identity_platform_api_key
   identity_auth_domain = local.identity_auth_domain
   infra_url = "https://infrastructure-administration-${ data.google_project.project.number }.${ var.region }.run.app"
@@ -111,7 +102,7 @@ module "premium_tenants_env" {
   subdomain = "premium"
   app_namespace = "premium-ns"
   repository = local.repository
-  git_tag = local.git_tag
+  git_tag = var.git_tag
   identity_api_key = module.park_app_infrastructure.identity_platform_api_key
   identity_auth_domain = local.identity_auth_domain
   infra_url = "https://infrastructure-administration-${ data.google_project.project.number }.${ var.region }.run.app"
@@ -120,12 +111,8 @@ module "premium_tenants_env" {
   tenant_id = "NOT_SET"
 }
 
-data "google_storage_bucket_object_content" "enterprise_tenants" {
-  name   = "enterprise-tenants.json"
-  bucket = "${var.project_id}-terraform-state"
-}
 locals {
-  enterprise_tenants = can(jsondecode(data.google_storage_bucket_object_content.enterprise_tenants.content)) ? jsondecode(data.google_storage_bucket_object_content.enterprise_tenants.content) : []
+  enterprise_tenants = jsondecode(var.enterprise_tenants_json)
 }
 
 module "per_enterprise_tenant" {
@@ -145,7 +132,7 @@ module "per_enterprise_tenant" {
   subdomain = each.value.dns
   app_namespace = "${each.value.tenantId}-ns"
   repository = local.repository
-  git_tag = local.git_tag
+  git_tag = var.git_tag
   identity_api_key = module.park_app_infrastructure.identity_platform_api_key
   identity_auth_domain = local.identity_auth_domain
   infra_url = "https://infrastructure-administration-${ data.google_project.project.number }.${ var.region }.run.app"

@@ -26,3 +26,9 @@ variable git_tag {
   type    = string
   default = ""
 }
+
+variable "enterprise_tenants_json" {
+  type        = string
+  default     = "[]"
+  description = "Raw JSON string of enterprise tenants."
+}

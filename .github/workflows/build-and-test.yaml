@@ -82,6 +82,27 @@ jobs:
         with:
           service_account: 'github-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com'
           workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
+
+      - name: Fetch enterprise-tenants.json or default to []
+        run: |
+          BUCKET_NAME="${{ secrets.GCP_PROJECT_ID }}-terraform-state"
+          OBJECT_PATH="enterprise-tenants.json"
+          
+          # Default
+          CONTENT="[]"
+
+          # If the file exists, read its contents; otherwise use default "[]"
+          if gsutil -q stat "gs://${BUCKET_NAME}/${OBJECT_PATH}"; then
+            echo "✔ enterprise-tenants.json found; fetching from GCS..."
+            CONTENT=$(gsutil cat "gs://${BUCKET_NAME}/${OBJECT_PATH}")
+            
+            # Optionally, verify that it is valid JSON 
+            echo "$CONTENT" | jq empty 2>/dev/null || CONTENT="[]"
+          else
+            echo "✖ enterprise-tenants.json not found. Using empty array."
+          fi
+
+          echo "ENTERPRISE_TENANTS_JSON=$CONTENT" >> $GITHUB_ENV
       
       - uses: hashicorp/setup-terraform@v3
       - name: Run Terraform plan
@@ -93,4 +114,5 @@ jobs:
             -var="project_id=${{ vars.STAGING_PROJECT_ID }}" \
             -var="region=${{ vars.STAGING_REGION }}" \
             -var="domain_name=${{ vars.STAGING_DOMAIN }}" \
+            -var="enterprise_tenants_json=$ENTERPRISE_TENANTS_JSON" \
             -var="create_cluster=true"

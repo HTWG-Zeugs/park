@@ -96,6 +96,53 @@ jobs:
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
+      - name: Check for deployment.json
+        run: |
+          BUCKET_NAME="${{ inputs.project_id }}-terraform-state"
+          OBJECT_PATH="deployment.json"
+          
+          # Check if the file exists in GCS; if not, exit 1 to fail the job
+          if ! gsutil -q stat "gs://${BUCKET_NAME}/${OBJECT_PATH}"; then
+            echo "🚫 deployment.json not found in GCS bucket. Failing."
+            exit 1
+          fi
+
+          # If the file exists, read it into a variable
+          CONTENT=$(gsutil cat "gs://${BUCKET_NAME}/${OBJECT_PATH}")
+          
+          # Parse git_tag using jq (assuming your file has a structure like { "git_tag": "somevalue" })
+          GIT_TAG=$(echo "$CONTENT" | jq -r .git_tag)
+          
+          # Optionally check if no git_tag field is present or is empty
+          if [ -z "$GIT_TAG" ] || [ "$GIT_TAG" = "null" ]; then
+            echo "🚫 'git_tag' was not set in deployment.json. Failing."
+            exit 1
+          fi
+
+          # Export it for subsequent steps to use
+          echo "GIT_TAG=$GIT_TAG" >> $GITHUB_ENV
+
+      - name: Fetch enterprise-tenants.json or default to []
+        run: |
+          BUCKET_NAME="${{ secrets.GCP_PROJECT_ID }}-terraform-state"
+          OBJECT_PATH="enterprise-tenants.json"
+          
+          # Default
+          CONTENT="[]"
+
+          # If the file exists, read its contents; otherwise use default "[]"
+          if gsutil -q stat "gs://${BUCKET_NAME}/${OBJECT_PATH}"; then
+            echo "✔ enterprise-tenants.json found; fetching from GCS..."
+            CONTENT=$(gsutil cat "gs://${BUCKET_NAME}/${OBJECT_PATH}")
+            
+            # Optionally, verify that it is valid JSON 
+            echo "$CONTENT" | jq empty 2>/dev/null || CONTENT="[]"
+          else
+            echo "✖ enterprise-tenants.json not found. Using empty array."
+          fi
+
+          echo "ENTERPRISE_TENANTS_JSON=$CONTENT" >> $GITHUB_ENV
+
       - uses: hashicorp/setup-terraform@v3
       - name: Terraform apply
         working-directory: ./ci-cd/terraform/${{ inputs.environment }}
@@ -106,4 +153,6 @@ jobs:
             -var="project_id=${{ inputs.project_id }}" \
             -var="region=${{ inputs.region }}" \
             -var="domain_name=${{ inputs.domain }}" \
+            -var="git_tag=$GIT_TAG" \
+            -var="enterprise_tenants_json=$ENTERPRISE_TENANTS_JSON" \
             -var="create_cluster=true"

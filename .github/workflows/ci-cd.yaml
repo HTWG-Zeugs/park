@@ -202,6 +202,27 @@ jobs:
             --port=80 \
             --service-account=${{ env.SIGNUP_FRONTEND_SERVICE_ACCOUNT }} \
             --set-env-vars "PARK_AUTHENTICATION_URL=https://authentication-service-${{ inputs.project_number }}.${{ inputs.region }}.run.app"
+
+      - name: Fetch enterprise-tenants.json or default to []
+        run: |
+          BUCKET_NAME="${{ secrets.GCP_PROJECT_ID }}-terraform-state"
+          OBJECT_PATH="enterprise-tenants.json"
+          
+          # Default
+          CONTENT="[]"
+
+          # If the file exists, read its contents; otherwise use default "[]"
+          if gsutil -q stat "gs://${BUCKET_NAME}/${OBJECT_PATH}"; then
+            echo "✔ enterprise-tenants.json found; fetching from GCS..."
+            CONTENT=$(gsutil cat "gs://${BUCKET_NAME}/${OBJECT_PATH}")
+            
+            # Optionally, verify that it is valid JSON 
+            echo "$CONTENT" | jq empty 2>/dev/null || CONTENT="[]"
+          else
+            echo "✖ enterprise-tenants.json not found. Using empty array."
+          fi
+
+          echo "ENTERPRISE_TENANTS_JSON=$CONTENT" >> $GITHUB_ENV
       
       - uses: hashicorp/setup-terraform@v3
       - name: Terraform apply
@@ -214,7 +235,8 @@ jobs:
             -var="region=${{ inputs.region }}" \
             -var="domain_name=${{ inputs.domain }}" \
             -var="create_cluster=true" \
-            -var="git_tag=${{ env.TAG_ID }}"
+            -var="git_tag=${{ env.TAG_ID }}" \
+            -var="enterprise_tenants_json=$ENTERPRISE_TENANTS_JSON"
       
       - name: Create deployment.json with current Git tag
         run: |
