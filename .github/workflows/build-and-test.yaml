@@ -118,14 +118,11 @@ jobs:
           CONTENT="[]"
 
           # If the file exists, read its contents; otherwise use default "[]"
-          gsutil stat "gs://${BUCKET_NAME}/${OBJECT_PATH}"
+          gsutil -q stat "gs://${BUCKET_NAME}/${OBJECT_PATH}"
           status=$?
           if [[ $status == 0 ]]; then
             echo "✔ enterprise-tenants.json found; fetching from GCS..."
             CONTENT=$(gsutil cat "gs://${BUCKET_NAME}/${OBJECT_PATH}")
-            
-            # Optionally, verify that it is valid JSON 
-            echo "$CONTENT" | jq empty 2>/dev/null || CONTENT="[]"
           else
             echo "✖ enterprise-tenants.json not found. Using empty array."
           fi
