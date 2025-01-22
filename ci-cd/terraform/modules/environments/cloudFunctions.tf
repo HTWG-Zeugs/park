@@ -28,7 +28,7 @@ resource "google_cloud_run_service_iam_member" "cloud_run_invoker" {
 }
 
 resource "google_cloudfunctions2_function" "defect_report" {
-  name = "function-v2"
+  name = "${var.environment_name}-defect-reports"
   location = var.region
   description = "Create changed defects report"
 
