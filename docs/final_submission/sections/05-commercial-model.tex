@@ -1,4 +1,111 @@
 \section{Commercial Model}
 \subsection{Tenant Types}
+
+\paragraph{Free Tenant}
+Der Free Plan richtet sich an Benutzer, die grundlegende Funktionen zur Verwaltung von Standorten und Infrastruktur benötigen. Die wesentlichen Merkmale dieses Plans umfassen:
+\begin{itemize}
+    \item \textbf{Parkhausverwaltung:} Erstellung und Management mehrerer Parkhäuser, um Standorte effizient zu organisieren.
+    \item \textbf{Defektmanagement:} Nachverfolgung und Bearbeitung von Defekten, um eine schnelle Problemlösung zu gewährleisten.
+    \item \textbf{Integration von eMobility-Ladestationen:} Einbindung und Überwachung von Ladeinfrastruktur für Elektrofahrzeuge.
+\end{itemize}
+Der Free Plan bietet die essenziellen Tools, um Parkhäuser und Ladestationen effizient zu managen, ohne dabei monatliche Kosten zu verursachen.
+
+\paragraph{Premium Tenant}
+Der Premium Plan hat die selbe Grundfunktionalität wie der Free Plan und richtet sich an Organisationen mit gesteigerten Anforderungen an Benutzerfreundlichkeit, Analysen und Leistung. 
+Die Merkmale umfassen:
+\begin{itemize}
+    \item \textbf{Benutzerverwaltung:} Unbegrenzte Hinzufügung von Benutzern und umfassende Zugriffskontrolle.
+    \item \textbf{eMobility-Ladestationen:} Einfache Integration und Verwaltung von Ladeinfrastruktur.
+    \item \textbf{Mehrsprachigkeit:} Unterstützung für mehrere Sprachen zur Förderung internationaler Zusammenarbeit.
+    \item \textbf{Analytics-Page:} Bereitstellung von detaillierten Analysen und Einblicken zur Optimierung der operativen Prozesse.
+    \item \textbf{Verbesserte Performance:} Schnellere Ladezeiten und höhere Zuverlässigkeit des Systems.
+    \item \textbf{Premium-Support:} Priorisierte Kundenbetreuung für schnelle Problemlösung.
+    \item \textbf{Erhöhte Sicherheit:} Erweiterte Sicherheitsfeatures zum Schutz sensibler Daten.
+\end{itemize}
+\textbf{Kosten:}
+\begin{itemize}
+    \item \textbf{79,00 €/Monat} Grundgebühr.
+    \item \textbf{1 €/Benutzer.}
+    \item \textbf{5 €/10.000 Backend-Requests.}
+\end{itemize}
+
+\paragraph{Enterprise Tenant}
+Der Enterprise Plan bietet die gleiche Funktionalität wie der Premium Plan, ist jedoch für große Organisationen ausgelegt, die maximale Leistung, Sicherheit und Unterstützung benötigen. 
+Die enthaltenen Features bieten höchste Flexibilität und Effizienz:
+\begin{itemize}
+    \item \textbf{Anpassbarkeit:} Der Kunde erhält eigene Domain.
+    \item \textbf{Beste Performance:} Höchste Geschwindigkeit und Systemzuverlässigkeit.
+    \item \textbf{Top-Support:} Höchstpriorisierte Unterstützung für alle Anliegen.
+    \item \textbf{Höchste Sicherheitsstandards:} Umfassender Schutz sensibler Daten.
+\end{itemize}
+\textbf{Kosten:}
+\begin{itemize}
+    \item \textbf{129,90 €/Monat} Grundgebühr.
+    \item \textbf{5 €/10.000 Backend-Requests.}
+\end{itemize}
+
 \subsection{Pricing Model}
+Die Preisstruktur der Plattform bietet flexible Modelle, die auf die unterschiedlichen Anforderungen der Benutzer zugeschnitten sind. 
+Sie ermöglicht eine einfache Skalierbarkeit basierend auf der Anzahl der Benutzer und der Backend-Anfragen.
+
+\begin{table}[h!]
+\centering
+\caption{Preisübersicht der Tenant Types}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Plan}         & \textbf{Grundgebühr (€/Monat)} & \textbf{Preis pro Benutzer (€/Monat)} & \textbf{Preis pro 10.000 Backend-Requests (€/Monat)} \\ \hline
+Free                  & 0,00                          & -                                    & -                                                   \\ \hline
+Premium               & 79,00                         & 1,00                                 & 5,00                                                \\ \hline
+Enterprise            & 129,90                        & -                                    & 5,00                                                \\ \hline
+\end{tabular}
+\label{tab:pricing}
+\end{table}
+
+Die Tabelle \ref{tab:pricing} fasst die Preise der verschiedenen Tenant Types zusammen und verdeutlicht die unterschiedlichen Kostenmodelle:
+
+- Der \textit{Free Plan} ist kostenlos (0,00 €/Monat) und beinhaltet keine zusätzlichen Gebühren für Benutzer oder Backend-Anfragen. 
+Er eignet sich ideal für kleine Teams oder Einzelpersonen, die grundlegende Funktionen benötigen, ohne Kosten zu verursachen.
+  
+- Der \textit{Premium Plan} bietet erweiterte Funktionen zu einer Grundgebühr von 79,00 €/Monat. 
+Zusätzlich fällt ein flexibler Betrag von 1,00 € pro Benutzer und 5,00 € pro 10.000 Backend-Anfragen an, wodurch dieser Plan für mittelgroße Teams und Organisationen geeignet ist.
+
+- Der \textit{Enterprise Plan} richtet sich an große Organisationen mit hohen Anforderungen. 
+Die Grundgebühr beträgt 129,90 €/Monat, wobei die Kosten für Backend-Anfragen identisch zum Premium Plan sind (5,00 € pro 10.000 Backend-Anfragen). 
+Eine Kostenstruktur pro Benutzer entfällt in diesem Plan, was ihn für Unternehmen mit einer großen Benutzerbasis besonders attraktiv macht.
+
+Diese Preisgestaltung bietet die notwendige Flexibilität und Skalierbarkeit, um sowohl kleine als auch große Benutzergruppen effizient zu bedienen.
+
 \subsection{Cost Model}
+Das interne Kostenmodell basiert auf einer effizienten Ressourcennutzung und differenziert zwischen den Anforderungen der verschiedenen Tenant Types. Die Aufteilung der Ressourcen erfolgt wie folgt:
+
+\begin{itemize}
+    \item \textbf{Free Plan:} Alle Mandanten teilen sich einen Kubernetes-Namespace, eine gemeinsame Firestore-Datenbank und einen gemeinsamen Cloud Storage.
+    \item \textbf{Premium Plan:} Mandanten teilen sich ebenfalls einen Kubernetes-Namespace, jedoch mit höheren Ressourcenallokationen, sowie eine gemeinsame Firestore-Datenbank und einen gemeinsamen Cloud Storage.
+    \item \textbf{Enterprise Plan:} Jeder Mandant erhält einen eigenen Kubernetes-Namespace, eine eigene Firestore-Datenbank und einen eigenen Cloud Storage, um maximale Isolation und Leistung zu gewährleisten.
+    \item \textbf{Geteilte Services:} Drei zentrale Services, die auf Google Cloud Run ausgeführt werden, werden von allen Mandanten gemeinsam genutzt, unabhängig vom Plan.
+\end{itemize}
+
+\begin{table}[h!]
+\centering
+\caption{Ressourcennutzung und Kostenschätzung pro Monat}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Ressource}               & \textbf{Free Plan} & \textbf{Premium Plan} & \textbf{Enterprise (pro Mandant)} \\ \hline
+Kubernetes Namespace             & 50 €/Monat         & 150 €/Monat           & 40 €/Monat                        \\ \hline
+Firestore-Datenbank              & 30 €/Monat         & 100 €/Monat           & 10 €/Monat                        \\ \hline
+Cloud Storage                    & 20 €/Monat         & 50 €/Monat            & 6 €/Monat                         \\ \hline
+Cloud Run (geteilt)              & 100 €/Monat        & 200 €/Monat           & 40 €/Monat (anteilig)              \\ \hline
+\textbf{Gesamtkosten (Schätzung)} & 200 €/Monat        & 500 €/Monat           & 96 €/Monat                        \\ \hline
+\end{tabular}
+\label{tab:costmodel}
+\end{table}
+
+In Tabelle \ref{tab:costmodel} werden die geschätzten Kosten für die verschiedenen Pläne dargestellt. Dabei wurden die ursprünglichen Kosten für den Enterprise Plan durch fünf geteilt, um die Verteilung der Ausgaben für einzelne Mandanten zu berücksichtigen. Die wichtigsten Punkte sind:
+
+\begin{itemize}
+    \item \textbf{Free Plan:} Die Gesamtkosten belaufen sich auf geschätzte 200 €/Monat durch die gemeinsame Nutzung von Ressourcen.
+    \item \textbf{Premium Plan:} Durch höhere Anforderungen betragen die Kosten für alle Premium-Mandanten zusammen etwa 500 €/Monat.
+    \item \textbf{Enterprise Plan:} Jeder Enterprise-Mandant verursacht individuelle Kosten von rund 96 €/Monat. Dies ist bedingt durch die exklusive Zuweisung von Ressourcen wie Kubernetes-Namespace, Firestore-Datenbank und Cloud Storage.
+\end{itemize}
+
+Dieses Kostenmodell bietet eine klare Grundlage für die wirtschaftliche Planung und Skalierung der Plattform.
