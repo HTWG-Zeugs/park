@@ -71,7 +71,29 @@ jobs:
         cd ${{ matrix.service }}
         npm test --if-present
 
-  plan-terraform:
+  plan-terraform-infrastructure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Google Cloud
+        uses: 'google-github-actions/auth@v2'
+        with:
+          service_account: 'github-sa@${{ vars.STAGING_PROJECT_ID }}.iam.gserviceaccount.com'
+          workload_identity_provider: '${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}'
+      
+      - uses: hashicorp/setup-terraform@v3
+      - name: Run Terraform plan for infrastructure
+        working-directory: ./ci-cd/terraform/${{ env.TERRAFORM_PLAN_ENVIRONMENT}}-infra
+        run: |
+          terraform init
+          terraform plan \
+            -var="is_github_actions=true" \
+            -var="project_id=${{ vars.STAGING_PROJECT_ID }}" \
+            -var="region=${{ vars.STAGING_REGION }}"
+
+  plan-terraform-application:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -85,7 +107,7 @@ jobs:
 
       - name: Fetch enterprise-tenants.json or default to []
         run: |
-          BUCKET_NAME="${{ secrets.GCP_PROJECT_ID }}-terraform-state"
+          BUCKET_NAME="${{ vars.STAGING_PROJECT_ID }}-terraform-state"
           OBJECT_PATH="enterprise-tenants.json"
           
           # Default
@@ -105,7 +127,7 @@ jobs:
           echo "ENTERPRISE_TENANTS_JSON=$CONTENT" >> $GITHUB_ENV
       
       - uses: hashicorp/setup-terraform@v3
-      - name: Run Terraform plan
+      - name: Run Terraform plan for application
         working-directory: ./ci-cd/terraform/${{ env.TERRAFORM_PLAN_ENVIRONMENT}}
         run: |
           terraform init
@@ -114,5 +136,4 @@ jobs:
             -var="project_id=${{ vars.STAGING_PROJECT_ID }}" \
             -var="region=${{ vars.STAGING_REGION }}" \
             -var="domain_name=${{ vars.STAGING_DOMAIN }}" \
-            -var="enterprise_tenants_json=$ENTERPRISE_TENANTS_JSON" \
-            -var="create_cluster=true"
+            -var="enterprise_tenants_json=$ENTERPRISE_TENANTS_JSON"

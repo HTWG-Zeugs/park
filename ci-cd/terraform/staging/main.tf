@@ -7,6 +7,11 @@ terraform {
   }
 }
 
+data "google_container_cluster" "primary" {
+  name     = "${var.project_id}-gke"
+  location = var.region
+}
+
 provider "google" {
   credentials = var.is_github_actions ? null : file("terraform-key.json")
   project     = var.project_id
@@ -14,15 +19,15 @@ provider "google" {
 }
 
 provider "kubernetes" {
-  host                   = "https://${module.gke_cluster.cluster_endpoint}"
-  cluster_ca_certificate = base64decode(module.gke_cluster.cluster_ca_certificate)
+  host                   = "https://${data.google_container_cluster.primary.endpoint}"
+  cluster_ca_certificate = base64decode(data.google_container_cluster.primary.master_auth[0].cluster_ca_certificate)
   token                  = data.google_client_config.provider.access_token
 }
 
 provider "helm" {
   kubernetes {
-    host                   = "https://${module.gke_cluster.cluster_endpoint}"
-    cluster_ca_certificate = base64decode(module.gke_cluster.cluster_ca_certificate)
+    host                   = "https://${data.google_container_cluster.primary.endpoint}"
+    cluster_ca_certificate = base64decode(data.google_container_cluster.primary.master_auth[0].cluster_ca_certificate)
     token                  = data.google_client_config.provider.access_token
   }
 }
@@ -35,22 +40,7 @@ locals {
   identity_auth_domain = "${ var.project_id}.firebaseapp.com"
 }
 
-module "gke_cluster" {
-  source = "../modules/gke_cluster"
-  region = var.region
-  project_id = var.project_id
-  create_cluster = var.create_cluster
-}
-
-module "ci_cd_infrastructure" {
-  source = "../modules/ci_cd_infrastructure"
-  region = var.region
-  project_id = var.project_id
-  github_org = "HTWG-Zeugs"
-}
-
 module "park_app_infrastructure" {
-  depends_on = [ module.gke_cluster ]
   source = "../modules/park_app_infrastructure"
   region = var.region
   project_id = var.project_id
@@ -62,7 +52,7 @@ module "park_app_infrastructure" {
 }
 
 module "free_tenants_env" {
-  depends_on = [ module.gke_cluster, module.park_app_infrastructure ]
+  depends_on = [ module.park_app_infrastructure ]
   source = "../modules/environments"
   region = var.region
   project_id = var.project_id
@@ -87,7 +77,7 @@ module "free_tenants_env" {
 }
 
 module "premium_tenants_env" {
-  depends_on = [ module.gke_cluster, module.park_app_infrastructure ]
+  depends_on = [ module.park_app_infrastructure ]
   source = "../modules/environments"
   region = var.region
   project_id = var.project_id
@@ -116,7 +106,7 @@ locals {
 }
 
 module "per_enterprise_tenant" {
-  depends_on = [ module.gke_cluster, module.park_app_infrastructure ]
+  depends_on = [ module.park_app_infrastructure ]
   for_each = { for tenant in local.enterprise_tenants : tenant.tenantId => tenant }
   source = "../modules/environments"
   region = var.region
@@ -139,12 +129,4 @@ module "per_enterprise_tenant" {
   auth_url = "https://authentication-service-${ data.google_project.project.number }.${ var.region }.run.app"
   tenant_type = "enterprise"
   tenant_id = each.value.tenantId
-}
-
-output "github_sa_email" {
-  value = module.ci_cd_infrastructure.github_sa_email
-}
-
-output "workload_identity_pool_provider_name" {
-  value = module.ci_cd_infrastructure.workload_identity_pool_provider_name
 }

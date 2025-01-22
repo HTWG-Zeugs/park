@@ -17,11 +17,6 @@ variable domain_name {
   type    = string
 }
 
-variable create_cluster {
-  type    = bool
-  default = true
-}
-
 variable git_tag {
   type    = string
   default = ""
