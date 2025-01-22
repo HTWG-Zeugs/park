@@ -27,6 +27,21 @@ resource "google_cloud_run_service_iam_member" "cloud_run_invoker" {
   member   = "serviceAccount:${google_service_account.defect_report_sa.email}"
 }
 
+variable "defect_report_sa_roles" {
+  type = list(string)
+  default = [
+    "roles/datastore.user",
+    "roles/storage.objectCreator"
+  ]
+}
+
+resource "google_project_iam_member" "defect_report_sa_iam_member" {	
+  for_each = { for value in var.defect_report_sa_roles : value => value }
+  project = var.project_id
+  role    = each.value
+  member = "serviceAccount:${google_service_account.defect_report_sa.email}"
+}
+
 resource "google_cloudfunctions2_function" "defect_report" {
   name = "${var.environment_name}-defect-reports"
   location = var.region
