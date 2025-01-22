@@ -113,21 +113,20 @@ jobs:
         run: |
           BUCKET_NAME="${{ vars.STAGING_PROJECT_ID }}-terraform-state"
           OBJECT_PATH="enterprise-tenants.json"
-          
-          # Default
+
+          # Default empty JSON array
           CONTENT="[]"
 
-          # If the file exists, read its contents; otherwise use default "[]"
-          gsutil -q stat "gs://${BUCKET_NAME}/${OBJECT_PATH}"
-          status=$?
-          if [[ $status == 0 ]]; then
-            echo "✔ enterprise-tenants.json found; fetching from GCS..."
-            CONTENT=$(gsutil cat "gs://${BUCKET_NAME}/${OBJECT_PATH}")
+          # Check if file exists in GCS
+          if gsutil -q stat "gs://${BUCKET_NAME}/${OBJECT_PATH}"; then
+              echo "✔ enterprise-tenants.json found; fetching from GCS..."
+              CONTENT=$(gsutil cat "gs://${BUCKET_NAME}/${OBJECT_PATH}" | jq -c . || echo "[]")
           else
-            echo "✖ enterprise-tenants.json not found. Using empty array."
+              echo "✖ enterprise-tenants.json not found. Using empty array."
           fi
 
-          echo "ENTERPRISE_TENANTS_JSON=$CONTENT" >> $GITHUB_ENV
+          # Safely set as a single-line JSON environment variable
+          echo "ENTERPRISE_TENANTS_JSON=$(echo $CONTENT | jq -c .)" >> $GITHUB_ENV
       
       - uses: hashicorp/setup-terraform@v3
       - name: Run Terraform plan for application
