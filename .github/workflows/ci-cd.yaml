@@ -264,7 +264,6 @@ jobs:
             -var="project_id=${{ inputs.project_id }}" \
             -var="region=${{ inputs.region }}" \
             -var="domain_name=${{ inputs.domain }}" \
-            -var="create_cluster=true" \
             -var="git_tag=${{ env.TAG_ID }}" \
             -var="enterprise_tenants_json=$ENTERPRISE_TENANTS_JSON"
       
