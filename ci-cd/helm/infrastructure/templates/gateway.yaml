@@ -3,7 +3,7 @@ kind: Gateway
 metadata:
   name: {{ .Values.gateway.name }}
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-staging
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   gatewayClassName: gke-l7-global-external-managed
   listeners:
