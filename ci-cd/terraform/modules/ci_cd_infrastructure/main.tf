@@ -7,6 +7,15 @@ resource "google_artifact_registry_repository" "docker_repository" {
   format        = "DOCKER"
 }
 
+resource "google_storage_bucket" "gcf_source_bucket" {
+  project  = var.project_id
+  name     = "${var.project_id}-gcf-source"
+  location = var.region
+  uniform_bucket_level_access = true
+  force_destroy = true
+  public_access_prevention = "enforced"
+}
+
 resource "google_service_account" "github_sa" {
   account_id   = "github-sa"
   display_name = "GitHub Service Account"

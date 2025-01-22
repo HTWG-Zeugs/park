@@ -12,7 +12,6 @@ resource "google_storage_bucket" "property_management_bucket" {
   }
 }
 
-
 resource "google_firestore_database" "property_management_db" {
   project  = var.project_id
   name     = "${var.project_id}-prop-ma-${var.environment_name}"

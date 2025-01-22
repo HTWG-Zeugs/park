@@ -68,8 +68,6 @@ variable tenant_type {
   type    = string
 }
 
-
-
 variable app_namespace {
   description = "The kubernetes namespace for the app services"
   type        = string
@@ -91,4 +89,10 @@ variable frontend_sa {
   description = "The service account to use for the frontend service"
   type        = string
   default     = "front-sa"
+}
+
+variable defect_report_sa {
+  description = "The service account to use for the defect report cloud function"
+  type        = string
+  default     = "defect-report-sa"
 }
