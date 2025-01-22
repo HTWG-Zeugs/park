@@ -1,0 +1,35 @@
+\section{DevOps}
+
+Im Folgenden werden alle Aspekte des DevOps-Prozesses beschrieben, 
+die für die Entwicklung und den Betrieb der Anwendung relevant sind. 
+Dies beinhaltet die Bereitstellung von Umgebungen, Rollen und Serviceaccounts, 
+Pipelines und die Veröffentlichung neuer Features, die Einrichtung neuer Mandanten, 
+das Monitoring und das Load Testing.
+
+\subsection{Environments}
+
+Für die Entwicklung und den Betrieb der Anwendung werden verschiedene Umgebungen (Environments) verwendet.
+Für den Betrieb der Anwendung wird die \glqq{}Production\grqq{}-Umgebung verwendet, für 
+die Entwicklung wird die \glqq{}Staging\grqq{}-Umgebung verwendet. 
+Eine weitere \glqq{}Development\grqq{}-Umgebung wurde aufgrund der geringen Anzahl an Entwicklern 
+nicht eingerichtet. Werden für die lokale Entwicklung Cloud-Dienste wie Firestore oder 
+Storage Buckets benötigt, werden der Einfachheit halber diese aus der \glqq{}Staging\grqq{}-Umgebung 
+verwendet.
+
+Jede Umgebung wird in einem eigenen Projekt in der Google Cloud Platform betrieben.
+So wird eine klare Trennung zwischen den Umgebungen gewährleistet.
+Da beide Umgebungen über IAC (Infrastructure as Code) verwaltet werden,
+sind die Umgebungen identisch und können außerdem schnell wiederhergestellt werden.
+
+\subsubsection{Ressourcen pro Umgebung}
+
+Jede Umgebung hat ein eigenes Kubernetes-Cluster, in dem die Anwendung läuft.
+Bis auf die Anzahl der Nodes sind die Cluster identisch. 
+In der \glqq{}Production\grqq{}-Umgebung sind mehr Nodes vorhanden, um eine höhere Verfügbarkeit zu gewährleisten.
+
+
+\subsection{Roles and Role Mapping}
+\subsection{Pipelines and Release of new Features}
+\subsection{New Tenants}
+\subsection{Monitoring}
+\subsection{Load Testing}
