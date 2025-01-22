@@ -96,6 +96,24 @@ resource "google_project_iam_member" "cloud_build_sa-iam-member" {
   member = "serviceAccount:${google_service_account.cloud_build_sa.email}"
 }
 
+resource "google_project_iam_member" "cloud_build_sa-iam-member" {
+  project = var.project_id
+  role    = "roles/logging.logWriter"
+  member = "serviceAccount:${google_service_account.cloud_build_sa.email}"
+}
+
+resource "google_project_iam_member" "cloud_build_sa-iam-member" {
+  project = var.project_id
+  role    = "roles/artifactregistry.writer"
+  member = "serviceAccount:${google_service_account.cloud_build_sa.email}"
+}
+
+resource "google_project_iam_member" "cloud_build_sa-iam-member" {
+  project = var.project_id
+  role    = "roles/storage.objectViewer"
+  member = "serviceAccount:${google_service_account.cloud_build_sa.email}"
+}
+
 output "github_sa_email" {
   value = google_service_account.github_sa.email
 }

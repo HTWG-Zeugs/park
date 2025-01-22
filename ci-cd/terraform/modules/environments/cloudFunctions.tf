@@ -41,7 +41,7 @@ resource "google_cloudfunctions2_function" "defect_report" {
         object = "createChangedDefectsReport.zip"
       }
     }
-    service_account = "cloud-build-sa@${var.project_id}.iam.gserviceaccount.com"
+    service_account = "projects/${var.project_id}/serviceAccounts/cloud-build-sa@${var.project_id}.iam.gserviceaccount.com"
   }
   service_config {
     max_instance_count  = 1
