@@ -187,57 +187,9 @@ jobs:
           cluster_name: "${{ inputs.project_id }}-gke"
           location: ${{ inputs.region }}
 
-      # Example: Deploy infrastructure-administration to Cloud Run
-      - name: Deploy infrastructure-administration
-        run: |
-          gcloud run deploy infrastructure-administration \
-            --image=${{ env.GCR_REPO }}/infrastructure-administration:${{ env.TAG_ID }} \
-            --platform=managed \
-            --region=${{ inputs.region }} \
-            --allow-unauthenticated \
-            --port=8083 \
-            --service-account=${{ env.INFRA_SERVICE_ACCOUNT }} \
-            --set-env-vars "AUTHENTICATION_SERVICE_URL=https://authentication-service-${{ inputs.project_number }}.${{ inputs.region }}.run.app" \
-            --set-env-vars "ANALYTICS_DB_ID=${{ env.INFRA_DB_ID }}" \
-            --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
-            --set-env-vars "GITHUB_ACTION_TOKEN=${{ secrets.cd_token }}" \
-            --set-env-vars "GITHUB_TENANT_WORKFLOW_ID=${{ inputs.environment }}-enterprise-tenants-list.yaml" \
-            --set-env-vars "GITHUB_TENANT_WORKFLOW_BRANCH=dev" \
-            --set-custom-audiences "[ ${{ env.SERVICE_AUDIENCE }} ]"
-
-      # Example: Deploy authentication-service to Cloud Run
-      - name: Deploy authentication-service
-        run: |
-          gcloud run deploy authentication-service \
-            --image=${{ env.GCR_REPO }}/authentication-service:${{ env.TAG_ID }} \
-            --platform=managed \
-            --region=${{ inputs.region }} \
-            --allow-unauthenticated \
-            --port=8082 \
-            --service-account=${{ env.AUTH_SERVICE_ACCOUNT }} \
-            --set-env-vars "FIRESTORE_DB_ID=${{ env.AUTH_DB_ID }}" \
-            --set-env-vars "IDENTITY_PLATFORM_API_KEY=${{ secrets.identity_platform_api_key }}" \
-            --set-env-vars "IDENTITY_PLATFORM_AUTH_DOMAIN=${{ inputs.project_id }}.firebaseapp.com" \
-            --set-env-vars "PARK_IDENTITY_PLATFORM_PROJECT_ID=${{ inputs.project_id }}" \
-            --set-env-vars "INFRASTRUCTURE_SERVICE_URL=https://infrastructure-administration-${{ inputs.project_number }}.${{ inputs.region }}.run.app" \
-            --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
-            --set-custom-audiences "[ ${{ env.SERVICE_AUDIENCE }} ]"
-
-      # Example: Deploy signup-frontend
-      - name: Deploy signup-frontend
-        run: |
-          gcloud run deploy signup-frontend \
-            --image=${{ env.GCR_REPO }}/signup-frontend:${{ env.TAG_ID }} \
-            --platform=managed \
-            --region=${{ inputs.region }} \
-            --allow-unauthenticated \
-            --port=80 \
-            --service-account=${{ env.SIGNUP_FRONTEND_SERVICE_ACCOUNT }} \
-            --set-env-vars "PARK_AUTHENTICATION_URL=https://authentication-service-${{ inputs.project_number }}.${{ inputs.region }}.run.app"
-
       - name: Fetch enterprise-tenants.json or default to []
         run: |
-          BUCKET_NAME="${{ vars.STAGING_PROJECT_ID }}-terraform-state"
+          BUCKET_NAME="${{ inputs.project_id }}-terraform-state"
           OBJECT_PATH="enterprise-tenants.json"
 
           # Default empty JSON array
@@ -266,6 +218,51 @@ jobs:
             -var="domain_name=${{ inputs.domain }}" \
             -var="git_tag=${{ env.TAG_ID }}" \
             -var="enterprise_tenants_json=$ENTERPRISE_TENANTS_JSON"
+
+      - name: Deploy infrastructure-administration
+        run: |
+          gcloud run deploy infrastructure-administration \
+            --image=${{ env.GCR_REPO }}/infrastructure-administration:${{ env.TAG_ID }} \
+            --platform=managed \
+            --region=${{ inputs.region }} \
+            --allow-unauthenticated \
+            --port=8083 \
+            --service-account=${{ env.INFRA_SERVICE_ACCOUNT }} \
+            --set-env-vars "AUTHENTICATION_SERVICE_URL=https://authentication-service-${{ inputs.project_number }}.${{ inputs.region }}.run.app" \
+            --set-env-vars "ANALYTICS_DB_ID=${{ env.INFRA_DB_ID }}" \
+            --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
+            --set-env-vars "GITHUB_ACTION_TOKEN=${{ secrets.cd_token }}" \
+            --set-env-vars "GITHUB_TENANT_WORKFLOW_ID=${{ inputs.environment }}-enterprise-tenants-list.yaml" \
+            --set-env-vars "GITHUB_TENANT_WORKFLOW_BRANCH=dev" \
+            --set-custom-audiences "[ ${{ env.SERVICE_AUDIENCE }} ]"
+
+      - name: Deploy authentication-service
+        run: |
+          gcloud run deploy authentication-service \
+            --image=${{ env.GCR_REPO }}/authentication-service:${{ env.TAG_ID }} \
+            --platform=managed \
+            --region=${{ inputs.region }} \
+            --allow-unauthenticated \
+            --port=8082 \
+            --service-account=${{ env.AUTH_SERVICE_ACCOUNT }} \
+            --set-env-vars "FIRESTORE_DB_ID=${{ env.AUTH_DB_ID }}" \
+            --set-env-vars "IDENTITY_PLATFORM_API_KEY=${{ secrets.identity_platform_api_key }}" \
+            --set-env-vars "IDENTITY_PLATFORM_AUTH_DOMAIN=${{ inputs.project_id }}.firebaseapp.com" \
+            --set-env-vars "PARK_IDENTITY_PLATFORM_PROJECT_ID=${{ inputs.project_id }}" \
+            --set-env-vars "INFRASTRUCTURE_SERVICE_URL=https://infrastructure-administration-${{ inputs.project_number }}.${{ inputs.region }}.run.app" \
+            --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
+            --set-custom-audiences "[ ${{ env.SERVICE_AUDIENCE }} ]"
+
+      - name: Deploy signup-frontend
+        run: |
+          gcloud run deploy signup-frontend \
+            --image=${{ env.GCR_REPO }}/signup-frontend:${{ env.TAG_ID }} \
+            --platform=managed \
+            --region=${{ inputs.region }} \
+            --allow-unauthenticated \
+            --port=80 \
+            --service-account=${{ env.SIGNUP_FRONTEND_SERVICE_ACCOUNT }} \
+            --set-env-vars "PARK_AUTHENTICATION_URL=https://authentication-service-${{ inputs.project_number }}.${{ inputs.region }}.run.app"
       
       - name: Create deployment.json with current Git tag
         run: |

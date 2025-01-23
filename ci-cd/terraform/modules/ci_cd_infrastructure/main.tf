@@ -30,7 +30,6 @@ resource "google_iam_workload_identity_pool" "github_pool" {
 
 
 resource "google_iam_workload_identity_pool_provider" "github_identity_provider" {
-  project                            = var.project_id
   workload_identity_pool_id          = google_iam_workload_identity_pool.github_pool.workload_identity_pool_id
   workload_identity_pool_provider_id = "github-repo-provider"
   display_name                       = "GitHub provider"
@@ -72,6 +71,7 @@ variable "github_sa_roles" {
     "roles/artifactregistry.admin",
     "roles/iam.workloadIdentityPoolAdmin",
     "roles/iam.serviceAccountAdmin",
+    "roles/iam.serviceAccountUser",
     "roles/serviceusage.serviceUsageAdmin",
     "roles/run.admin",
     "roles/storage.objectAdmin",

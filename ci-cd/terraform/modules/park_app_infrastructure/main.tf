@@ -185,6 +185,9 @@ resource "kubernetes_namespace" "infra" {
       "iam.gke.io/gcp-service-account" : "cert-manager@${ var.project_id }.iam.gserviceaccount.com"
     }
   }
+  timeouts {
+    delete = "20m"
+  }
 }
 
 resource "helm_release" "cert_manager" {
