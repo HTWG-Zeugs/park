@@ -74,7 +74,7 @@ resource "google_cloudfunctions2_function" "defect_report" {
 
 resource "google_cloud_scheduler_job" "defect_report" {
   name      = "${var.environment_name}-defect-reports-job"
-  schedule  = "0 */12 * * *"
+  schedule  = "0 * * * *"
   time_zone = "Europe/Berlin"
   project   = var.project_id
   region    = var.region
