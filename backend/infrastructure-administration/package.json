@@ -1,6 +1,6 @@
 {
   "name": "infrastructure-administration",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "description": "infrastructure administration service",
   "main": "main.ts",
   "scripts": {
