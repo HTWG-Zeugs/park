@@ -102,7 +102,7 @@ export class GarageService {
     ticket.paymentTimestamp = new Date();
     await this.repo.updateTicket(ticket);
     const garage = await this.repo.getGarage(ticket.garageId);
-    const diffInMilliseconds = ticket.paymentTimestamp.getMilliseconds() - new Date(ticket.entryTimestamp).getMilliseconds()
+    const diffInMilliseconds = Math.abs(Number(ticket.paymentTimestamp) - Number(ticket.entryTimestamp));
     const diffInMinutes = diffInMilliseconds / (1000 * 60)
     this.notifyAnalytics(
       garage.tenantId,
