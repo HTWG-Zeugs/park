@@ -134,7 +134,7 @@ resource "kubernetes_namespace" "tenant" {
     name = "${var.environment_name}-ns"
   }
   timeouts {
-    delete = "10m"
+    delete = "20m"
   }
 }
 
