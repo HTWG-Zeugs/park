@@ -98,6 +98,66 @@ in den GitHub Secrets gespeichert werden.\footnote{https://cloud.google.com/blog
 
 \subsection{Pipelines and Release of new Features}
 
+Für die Bereitstellung von neuen Features und Bugfixes wird ein CI/CD-Prozess verwendet.
+Die CI/CD-Pipeline wird mit GitHub Actions realisiert.
+Die gesamte Pipeline ist in mehrere Actions unterteilt, wobei die eine Action bei Pull-Requests ausgeführt wird,
+die andere bei einem Push auf den \textit{dev}- oder \textit{main}-Branch.
+
+\subsubsection*{Pipeline für Pull-Requests auf \textit{dev} und \textit{main}}
+
+Die Pipeline für Pull-Requests besteht aus den folgenden Jobs:
+\begin{itemize}
+  \item \textbf{Build}: Die Docker Images aller Services werden gebaut und auf eventuelle Fehler überprüft.
+  \item \textbf{Test}: Die Unittests der Services werden ausgeführt.
+  \item \textbf{Plan Terraform for the Infrastructure}: Die Änderungen an der Infrastruktur werden geplant.
+  \item \textbf{Plan Terraform for the Application}: Die Änderungen an der Anwendung werden geplant.
+\end{itemize}
+
+Je nachdem, ob es sich um einen Push auf den \textit{dev}- oder \textit{main}-Branch handelt, wird die Pipeline
+für die \textit{staging}- oder \textit{production}-Umgebung ausgeführt. 
+Abbildung \ref{fig:pr-pipeline} zeigt die Pipeline für Pull-Requests.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.6\textwidth]{resources/pr-pipeline.pdf}
+  \caption{PR Pipeline}
+  \label{fig:pr-pipeline}
+\end{figure}
+
+
+\subsubsection*{Pipeline für Push auf \textit{dev} und \textit{main}}
+
+Die Pipeline für einen Push auf den \textit{dev}- oder \textit{main}-Branch ist für das 
+Deployment der Änderungen in der Infrastruktur und der Anwendung zuständig.
+Die Pipeline besteht aus den folgenden Jobs:
+
+\begin{itemize}
+  \item \textbf{Apply Terraform for the Infrastructure}: Die Änderungen an der Infrastruktur werden angewendet.
+  \item \textbf{Build and Push Images}: Die Docker Images aller Services werden gebaut und in die Artifact Registry hochgeladen.
+  \item \textbf{Package Cloud Functions}: Die Cloud-Functions werden in ein Zip-Archiv gepackt.
+  \item \textbf{Apply Terraform for the Application}: Die Änderungen an der Anwendung werden angewendet. Das beinhaltet das Deployment der Docker Images und der Cloud-Functions.
+  \item \textbf{Deploy Cloud Run}: Cloud-Run-Services, die nicht im Kubernetes Cluster laufen, werden deployed.
+  \item \textbf{Update deployment.json}: Deployment-Informationen wie der Tag der Images werden in einer JSON-Datei in einem Bucket für spätere Pipelines gespeichert.
+\end{itemize}
+
+Da die Park Anwendung Multi-Tenant-fähig ist, müssen die Tenants auch in den Pipelines berücksichtigt werden.
+Viele Ressourcen wie Buckets, Firestore Datenbanken und DNS-Zonen müssen pro Enterprise Tenant erstellt werden.
+Um herauszufinden, ob Ressourcen erstellt, aktualisiert oder gelöscht werden müssen, wird eine JSON-Datei 
+aus einem Bucket geladen. Diese Datei enthält die Konfiguration der Enterprise Tenants.
+
+Je nachdem, ob es sich um einen Push auf den \textit{dev}- oder \textit{main}-Branch handelt, wird die Pipeline
+für die \textit{staging}- oder \textit{production}-Umgebung ausgeführt.
+Abbildung \ref{fig:cd-pipeline} zeigt die Pipeline für einen Push auf den \textit{dev}- oder \textit{main}-Branch.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{resources/cd-pipeline.pdf}
+  \caption{CD Pipeline}
+  \label{fig:cd-pipeline}
+\end{figure}
+
+
+
 \subsection{New Tenants}
 \subsection{Monitoring}
 \subsection{Load Testing}
