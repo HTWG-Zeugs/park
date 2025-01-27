@@ -18,7 +18,10 @@ Funktional ermöglicht die Anwendung die digitale Abbildung der realen Infrastru
 
 
 \subsection{System Context}
-System context diagram und Beschreibung der angrenzenden Systeme
+
+Das System läuft im Kontext unterschiedlicher interner und externer Komponenten. Interne Komponenten beschreiben dabei Komponenten, die vom Solution Administrator selbst verwaltet werden, über die er/sie also eine gewisse Kontrolle hat. Externe Komponenten sind dann alle diejenigen, über die der Solution Administrator keine Kontrolle hat. 
+
+In Abbildung \ref{fig:context-diagram} ist der Systemkontext und die Interaktion mit der Solution in einem Kontextdiagram dargestellt.
 
 \begin{figure}[ht]
     \centering
@@ -29,35 +32,7 @@ System context diagram und Beschreibung der angrenzenden Systeme
 
 
 \subsection{Use Case Overview}
-Use Case Diagramm und kurze Beschreibung alles Use Cases und Aktoren.
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=\textwidth]{resources/park-ma-use-cases.pdf}
-    \caption{Parking Management Use Cases}
-    \label{fig:park-ma-use-cases}
-\end{figure}
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=\textwidth]{resources/prop-ma-use-cases.pdf}
-    \caption{Property Management Use Cases}
-    \label{fig:prop-ma-use-cases}
-\end{figure}
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=\textwidth]{resources/inf-ma-use-cases.pdf}
-    \caption{Infrastructure Management Use Cases}
-    \label{fig:inf-ma-use-cases}
-\end{figure}
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=\textwidth]{resources/auth-use-cases.pdf}
-    \caption{Authentication Service Use Cases}
-    \label{fig:auth-use-cases}
-\end{figure}
+Im folgenden Abschnitt werden die Use Cases der Parking Management Lösung genauer beschrieben. Diese Aktoren existieren in diesem Kontext:
 
 \renewcommand{\arraystretch}{1.5}
 {\rowcolors{2}{}{gray!20}
@@ -69,3 +44,43 @@ Use Case Diagramm und kurze Beschreibung alles Use Cases und Aktoren.
     Solution Administrator & Administrator, der die Lösung bereitstellt \\ [0.5ex]
     Lead & Potenzielle Kunden, die eine Instanz der Lösung erstellen möchten \\ 
 \end{longtable}}
+
+Zusätzlich zu den Aktoren, die entsprechende Personen darstellen, existieren noch sogenannte System Actors. Damit sind die Systemkomponenten gemeint, sie auch als Aktoren mit anderen Systemkomponenten interagieren. Dies sind beispielsweise externe Komponenten wie die Ladestationen, Schranken, 3rd Party Applikationen des E-Charging Anbieters, aber auch die Microservices der Lösung, die untereinander interagieren.
+
+Das Parking Management bündelt sämtliche Funktionalität für die Abwicklung der Prozesse rund um das Parken und Laden. In Abbildung \ref{fig:park-ma-use-cases} sind die Use Cases des Parking Managements abgebildet.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{resources/park-ma-use-cases.pdf}
+    \caption{Parking Management Use Cases}
+    \label{fig:park-ma-use-cases}
+\end{figure}
+
+Das Property Management umfasst alle Funktionen für das Erstellen, Verwalten und Löschen der digitalen Abbildungen der Infrastruktur, sowie das Defect Management.
+In Abbildung \ref{fig:prop-ma-use-cases} sind alle Use Cases für des Property Managements dargestellt.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{resources/prop-ma-use-cases.pdf}
+    \caption{Property Management Use Cases}
+    \label{fig:prop-ma-use-cases}
+\end{figure}
+
+Infrastructure Management umfasst die Verwaltung der Infrastruktur auf Anwendungsebene. Dazu gehören beispielweise die Instanzerstellung für neue Tenants und die gesamte Funktionalität für das konsolidieren und abrufen von anwendungsweiten Analytics. Abbildung \ref{fig:inf-ma-use-cases} zeigt die Use Cases für das Infrastructure Management.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{resources/inf-ma-use-cases.pdf}
+    \caption{Infrastructure Management Use Cases}
+    \label{fig:inf-ma-use-cases}
+\end{figure}
+
+Die Authentication Komponente der Parking Management Solution stellt einige erweiternde Funktionen zur Google Identity Platform bereit. In Abbildung \ref{fig:auth-use-cases} sind die entsprechenden Use Cases dargestellt.
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{resources/auth-use-cases.pdf}
+    \caption{Authentication Service Use Cases}
+    \label{fig:auth-use-cases}
+\end{figure}
