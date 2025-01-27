@@ -1,7 +1,5 @@
 \section{Development View}
 
-Im Folgenden wird die Sicht auf die Anwendung während der Entwicklung beschrieben.
-
 In den folgenden Abschnitten wird die Sicht auf die Anwendung während der Entwicklung beschrieben. Dies umfasst die Organisation des Quellcodes, die entwickelten Komponenten, Verwendete APIs und die Organisation der benötigten Daten.
 
 \subsection{Software Components}
@@ -37,7 +35,7 @@ Für die Organisation unseres Quellcodes haben wir einen Monorepo-Ansatz verwend
         |-- signup-frontend
         |-- ...
     \end{verbatim}
-    \caption{Repository Structure}
+    \caption{Repository Organisation}
     \label{fig:repo-structure}
 \end{figure}
 
@@ -166,11 +164,21 @@ Die Schnittstelle des Authentication Service stellt einige Erweiterungen um die 
 \end{itemize}
 
 \subsection{Data Model}
-Verschiedene Datenbanken
-Analytics Records
-Garage (Parking und Property Management)
-Defects (Dokumente und Bilder im object storage)
-tickets und charging sessions
+
+In Abbildung \ref{fig:data-model} ist die Organisation der Daten dargestellt. Alle Objekte die für die Anwendung persistiert werden müssen, werden in Firestore gespeichert. Das betrifft beispielsweise User, Charging Sessions, Garagen, Tickets, usw. Außerdem werden auch die Analytics Records in in Firestore gespeichert. Für die Analytics wird immer, wenn eine Änderung der entsprechenden Metrik verzeichnet wird ein neuer Record mit Zeitstempel abgespeichert, damit später in der Applikation der historische Verlauf für die Histogramme und rückblickende Analysen abgefragt werden kann. Für die Parking Status Analytics sieht ein solcher Analytics Record dann beispielsweise folgendermaßen aus:
+
+\begin{verbatim}
+    {
+        "timestamp": "2025-01-23T15:10:55.391Z",
+        "totalSpaces": 125,
+        "occupiedSpaces": 98
+    }
+\end{verbatim}
+
+Die Firestore Datenbanken für den Authentication Service und den Infrastructure-Management Service existieren einmal für die gesamte Anwendung, die Datenbanken für das Parking- und Property-Management existieren jeweils einmal für die Free-Tenants, einmal für die Premium-Tenants und für jeden Enterprise-Tenant. Gleich verhält es sich auch für die Collections, die mit dem Suffix \verb|-<tenantId>| versehen sind.
+
+Neben den Firestore Datenbanken werden, wie in Abbildung \ref{fig:data-model} gezeigt, auch verschiedene Cloud Storage Buckets verwendet. Der Bucket \verb|gcf-source| beinhaltet dabei den Quellcode für die Cloud Function zur Erstellung der Defect Reports und wird für das Deployment benötigt. Die Defect Reports, die von dieser Cloud Function erstellt werden, werden wieder entsprechend des Tenants in einem Bucket abgelget (\verb|defect-reports-<tenantId>|). Der \verb|terraform-state| bucket wird ebenfalls für das Deployment benötigt, und umfasst neben den \verb|.tfstate| Files für Terraform auch zwei JSON Files für das Deployment und die Enterprise Tenants.
+Darüber hinaus existiert noch ein Bucket \verb|prop-ma-<tenantId>|, in welchem die Bilder für die Defects abgespeichert werden können.
 
 \begin{figure}[ht]
     \centering
