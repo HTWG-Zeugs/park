@@ -3,10 +3,10 @@
 Im Folgenden werden alle Aspekte des DevOps-Prozesses beschrieben, 
 die für die Entwicklung und den Betrieb der Anwendung relevant sind. 
 Dies beinhaltet die Bereitstellung von Umgebungen, Rollen und Serviceaccounts, 
-Pipelines und die Veröffentlichung neuer Features, die Einrichtung neuer Mandanten, 
+Pipelines und die Veröffentlichung neuer Features, die Einrichtung neuer Tenants, 
 das Monitoring und das Load Testing.
 
-\subsection{Environments}
+\subsection{Umgebungen / Environments}
 
 Für die Entwicklung und den Betrieb der Anwendung werden verschiedene Umgebungen (Environments) verwendet.
 Für den Betrieb der Anwendung wird die \glqq{}Production\grqq{}-Umgebung verwendet, für 
@@ -23,12 +23,66 @@ sind die Umgebungen identisch und können außerdem schnell wiederhergestellt we
 
 \subsubsection{Ressourcen pro Umgebung}
 
-Jede Umgebung hat ein eigenes Kubernetes-Cluster, in dem die Anwendung läuft.
-Bis auf die Anzahl der Nodes sind die Cluster identisch. 
-In der \glqq{}Production\grqq{}-Umgebung sind mehr Nodes vorhanden, um eine höhere Verfügbarkeit zu gewährleisten.
+Tabelle \ref{tab:google-cloud-ressourcen} listet die Google Cloud Ressourcen pro Umgebung auf und
+beschreibt kurz deren Funktion. Da die Umgebungen identisch sind, ist nur eine Tabelle notwendig.
 
+\renewcommand{\arraystretch}{1.5}
+{\rowcolors{2}{}{gray!20}
+\begin{longtable}{l p{10cm}}
+  \caption{Google Cloud Ressourcen pro Umgebung}
+  \label{tab:google-cloud-ressourcen} \\
+  \textbf{Ressource} & \textbf{Beschreibung} \\ [1ex]
+  Kubernetes Cluster & Cluster, auf dem die Anwendung läuft. \\ [0.5ex]
+  Storage Buckets  & Storage Buckets zur Speicherung von Defect Bildern, Defect Reports und anderen Dateien wie z.B. den Terraform State Files. \\ [0.5ex]
+  Firestore & Firestore Datenbank zur Speicherung von Daten. \\ [0.5ex]
+  Identity Platform & Identity Platform zur Verwaltung von Benutzern und Tenants \\ [0.5ex]
+  Identity Federation & Identity Federation zur Authentifizierung von GitHub ohne Credentials. \\ [0.5ex]
+  Cloud Run & Cloud Run für Services, die nicht im Kubernetes Cluster laufen. \\ [0.5ex]
+  Artifact Registry & Ein Repository für Docker Images in der Artifact Registry \\ [0.5ex]
+  DNS Zone & DNS Zone zur Verwaltung der Subdomains der einzelnen Tenants. \\ [0.5ex]
+\end{longtable}}
+
+\subsubsection{Tenant Isolation}
+
+Die Isolation der Tenants im Kubernetes Cluster wird durch die Verwendung von Namespaces erreicht.
+Es gibt einen Namespace für die \textit{free} Tenants und einen für die \textit{premium} Tenants.
+Die Tenants in den \textit{free} bzw. \textit{premium} Namespaces teilen sich die dem Namespace zugewiesenen Ressourcen.
+Enterprise Tenants erhalten einen eigenen Namespace. 
+Die darin enthaltenen Ressourcen sind nur für diesen Tenant verfügbar.
+
+Die Isolation der Tenants in der Google Cloud Platform wird durch die Verwendung von 
+separaten Buckets und Firestore Datenbanken erreicht. Die Ressourcen werden dabei 
+analog zu den Kubernetes Namespaces aufgeteilt. Die \textit{free} und \textit{premium} Tenants
+teilen sich die Ressourcen wie Buckets und Firestore Datenbanken. Die Enterprise Tenants
+erhalten eigene Ressourcen.
+
+Für die Isolation innerhalb der geteilten Ressourcen, werden in den Buckets Unterordner und in 
+den Firestore Datenbanken separate Collections für die Tenants angelegt.
 
 \subsection{Roles and Role Mapping}
+
+Da das Team aus nur drei Mitgliedern besteht, wurde auf eine detaillierte Aufteilung der Rollen unter
+den Teammitgliedern verzichtet. Jedes Teammitglied hat Zugriff auf alle Ressourcen in der jeweiligen Umgebung.
+Dafür wurde jedem Teammitglied die Rolle \textit{roles/owner} zugewiesen.
+
+\subsubsection{Dienstkonten}
+
+Um die einzelnen Services der Park Anwendung zu authentifizieren, wurde pro Service ein Dienstkonto erstellt.
+Genauer wurde pro Service pro Namespace ein Dienstkonto angelegt weil ein Service aus dem \textit{free}
+Namespace nicht auf die Ressourcen eines Services aus dem \textit{premium} Namespace zugreifen darf.
+
+Um keine Credentials in den Services speichern zu müssen, wurde die \glqq{}Workload Identity Federation for GKE\grqq{} verwendet.
+Diese muss bei der Erstellung des Clusters aktiviert werden und läuft auf den Nodes des Clusters. Die 
+Workload Identity Federation unterscheidet zwischen Dienstkonten der Google Cloud Platform und Dienstkonten 
+des Kubernetes Clusters.
+
+\begin{itemize}
+  \item \textbf{Kubernetes-Dienstkonten} sind Kubernetes-Ressourcen, die eine Identität für Prozesse bereitstellen, 
+  die in Ihren GKE-Pods ausgeführt werden.
+  \item \textbf{IAM-Dienstkonten} sind Google Cloud-Ressourcen, 
+  mit denen Anwendungen autorisierte Aufrufe an Google Cloud APIs ausführen können.
+\end{itemize}
+
 \subsection{Pipelines and Release of new Features}
 \subsection{New Tenants}
 \subsection{Monitoring}
