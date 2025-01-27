@@ -1,8 +1,19 @@
+
+
 resource "google_artifact_registry_repository" "docker_repository" {
   project       = var.project_id
   location      = var.region
   repository_id = "docker-repository"
   format        = "DOCKER"
+}
+
+resource "google_storage_bucket" "gcf_source_bucket" {
+  project  = var.project_id
+  name     = "${var.project_id}-gcf-source"
+  location = var.region
+  uniform_bucket_level_access = true
+  force_destroy = true
+  public_access_prevention = "enforced"
 }
 
 resource "google_service_account" "github_sa" {
@@ -19,7 +30,6 @@ resource "google_iam_workload_identity_pool" "github_pool" {
 
 
 resource "google_iam_workload_identity_pool_provider" "github_identity_provider" {
-  project                            = var.project_id
   workload_identity_pool_id          = google_iam_workload_identity_pool.github_pool.workload_identity_pool_id
   workload_identity_pool_provider_id = "github-repo-provider"
   display_name                       = "GitHub provider"
@@ -61,8 +71,11 @@ variable "github_sa_roles" {
     "roles/artifactregistry.admin",
     "roles/iam.workloadIdentityPoolAdmin",
     "roles/iam.serviceAccountAdmin",
+    "roles/iam.serviceAccountUser",
     "roles/serviceusage.serviceUsageAdmin",
-    "roles/run.admin"
+    "roles/run.admin",
+    "roles/storage.objectAdmin",
+    "roles/iam.securityAdmin"
   ]
 }
 
@@ -73,6 +86,27 @@ resource "google_project_iam_member" "github-sa-iam-member" {
   member = "serviceAccount:${google_service_account.github_sa.email}"
 }
 
+resource "google_service_account" "cloud_build_sa" {
+  account_id   = "cloud-build-sa"
+  display_name = "Cloud Build Service Account"
+}
+
+variable "cloud_build_sa_roles" {
+  type = list(string)
+  default = [
+    "roles/cloudbuild.builds.builder",
+    "roles/logging.logWriter",
+    "roles/artifactregistry.writer",
+    "roles/storage.objectViewer"
+  ]
+}
+
+resource "google_project_iam_member" "cloud_build_sa_iam_member" {
+  for_each = { for value in var.cloud_build_sa_roles : value => value }
+  project = var.project_id
+  role    = each.value
+  member = "serviceAccount:${google_service_account.cloud_build_sa.email}"
+}
 
 output "github_sa_email" {
   value = google_service_account.github_sa.email

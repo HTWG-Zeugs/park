@@ -1,0 +1,24 @@
+name: Production CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  ci-cd:
+    uses: ./.github/workflows/ci-cd.yaml
+    permissions:
+      id-token: write
+      contents: read
+    with:
+      environment: "production"
+      project_id: ${{ vars.PRODUCTION_PROJECT_ID }}
+      project_number: ${{ vars.PRODUCTION_PROJECT_NUMBER }}
+      region: ${{ vars.PRODUCTION_REGION }}
+      domain: ${{ vars.PRODUCTION_DOMAIN }}
+      state_bucket: ${{ vars.PRODUCTION_STATE_BUCKET }}
+
+    secrets:
+      workload_identity_provider: ${{ secrets.PRODUCTION_WORKLOAD_IDENTITY_PROVIDER }}
+      identity_platform_api_key: ${{ secrets.PRODUCTION_IDENTITY_PLATFORM_API_KEY }}
+      cd_token: ${{ secrets.CD_TOKEN }}

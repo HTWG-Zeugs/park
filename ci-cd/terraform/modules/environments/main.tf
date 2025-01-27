@@ -1,5 +1,4 @@
 ### Application resources for the tenant
-
 resource "google_storage_bucket" "property_management_bucket" {
   name     = "${var.project_id}-prop-ma-${var.environment_name}"
   location = var.region
@@ -12,7 +11,6 @@ resource "google_storage_bucket" "property_management_bucket" {
     max_age_seconds = 3600
   }
 }
-
 
 resource "google_firestore_database" "property_management_db" {
   project  = var.project_id
@@ -128,4 +126,133 @@ resource "google_dns_record_set" "tenant_dns_record" {
   type    = "A"
   rrdatas = [var.gateway_ip]
   ttl     = 300
+}
+
+
+resource "kubernetes_namespace" "tenant" {
+  metadata {
+    name = "${var.environment_name}-ns"
+  }
+  timeouts {
+    delete = "20m"
+  }
+}
+
+resource "helm_release" "backend" {
+  depends_on = [ kubernetes_namespace.tenant ]
+  name      = "${var.environment_name}-park-backend"
+  chart      = "../../helm/backend"
+  version    = var.git_tag
+  namespace  = kubernetes_namespace.tenant.metadata.0.name
+  create_namespace = false
+  
+  set {
+    name  = "repository"
+    value = var.repository
+  }
+  set {
+    name  = "gitTag"
+    value = var.git_tag
+  }
+  set {
+    name  = "identityPlatForm.apiKey"
+    value = var.identity_api_key
+  }
+  set {
+    name  = "identityPlatForm.authDomain"
+    value = var.identity_auth_domain
+  }
+  set {
+    name  = "gc_project_id"
+    value = var.project_id
+  }
+  set {
+    name  = "domain"
+    value = var.domain
+  }
+  set {
+    name  = "subdomain"
+    value = var.subdomain
+  }
+  set {
+    name  = "environment_name"
+    value = var.environment_name
+  }
+  set {
+    name  = "authenticationService.url"
+    value = var.auth_url
+  }
+  set {
+    name  = "infrastructureManagement.url"
+    value = var.infra_url
+  }
+  set {
+    name  = "tenant_type"
+    value = var.tenant_type
+  }
+}
+
+resource "helm_release" "frontend" {
+  depends_on = [ kubernetes_namespace.tenant ]
+  name      = "${var.environment_name}-park-frontend"
+  chart      = "../../helm/frontend"
+  namespace  = kubernetes_namespace.tenant.metadata.0.name
+  create_namespace = false
+  
+  set {
+    name  = "repository"
+    value = var.repository
+  }
+  set {
+    name  = "gitTag"
+    value = var.git_tag
+  }
+  set {
+    name  = "identityPlatForm.apiKey"
+    value = var.identity_api_key
+  }
+  set {
+    name  = "identityPlatForm.authDomain"
+    value = var.identity_auth_domain
+  }
+  set {
+    name  = "gc_project_id"
+    value = var.project_id
+  }
+  set {
+    name  = "frontend.env.authUrl"
+    value = var.auth_url
+  }
+  set {
+    name  = "frontend.env.infrastructureUrl"
+    value = var.infra_url
+  }
+  set {
+    name  = "frontend.env.propertyUrl"
+    value = "https://${var.subdomain}.${var.domain}/property"
+  }
+  set {
+    name  = "frontend.env.parkingUrl"
+    value = "https://${var.subdomain}.${var.domain}/parking"
+  }
+  set {
+    name  = "domain"
+    value = var.domain
+  }
+  set {
+    name  = "subdomain"
+    value = var.subdomain
+  }
+  set {
+    name  = "environment_name"
+    value = var.environment_name
+  }
+  set {
+    name  = "tenant_id"
+    value = var.tenant_id
+  }
+  set {
+    name  = "tenant_type"
+    value = var.tenant_type
+  }
 }

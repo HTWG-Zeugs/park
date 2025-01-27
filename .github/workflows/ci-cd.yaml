@@ -1,0 +1,273 @@
+name: CI/CD (Reusable)
+
+on:
+  # This makes the workflow reusable via "workflow_call"
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+      project_id:
+        type: string
+        required: true
+      project_number:
+        type: string
+        required: true
+      region:
+        type: string
+        required: true
+      domain:
+        type: string
+        required: true
+      state_bucket:
+        type: string
+        required: true
+
+    secrets:
+      # Adjust or add more secrets depending on your actual usage
+      workload_identity_provider:
+        required: true
+      identity_platform_api_key:
+        required: true
+      cd_token:
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  TAG_ID: ${{ github.sha }}
+  GCR_REPO: "${{ inputs.region }}-docker.pkg.dev/${{ inputs.project_id }}/docker-repository"
+  CLUSTER: "${{ inputs.project_id }}-gke"
+
+jobs:
+  sync-infrastructure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          service_account: "github-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
+          workload_identity_provider: ${{ secrets.workload_identity_provider }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: "${{ inputs.project_id }}-gke"
+          location: ${{ inputs.region }}
+      
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform apply
+        working-directory: ./ci-cd/terraform/${{ inputs.environment }}-infra
+        run: |
+          terraform init
+          terraform apply -auto-approve \
+            -var="is_github_actions=true" \
+            -var="project_id=${{ inputs.project_id }}" \
+            -var="region=${{ inputs.region }}"
+
+  # -------------------------------------------------------------------------
+  # 1) BUILD AND PUSH IMAGES
+  # -------------------------------------------------------------------------
+  build-and-push-images:
+    runs-on: ubuntu-latest
+    needs: sync-infrastructure
+    strategy:
+      matrix:
+        service:
+          - { name: "property-management", dockerfile: "./property-management.Dockerfile" }
+          - { name: "parking-management", dockerfile: "./parking-management.Dockerfile" }
+          - { name: "authentication-service", dockerfile: "./authentication-service.Dockerfile" }
+          - { name: "infrastructure-administration", dockerfile: "./infrastructure-administration.Dockerfile" }
+          - { name: "frontend", dockerfile: "./frontend.Dockerfile" }
+          - { name: "signup-frontend", dockerfile: "./signup-frontend.Dockerfile" }
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          service_account: "github-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
+          workload_identity_provider: ${{ secrets.workload_identity_provider }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Google Cloud
+        run: gcloud auth configure-docker ${{ inputs.region }}-docker.pkg.dev
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -f ${{ matrix.service.dockerfile }} \
+            . \
+            -t ${{ matrix.service.name }}:${{ env.TAG_ID }} \
+            --no-cache \
+            --platform linux/amd64
+
+      - name: Tag Docker image
+        run: |
+          docker tag ${{ matrix.service.name }}:${{ env.TAG_ID }} ${{ env.GCR_REPO }}/${{ matrix.service.name }}:${{ env.TAG_ID }}
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ env.GCR_REPO }}/${{ matrix.service.name }}:${{ env.TAG_ID }}
+
+  package-cloud-functions:
+    runs-on: ubuntu-latest
+    needs: sync-infrastructure
+    strategy:
+      matrix:
+        service:
+          - { path: "cloud-functions/createChangedDefectsReport", zip: "createChangedDefectsReport.zip" }
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          service_account: "github-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
+          workload_identity_provider: ${{ secrets.workload_identity_provider }}
+      
+      - name: Package Cloud Function
+        run: |
+          cd ${{ matrix.service.path }}
+          zip -r ${{ matrix.service.zip }} .
+
+      - name: Upload to GCS
+        uses: google-github-actions/upload-cloud-storage@v2
+        with:
+          path: ${{ matrix.service.path }}/${{ matrix.service.zip }}
+          destination: ${{ inputs.project_id }}-gcf-source
+
+  # -------------------------------------------------------------------------
+  # 2) SYNC SERVICES
+  # -------------------------------------------------------------------------
+  sync-services:
+    needs: [build-and-push-images, package-cloud-functions]
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_AUDIENCE: "infrastructure-administration-service"
+      INFRA_SERVICE_ACCOUNT: "infra-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
+      AUTH_SERVICE_ACCOUNT: "auth-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
+      INFRA_DB_ID: "${{ inputs.project_id }}-infra-management"
+      AUTH_DB_ID: "${{ inputs.project_id }}-auth"
+      SIGNUP_FRONTEND_SERVICE_ACCOUNT: "sign-up-frontend-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          service_account: "github-sa@${{ inputs.project_id }}.iam.gserviceaccount.com"
+          workload_identity_provider: ${{ secrets.workload_identity_provider }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: "${{ inputs.project_id }}-gke"
+          location: ${{ inputs.region }}
+
+      - name: Fetch enterprise-tenants.json or default to []
+        run: |
+          BUCKET_NAME="${{ inputs.project_id }}-terraform-state"
+          OBJECT_PATH="enterprise-tenants.json"
+
+          # Default empty JSON array
+          CONTENT="[]"
+
+          # Check if file exists in GCS
+          if gsutil -q stat "gs://${BUCKET_NAME}/${OBJECT_PATH}"; then
+              echo "✔ enterprise-tenants.json found; fetching from GCS..."
+              CONTENT=$(gsutil cat "gs://${BUCKET_NAME}/${OBJECT_PATH}" | jq -c . || echo "[]")
+          else
+              echo "✖ enterprise-tenants.json not found. Using empty array."
+          fi
+
+          # Safely set as a single-line JSON environment variable
+          echo "ENTERPRISE_TENANTS_JSON=$(echo $CONTENT | jq -c .)" >> $GITHUB_ENV
+      
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform apply
+        working-directory: ./ci-cd/terraform/${{ inputs.environment }}
+        run: |
+          terraform init
+          terraform apply -auto-approve \
+            -var="is_github_actions=true" \
+            -var="project_id=${{ inputs.project_id }}" \
+            -var="region=${{ inputs.region }}" \
+            -var="domain_name=${{ inputs.domain }}" \
+            -var="git_tag=${{ env.TAG_ID }}" \
+            -var="enterprise_tenants_json=$ENTERPRISE_TENANTS_JSON"
+
+      - name: Deploy infrastructure-administration
+        run: |
+          gcloud run deploy infrastructure-administration \
+            --image=${{ env.GCR_REPO }}/infrastructure-administration:${{ env.TAG_ID }} \
+            --platform=managed \
+            --region=${{ inputs.region }} \
+            --allow-unauthenticated \
+            --port=8083 \
+            --service-account=${{ env.INFRA_SERVICE_ACCOUNT }} \
+            --set-env-vars "AUTHENTICATION_SERVICE_URL=https://authentication-service-${{ inputs.project_number }}.${{ inputs.region }}.run.app" \
+            --set-env-vars "ANALYTICS_DB_ID=${{ env.INFRA_DB_ID }}" \
+            --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
+            --set-env-vars "GITHUB_ACTION_TOKEN=${{ secrets.cd_token }}" \
+            --set-env-vars "GITHUB_TENANT_WORKFLOW_ID=${{ inputs.environment }}-enterprise-tenants-list.yaml" \
+            --set-env-vars "GITHUB_TENANT_WORKFLOW_BRANCH=dev" \
+            --set-custom-audiences "[ ${{ env.SERVICE_AUDIENCE }} ]"
+
+      - name: Deploy authentication-service
+        run: |
+          gcloud run deploy authentication-service \
+            --image=${{ env.GCR_REPO }}/authentication-service:${{ env.TAG_ID }} \
+            --platform=managed \
+            --region=${{ inputs.region }} \
+            --allow-unauthenticated \
+            --port=8082 \
+            --service-account=${{ env.AUTH_SERVICE_ACCOUNT }} \
+            --set-env-vars "FIRESTORE_DB_ID=${{ env.AUTH_DB_ID }}" \
+            --set-env-vars "IDENTITY_PLATFORM_API_KEY=${{ secrets.identity_platform_api_key }}" \
+            --set-env-vars "IDENTITY_PLATFORM_AUTH_DOMAIN=${{ inputs.project_id }}.firebaseapp.com" \
+            --set-env-vars "PARK_IDENTITY_PLATFORM_PROJECT_ID=${{ inputs.project_id }}" \
+            --set-env-vars "INFRASTRUCTURE_SERVICE_URL=https://infrastructure-administration-${{ inputs.project_number }}.${{ inputs.region }}.run.app" \
+            --set-env-vars "INFRASTRUCTURE_ADMINISTRATION_SERVICE_AUDIENCE=${{ env.SERVICE_AUDIENCE }}" \
+            --set-custom-audiences "[ ${{ env.SERVICE_AUDIENCE }} ]"
+
+      - name: Deploy signup-frontend
+        run: |
+          gcloud run deploy signup-frontend \
+            --image=${{ env.GCR_REPO }}/signup-frontend:${{ env.TAG_ID }} \
+            --platform=managed \
+            --region=${{ inputs.region }} \
+            --allow-unauthenticated \
+            --port=80 \
+            --service-account=${{ env.SIGNUP_FRONTEND_SERVICE_ACCOUNT }} \
+            --set-env-vars "PARK_AUTHENTICATION_URL=https://authentication-service-${{ inputs.project_number }}.${{ inputs.region }}.run.app"
+      
+      - name: Create deployment.json with current Git tag
+        run: |
+          echo "{\"git_tag\": \"${{ env.TAG_ID }}\"}" > deployment.json
+      
+      - name: Upload deployment.json to GCP bucket
+        run: |
+          gsutil cp deployment.json gs://${{ inputs.state_bucket }}/deployment.json

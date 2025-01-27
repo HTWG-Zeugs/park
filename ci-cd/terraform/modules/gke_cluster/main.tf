@@ -43,7 +43,6 @@ resource "google_compute_subnetwork" "subnet" {
 
 # Create a GKE Standard cluster (non-Autopilot)
 resource "google_container_cluster" "primary" {
-  count = var.create_cluster ? 1 : 0
   name              = "${var.project_id}-gke"
   location          = var.region
   networking_mode   = "VPC_NATIVE"
@@ -80,8 +79,7 @@ resource "google_container_cluster" "primary" {
 
 # Create a single node pool for the cluster
 resource "google_container_node_pool" "default_pool" {
-  count = var.create_cluster ? 1 : 0
-  cluster    = google_container_cluster.primary[0].name
+  cluster    = google_container_cluster.primary.name
   location   = var.region
 
   node_config {
@@ -103,6 +101,6 @@ resource "google_container_node_pool" "default_pool" {
 
   autoscaling {
     min_node_count = 0
-    max_node_count = 2
+    max_node_count = 3
   }
 }

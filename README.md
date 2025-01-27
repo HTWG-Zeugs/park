@@ -114,9 +114,12 @@ Firestore local: https://firebase.google.com/docs/admin/setup?hl=de#initialize_t
    - run.googleapis.com
    - firestore.googleapis.com
    - certificatemanager.googleapis.com
+   - cloudbuild.googleapis.com
+   - cloudfunctions.googleapis.com
+   - cloudscheduler.googleapis.com
    
     ```bash
-    gcloud services enable iam.googleapis.com storage.googleapis.com compute.googleapis.com container.googleapis.com artifactregistry.googleapis.com cloudresourcemanager.googleapis.com serviceusage.googleapis.com identitytoolkit.googleapis.com run.googleapis.com firestore.googleapis.com certificatemanager.googleapis.com
+    gcloud services enable iam.googleapis.com storage.googleapis.com compute.googleapis.com container.googleapis.com artifactregistry.googleapis.com cloudresourcemanager.googleapis.com serviceusage.googleapis.com identitytoolkit.googleapis.com run.googleapis.com firestore.googleapis.com certificatemanager.googleapis.com cloudbuild.googleapis.com cloudfunctions.googleapis.com cloudscheduler.googleapis.com
     ```
 4. To get a list of enabled APIs:
     ```bash
@@ -151,6 +154,8 @@ Firestore local: https://firebase.google.com/docs/admin/setup?hl=de#initialize_t
     gcloud projects add-iam-policy-binding <PROJECT_ID> --member="serviceAccount:terraform@<PROJECT_ID>.iam.gserviceaccount.com" --role="roles/iam.workloadIdentityPoolAdmin"
     gcloud projects add-iam-policy-binding <PROJECT_ID> --member="serviceAccount:terraform@<PROJECT_ID>.iam.gserviceaccount.com" --role="roles/iam.serviceAccountAdmin"
     gcloud projects add-iam-policy-binding <PROJECT_ID> --member="serviceAccount:terraform@<PROJECT_ID>.iam.gserviceaccount.com" --role="roles/serviceusage.serviceUsageAdmin"
+    gcloud projects add-iam-policy-binding <PROJECT_ID> --member="serviceAccount:terraform@<PROJECT_ID>.iam.gserviceaccount.com" --role="roles/container.admin"
+    gcloud projects add-iam-policy-binding <PROJECT_ID> --member="serviceAccount:terraform@<PROJECT_ID>.iam.gserviceaccount.com" --role="roles/iam.securityAdmin"
     ```
 
 8. Create a key for the service account

@@ -3,7 +3,7 @@ kind: Gateway
 metadata:
   name: {{ .Values.gateway.name }}
   annotations:
-    cert-manager.io/issuer: letsencrypt-staging
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   gatewayClassName: gke-l7-global-external-managed
   listeners:
@@ -13,7 +13,7 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-      hostname: {{ .Values.domain }}
+      hostname: "*.{{ .Values.domain }}"
       tls:
         mode: Terminate
         certificateRefs:

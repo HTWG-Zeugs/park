@@ -1,0 +1,36 @@
+name: Manage enterprise tenant (Staging)
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'add or remove'
+        required: true
+      tenant_id:
+        required: true
+      tenant_subdomain:
+        required: true
+
+jobs:
+  manage-tenant-staging:
+    uses: ./.github/workflows/manage-tenant.yaml
+    permissions:
+      id-token: write
+      contents: read
+    with:
+      # Pass in environment-specific settings
+      environment: "staging"
+      project_id: ${{ vars.STAGING_PROJECT_ID }}
+      project_number: ${{ vars.STAGING_PROJECT_NUMBER }}
+      region: ${{ vars.STAGING_REGION }}
+      domain: ${{ vars.STAGING_DOMAIN }}
+      state_bucket: ${{ vars.STAGING_STATE_BUCKET }}
+
+      # Forward the user inputs from workflow_dispatch
+      tenant_action: ${{ github.event.inputs.action }}
+      tenant_id: ${{ github.event.inputs.tenant_id }}
+      tenant_subdomain: ${{ github.event.inputs.tenant_subdomain }}
+
+    secrets:
+      workload_identity_provider: ${{ secrets.STAGING_WORKLOAD_IDENTITY_PROVIDER }}
+      identity_platform_api_key: ${{ secrets.STAGING_IDENTITY_PLATFORM_API_KEY }}

@@ -1,6 +1,6 @@
 {
   "name": "authentication-service",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "authentication service",
   "main": "main.ts",
   "scripts": {
