@@ -62,7 +62,7 @@ den Firestore Datenbanken separate Collections für die Tenants angelegt.
 \subsection{Roles and Role Mapping}
 
 Da das Team aus nur drei Mitgliedern besteht, wurde auf eine detaillierte Aufteilung der Rollen unter
-den Teammitgliedern verzichtet. Jedes Teammitglied hat Zugriff auf alle Ressourcen in der jeweiligen Umgebung.
+den Teammitgliedern verzichtet. Jedes Teammitglied hat Zugriff auf alle Ressourcen in dem jeweiligen Projekt.
 Dafür wurde jedem Teammitglied die Rolle \textit{roles/owner} zugewiesen.
 
 \subsubsection{Dienstkonten}
@@ -71,10 +71,11 @@ Um die einzelnen Services der Park Anwendung zu authentifizieren, wurde pro Serv
 Genauer wurde pro Service pro Namespace ein Dienstkonto angelegt weil ein Service aus dem \textit{free}
 Namespace nicht auf die Ressourcen eines Services aus dem \textit{premium} Namespace zugreifen darf.
 
-Um keine Credentials in den Services speichern zu müssen, wurde die \glqq{}Workload Identity Federation for GKE\grqq{} verwendet.
-Diese muss bei der Erstellung des Clusters aktiviert werden und läuft auf den Nodes des Clusters. Die 
-Workload Identity Federation unterscheidet zwischen Dienstkonten der Google Cloud Platform und Dienstkonten 
-des Kubernetes Clusters.
+Um keine Credentials in den Services speichern zu müssen, 
+wurde die \glqq{}Workload Identity Federation for GKE\grqq{}\footnote{https://cloud.google.com/kubernetes-engine/docs/concepts/workload-identity} verwendet.
+Diese muss bei der Erstellung des Clusters aktiviert werden und läuft auf den Nodes des Clusters. 
+Die Workload Identity Federation unterscheidet zwischen Dienstkonten 
+der Google Cloud Platform und Dienstkonten des Kubernetes Clusters.
 
 \begin{itemize}
   \item \textbf{Kubernetes-Dienstkonten} sind Kubernetes-Ressourcen, die eine Identität für Prozesse bereitstellen, 
@@ -83,7 +84,20 @@ des Kubernetes Clusters.
   mit denen Anwendungen autorisierte Aufrufe an Google Cloud APIs ausführen können.
 \end{itemize}
 
+Die Workload Identity Federation ermöglicht es, dass ein Kubernetes-Dienstkonto auf ein IAM-Dienstkonto gemappt wird.
+Damit das Mapping funktioniert, muss das Kubernetes-Dienstkonto in der Annotation 
+\textit{iam.gke.io/gcp-service-account} die E-Mail-Adresse des IAM-Dienstkontos enthalten.
+\footnote{https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity\#kubernetes-sa-to-iam}
+
+
+Um den Zugriff auf die Google Cloud Ressourcen aus GitHub Actions zu ermöglichen,
+wurde pro Projekt ein weiteres Dienstkonto erstellt. Dieses Dienstkonto hat nur die minimalen Rechte,
+die für die Ausführung der GitHub Actions notwendig sind. Durch die \glqq{}Workload Identity Federation\grqq{}
+(das ist eine andere Workload Identity Federation als die für GKE) müssen keine Credentials
+in den GitHub Secrets gespeichert werden.\footnote{https://cloud.google.com/blog/products/identity-security/enabling-keyless-authentication-from-github-actions?hl=en}
+
 \subsection{Pipelines and Release of new Features}
+
 \subsection{New Tenants}
 \subsection{Monitoring}
 \subsection{Load Testing}
