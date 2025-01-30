@@ -1,0 +1,86 @@
+\section{Appendix}
+
+\subsection{Mircoservice Configuration}
+{\rowcolors{2}{}{gray!20}
+\begin{longtable}{l p{6cm}}
+  \caption{Environment-Variablen für den Authentication Service}
+  \label{tab:auth-service-env-vars} \\
+  \textbf{Environment-Variable} & \textbf{Beschreibung} \\ [1ex]
+  \texttt{IDENTITY\_PLATFORM\_API\_KEY} & API-Schlüssel für die Identity Platform \\ [0.5ex]
+  \texttt{IDENTITY\_PLATFORM\_AUTH\_DOMAIN} & Authentifizierungs-Domain für die Identity Platform \\ [0.5ex]
+  \texttt{IDENTITY\_PLATFORM\_PROJECT\_ID} & Projekt-ID der Identity Platform \\ [0.5ex]
+  \texttt{FIRESTORE\_DB\_ID} & Identifier für die Firestore-Datenbank \\ [0.5ex]
+  \texttt{PORT} & Port, auf dem der Service läuft \\ [0.5ex]
+  \texttt{INFRASTRUCTURE\_SERVICE\_URL} & URL für den Infrastructure Service \\ [0.5ex]
+  \texttt{INFRASTRUCTURE\_ADMINISTRATION\_SERVICE\_AUDIENCE} & Zielgruppe des Administration Service \\ 
+\end{longtable}}
+
+
+% Infrastructure Administration Service Table
+{\rowcolors{2}{}{gray!20}
+\begin{longtable}{l p{6cm}}
+  \caption{Environment-Variablen für den Infrastructure Administration Service}
+  \label{tab:infra-admin-service-env-vars} \\
+  \textbf{Environment-Variable} & \textbf{Beschreibung} \\ [1ex]
+  \texttt{AUTHENTICATION\_SERVICE\_URL} & URL des Authentication Service \\ [0.5ex]
+  \texttt{ANALYTICS\_DB\_ID} & Identifier für die Analytics-Datenbank \\ [0.5ex]
+  \texttt{INFRASTRUCTURE\_ADMINISTRATION\_SERVICE\_AUDIENCE} & Zielgruppe des Administration Service \\ [0.5ex]
+  \texttt{PORT} & Port, auf dem der Service läuft \\ [0.5ex]
+  \texttt{GITHUB\_ACTION\_TOKEN} & Token für GitHub-Aktionen \\ [0.5ex]
+  \texttt{GITHUB\_TENANT\_WORKFLOW\_ID} & ID des GitHub-Tenant-Workflows \\ [0.5ex]
+  \texttt{GITHUB\_TENANT\_WORKFLOW\_BRANCH} & Branch für den GitHub-Tenant-Workflow \\ 
+\end{longtable}}
+
+% Parking Management Service Table
+{\rowcolors{2}{}{gray!20}
+\begin{longtable}{l p{6cm}}
+  \caption{Environment-Variablen für den Parking Management Service}
+  \label{tab:parking-mgmt-service-env-vars} \\
+  \textbf{Environment-Variable} & \textbf{Beschreibung} \\ [1ex]
+  \texttt{FIRESTORE\_DB\_ID} & Identifier für die Firestore-Datenbank \\ [0.5ex]
+  \texttt{AUTHENTICATION\_SERVICE\_URL} & URL des Authentication Service \\ [0.5ex]
+  \texttt{INFRASTRUCTURE\_MANAGEMENT\_SERVICE\_URL} & URL des Infrastructure Management Service \\ [0.5ex]
+  \texttt{INFRASTRUCTURE\_ADMINISTRATION\_SERVICE\_AUDIENCE} & Zielgruppe des Administration Service \\ [0.5ex]
+  \texttt{PORT} & Port, auf dem der Service läuft \\ 
+\end{longtable}}
+
+% Property Management Service Table
+{\rowcolors{2}{}{gray!20}
+\begin{longtable}{l p{6cm}}
+  \caption{Environment-Variablen für den Property Management Service}
+  \label{tab:property-mgmt-service-env-vars} \\
+  \textbf{Environment-Variable} & \textbf{Beschreibung} \\ [1ex]
+  \texttt{FIRESTORE\_DB\_ID} & Identifier für die Firestore-Datenbank \\ [0.5ex]
+  \texttt{GCS\_BUCKET\_ID} & Identifier für den Google Cloud Storage Bucket \\ [0.5ex]
+  \texttt{PARKING\_MANAGEMENT\_BACKEND\_URL} & URL des Parking Management Backends \\ [0.5ex]
+  \texttt{AUTHENTICATION\_SERVICE\_URL} & URL des Authentication Service \\ [0.5ex]
+  \texttt{INFRASTRUCTURE\_MANAGEMENT\_SERVICE\_URL} & URL des Infrastructure Management Service \\ [0.5ex]
+  \texttt{INFRASTRUCTURE\_ADMINISTRATION\_SERVICE\_AUDIENCE} & Zielgruppe des Administration Service \\ [0.5ex]
+  \texttt{PORT} & Port, auf dem der Service läuft \\ 
+\end{longtable}}
+
+% Park Frontend Table
+{\rowcolors{2}{}{gray!20}
+\begin{longtable}{l p{6cm}}
+  \caption{Environment-Variablen für das Park Frontend}
+  \label{tab:park-frontend-env-vars} \\
+  \textbf{Environment-Variable} & \textbf{Beschreibung} \\ [1ex]
+  \texttt{VITE\_TENANT\_ID} & ID des Tenants \\ [0.5ex]
+  \texttt{VITE\_TENANT\_TYPE} & Typ des Tenants \\ [0.5ex]
+  \texttt{VITE\_PROPERTY\_MANAGEMENT\_SERVICE\_URL} & URL des Property Management Services \\ [0.5ex]
+  \texttt{VITE\_AUTHENTICATION\_SERVICE\_URL} & URL des Authentication Services \\ [0.5ex]
+  \texttt{VITE\_PARKING\_MANAGEMENT\_SERVICE\_URL} & URL des Parking Management Services \\ [0.5ex]
+  \texttt{VITE\_INFRASTRUCTURE\_MANAGEMENT\_SERVICE\_URL} & URL des Infrastructure Management Services \\ [0.5ex]
+  \texttt{VITE\_IDENTITY\_PLATFORM\_API\_KEY} & API-Schlüssel für die Identity Platform \\ [0.5ex]
+  \texttt{VITE\_IDENTITY\_PLATFORM\_AUTH\_DOMAIN} & Authentifizierungs-Domain für die Identity Platform \\ [0.5ex]
+  \texttt{VITE\_IDENTITY\_PLATFORM\_PROJECT\_ID} & Projekt-ID der Identity Platform \\ 
+\end{longtable}}
+
+% Sign Up Frontend Table
+{\rowcolors{2}{}{gray!20}
+\begin{longtable}{l p{6cm}}
+  \caption{Environment-Variablen für das Sign Up Frontend}
+  \label{tab:signup-frontend-env-vars} \\
+  \textbf{Environment-Variable} & \textbf{Beschreibung} \\ [1ex]
+  \texttt{VITE\_AUTHENTICATION\_SERVICE\_URL} & URL des Authentication Services \\ 
+\end{longtable}}
