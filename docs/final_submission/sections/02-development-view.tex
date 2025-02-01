@@ -8,7 +8,7 @@ In den folgenden Abschnitten wird die Sicht auf die Anwendung während der Entwi
 \subsubsection{Source Code Organization}
 Für die Organisation unseres Quellcodes haben wir einen Monorepo-Ansatz verwendet. Alle Backend-Services, das Frontend und die Dateien für CI/CD sind in diesem Repository in der Ordnerstruktur wie in Figure \ref{fig:repo-structure} gezeigt abgelegt.
 
-\begin{figure}[ht]
+\begin{figure}[H]
     \begin{verbatim}
         park
         |-- backend
@@ -89,7 +89,7 @@ Da für die Authentifizierung der Komponenten innerhalb der Anwendung JWT Tokens
 \subsubsection{APIs}
 Im Wesentlichen stellt jeder Service eine API bereit, wie in Abbildung \ref{fig:api-overview} dargestellt, über welche dessen Funktionalität genutzt werden kann.
 
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{resources/api-overview-blue.png}
     \caption{Übersicht der APIs}
@@ -188,7 +188,7 @@ Die Firestore Datenbanken für den Authentication Service und den Infrastructure
 Neben den Firestore Datenbanken werden, wie in Abbildung \ref{fig:data-model} gezeigt, auch verschiedene Cloud Storage Buckets verwendet. Der Bucket \verb|gcf-source| beinhaltet dabei den Quellcode für die Cloud Function zur Erstellung der Defect Reports und wird für das Deployment benötigt. Die Defect Reports, die von dieser Cloud Function erstellt werden, werden wieder entsprechend des Tenants in einem Bucket abgelget (\verb|defect-reports-<tenantId>|). Der \verb|terraform-state| bucket wird ebenfalls für das Deployment benötigt, und umfasst neben den \verb|.tfstate| Files für Terraform auch zwei JSON Files für das Deployment und die Enterprise Tenants.
 Darüber hinaus existiert noch ein Bucket \verb|prop-ma-<tenantId>|, in welchem die Bilder für die Defects abgespeichert werden können.
 
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{resources/data-model.drawio.pdf}
     \caption{Organisation der Daten in Firestore und Cloud Storage}

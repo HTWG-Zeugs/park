@@ -4,14 +4,14 @@ In diesem Abschnitt wird die Laufzeitumgebung der Anwendung beschrieben, das hei
 Die Microservices werden dabei in globale Microservices, welche von allen Tenants gemeinsam genutzt werden und Tenant Typ spezifische Microservices, welche von allen Tenants eines Tenant Typs gemeinsam genutzt werden, unterteilt.
 Die Data Stores werden ebenfalls in globale Data Stores und Tenant Typ spezifische Data Stores unterteilt.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{resources/03-runtime-view/pdf/cloud-ressources.pdf}
 	\caption{Übersicht über die Cloud Ressourcen}
 	\label{fig:cloud-ressources}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{resources/03-runtime-view/pdf/architecture.pdf}
 	\caption{Übersicht über alle Microservices und für diese benötigten Cloud Ressourcen}
@@ -40,7 +40,7 @@ Die Ressourcen unterteilen sich nochmal in folgende Kategorien:
 Um die Interaktionen zwischen den Komponenten als auch den anwendungweiten und Tenant Typ spezifischen Ressourcen zu verdeutlichen, wird in Abbildung~\ref{fig:system-architecture} die gesamte Systemarchitektur dargestellt.
 Hier sieht man, wie sich alle Komponenten eine Authentication Service und Infrastructure Management Service Instanz teilen.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{resources/03-runtime-view/pdf/authentication-sequence.pdf}
 	\caption{Ablauf der Tenant Typ abhängigen Authentifizierung}
@@ -51,14 +51,14 @@ Eine Besonderheit ist die Authentifizierung mittels Authentication Service und I
 Bei den Instanzen den Tenant Typs Enterprise entfällt die Anfrage an den Authentication Service, da diese Frontend Instanzen jeweils nur von einem Tenant verwendet werden und daher die Tenant Id als Konstante im Environment hinterlegt ist.
  Durch diese Mechanismen wird sichergestellt, dass sich Nutzer nur bei den Instanzen ihres Tenant Typs bzw. Tenants anmelden können.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.95\textwidth]{resources/03-runtime-view/pdf/components-frontend-park.pdf}
 	\caption{Alle verwendeten Komponenten, wenn ein Client mit dem PARK Frontend interagiert, mit Berücksichtigung von Multitenancy}
 	\label{fig:components-park-frontend}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{resources/03-runtime-view/pdf/components-frontend-signup.pdf}
 	\caption{Alle verwendeten Komponenten, wenn ein Client mit dem Signup Frontend interagiert}
