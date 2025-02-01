@@ -68,6 +68,7 @@ Auf die Components und das Runtime Environment wird hierbei nicht weiter eingega
 Folgende Microservices werden von allen Tenants gemeinsam genutzt und werden in Google Cloud Run gehostet:
 
 \paragraph{Sign Up Frontend}
+\label{sec:signup-frontend}
 \begin{itemize}
 	\item Wird von allen Nutzern verwendet, um sich für einen neuen Tenant zu registrieren.
 	\item Wird mittels Environment-Variablen konfiguriert. Die Environment-Variablen sind in Tabelle~\ref{tab:signup-frontend-env-vars} aufgelistet.
@@ -78,6 +79,7 @@ Folgende Microservices werden von allen Tenants gemeinsam genutzt und werden in 
 \end{itemize}
 
 \paragraph{Authentication Service}
+\label{sec:auth-service}
 \begin{itemize}
 	\item Wird verwendet um neue Nutzer und Tenants zu erstellen und um Informationen über Nutzer abzufragen.
 	\item Wird mittels Environment-Variablen konfiguriert. Die Environment-Variablen sind in Tabelle~\ref{tab:auth-service-env-vars} aufgelistet.
@@ -104,7 +106,8 @@ Folgende Microservices werden von allen Tenants eines Tenant Typs gemeinsam genu
 \begin{itemize}
 	\item Wird verwendet um neue Parkhäuser mit Parkplätzen und Ladestationen zu erstellen, um Informationen über Parkhäuser abzufragen, um Defects zu melden und Analytics zu betrachten.
 	\item Wird mittels Environment-Variablen konfiguriert. Die Environment-Variablen sind in Tabelle~\ref{tab:park-frontend-env-vars} aufgelistet.
-	\item Skaliert %TODO: @Benner Scaling
+	\item Zur Skalierung wird sowohl ein Horizontal Pod Autoscaler, der auf die CPU Auslastung reagiert, als auch ein Vertikales Scaling mittels Container Ressource Requests und Limits verwendet.
+  Der Horinzontal Pod Autoscaler skaliert ab 80\% CPU Auslastung und maximal 10 Pods.
 	\item Der Microservice ist nicht customizable. Das Frontend von Premium und Enterprise Tenants unterscheidet sich jedoch in der Darstellung, denn es gibt eine Analyticsseite und man kann zwischen den Sprachen Deutsch und Englisch wechseln.
 	\item Security Setup: Die Nutzer müssen sich über die Identity Platform authentifizieren und der Service ist über HTTPS erreichbar. Es wird durch eine Anfrage an den Authentication Service sichergestellt, dass sich nur Nutzer des richtigen Tenant Typs in der jeweiligen Instanz anmelden können. Alle Anfragen an den Backend Service müssen ein Authorization Header mit dem Identity Platform JWT Token enthalten, damit nur authentifiziert Anfragen geschickt werden können. Alle Routen bis auch Home und Contact sind nur für authentifizierte Nutzer erreichbar.
 	\item Der Service mit allen anderen Mircoservices.
@@ -114,7 +117,7 @@ Folgende Microservices werden von allen Tenants eines Tenant Typs gemeinsam genu
 \begin{itemize}
 	\item Wird verwendet für die Kommuniaktion mit Schranken, Bezahlterminals, Ladestationen und bietet eine Schnittstelle für externe Monitore um den Belegungsstatus abzufragen.
 	\item Wird mittels Environment-Variablen konfiguriert. Die Environment-Variablen sind in Tabelle~\ref{tab:parking-mgmt-service-env-vars} aufgelistet.
-	\item Skaliert %TODO: @Benner Scaling
+	\item Der Parking Management Service skaliert nach dem gleichen Prinzip wie das Park Frontend.
 	\item Der Microservice ist nicht customizable.
 	\item Security Setup: Der Service ist über HTTPS erreichbar und den meisten Anfragen muss ein Authorization Header angefügt werden, in welchem das Identity Plattform JWT Token zur Validierung hinterlegt sein muss. Ausnahme ist hier der Endpunkt zum Belegungsstatus der immer frei abgefragt werden kann für ein Parkhaus. Es ist mittels IAM Policy eingestellt, dass nur der Parking Management Service auf die Parking Management Firestore Datenbank zugreifen kann.
 	\item Der Service hat eine Verbindung zu seiner eigenen Parking Management Firestore Datenbank und zum Property Management Service.
@@ -124,7 +127,7 @@ Folgende Microservices werden von allen Tenants eines Tenant Typs gemeinsam genu
 \begin{itemize}
 	\item Wird verwendet um Informationen über Parkhäuser abzufragen, um Defects zu verwalten und um Bilder von Defects zu speichern.
 	\item Wird mittels Environment-Variablen konfiguriert. Die Environment-Variablen sind in Tabelle~\ref{tab:property-mgmt-service-env-vars} aufgelistet.
-	\item Skaliert %TODO: @Benner Scaling
+	\item Der Property Management Service skaliert nach dem gleichen Prinzip wie das Park Frontend.
 	\item Der Microservice ist nicht customizable.
 	\item Security Setup: Der Service ist über HTTPS erreichbar und für alle Anfragen muss ein Authorization Header angefügt werden, in welchem das Identity Plattform JWT Token zur Validierung hinterlegt sein muss. Es ist mittels IAM Policy eingestellt, dass nur der Property Management Service auf die Property Management Firestore Datenbank und den Property Management Cloud Storage Bucket zugreifen kann.
 	\item Der Service hat eine Verbindung zu seiner eigenen Property Management Firestore Datenbank, seinem eigenen Cloud Storage Bucket und zum Parking Management Service.

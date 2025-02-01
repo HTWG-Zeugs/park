@@ -157,7 +157,56 @@ Abbildung \ref{fig:cd-pipeline} zeigt die Pipeline für einen Push auf den \text
 \end{figure}
 
 
-
 \subsection{New Tenants}
+
+Wenn ein neuer Client die Park Anwendung verwenden möchte und über das Sign-Up-Frontend(\ref{sec:signup-frontend})
+das Anmeldeformular ausgefüllt hat, wird ein Request an den Authentication Service(\ref{sec:auth-service}) gesendet.
+Der Authentication Service erstellt einen neuen Tenant in der Identity Platform und in der Firestore Datenbank.
+Neben dem Tenant wird auch ein Admin-Benutzer für den neuen Tenant erstellt. Der Admin-Benutzer 
+erhält die vom Client angegebene E-Mail-Adresse und das vom Client angegebene Passwort.
+
+Anschließend wird ein Request an den Infrastructure Service gesendet.
+Handelt es sich um einen \textit{free} oder \textit{premium} werden keine Änderungen an der Infrastruktur vorgenommen.
+Handelt es sich um einen Enterprise Tenant, wird ein Request an GitHub gesendet, der
+den Workflow für die Erstellung der Ressourcen für den neuen Tenant startet.
+
+\subsubsection{Erstellung der Ressourcen für Enterprise Tenants}
+
+Die Erstellung der Ressourcen für Enterprise Tenants erfolgt über einen GitHub Workflow.
+Der Workflow bekommt als Input die Tenant-ID und die Subdomain des Tenants.
+Der im Folgenden etwas genauer beschriebene Workflow ist in Abbildung \ref{fig:tenant-pipeline} dargestellt.
+Der Workflow besteht aus den folgenden Jobs:
+\begin{itemize}
+  \item \textbf{Manage enterprise tenants}: Der Workflow fügt die neue Konfiguration des Enterprise Tenants zur JSON-Datei hinzu.
+  \item \textbf{Load deployment.json}: Die JSON-Datei mit den Informationen über das aktuelle Deployment wird geladen. Hier wird der
+  Tag der Docker Images ausgelesen. Weil die aktuell deployten Services nicht verändert werden sollen, sondern nur neue Services 
+  hinzugefügt werden sollen, wird der Tag der Images benötigt.
+  \item \textbf{Load enterprise-tenants.json}: Die im vorherigen Schritt aktualisierte JSON-Datei wird geladen. Der Inhalt der JSON-Datei
+  wird in einer Umgebungsvariable gespeichert, damit die folgenden Jobs darauf zugreifen können.
+  \item \textbf{Apply Terraform for the Application}: Mithilfe von Terraform werden \textbf{alle} Ressourcen für den neuen Tenant erstellt.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{resources/tenant-pipeline.pdf}
+  \caption{Tenant Pipeline}
+  \label{fig:tenant-pipeline}
+\end{figure}
+
 \subsection{Monitoring}
+
+Für das Monitoring der Anwendung wird Google Cloud Monitoring verwendet.
+Einerseits bietet Google Cloud Monitoring eine Vielzahl von Metriken und vorkonfigurierte Dashboards,
+andererseits können auch eigene Dashboards erstellt werden.
+
+Für die Überwachung der Anwendung und der durch die Tenants verursachten Last werden 
+vor allem folgende Metriken überwacht:
+
+\begin{itemize}
+  \item \textbf{CPU Utilization}: Überwachung der CPU-Auslastung pro Namespace.
+  \item \textbf{Memory Utilization}: Überwachung des Speicherverbrauchs pro Namespace.
+  \item \textbf{Request Count}: Überwachung der Anzahl der Requests pro Namespace.
+\end{itemize}
+
+
 \subsection{Load Testing}
