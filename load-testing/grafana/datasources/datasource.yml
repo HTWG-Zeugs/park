@@ -1,0 +1,10 @@
+apiVersion: 1
+
+datasources:
+  - name: k6influxdb
+    type: influxdb
+    access: proxy
+    database: k6
+    orgId: 1
+    url: http://load-test-influx:8086
+    isDefault: true
