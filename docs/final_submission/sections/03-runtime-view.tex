@@ -1,5 +1,8 @@
 \section{Runtime View}
 \subsection{Runtime Overview}
+In diesem Abschnitt wird die Laufzeitumgebung der Anwendung beschrieben, das heißt welche Cloud Ressourcen, Microservices und Data Stores verwendet werden und wie diese miteinander interagieren.
+Die Microservices werden dabei in globale Microservices, welche von allen Tenants gemeinsam genutzt werden und Tenant Typ spezifische Microservices, welche von allen Tenants eines Tenant Typs gemeinsam genutzt werden, unterteilt.
+Die Data Stores werden ebenfalls in globale Data Stores und Tenant Typ spezifische Data Stores unterteilt.
 
 \begin{figure}[ht]
 	\centering
@@ -11,12 +14,12 @@
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=\textwidth]{resources/03-runtime-view/pdf/architecture.pdf}
-	\caption{Alle Mircoservices}
+	\caption{Übersicht über alle Microservices und für diese benötigten Cloud Ressourcen}
 	\label{fig:system-architecture}
 \end{figure}
 
-In Abbildung~\ref{fig:cloud-ressources} werden alle verwendeten Cloud Ressourcen unterteilt in zwei Gruppen dargestellt:
-\paragraph{Anwendungweite Ressources} sind Ressourcen, die von allen Tenants gemeinsam genutzt werden.
+\noindent In Abbildung~\ref{fig:cloud-ressources} werden alle verwendeten Cloud Ressourcen unterteilt in zwei Gruppen dargestellt:
+\paragraph{Anwendungweite Ressources}sind Ressourcen, die von allen Tenants gemeinsam genutzt werden.
 Diese Ressourcen unterteilen sich nochmal in folgende Kategorien:
 \begin{itemize}
 	\item \textbf{Cloud Run} - Alle Services, welche in Cloud Run laufen. (Authentication Service, Infrastructure Management Service \& Sign Up Frontend)
@@ -25,16 +28,17 @@ Diese Ressourcen unterteilen sich nochmal in folgende Kategorien:
 	\item \textbf{Mixed} - Weitere Cloud Ressourcen, welche für den Betrieb unsere Anwendung benötigt werden. (z.B. Cloud Storage, Identity Platform, Kubernetes Engine, Artifact Registry \& Ingres / DNS)
 \end{itemize}
 
-\paragraph{Tenant Typ spezifische Ressources} sind Ressourcen, die sich von allen Tenants des selben Tenant Typs geteilt werden.
-Jeder Enterprise Tenant wird hierbei als eigener Tenant Typ betrachtet, um die verwendeten Ressourcen bessere darstellen und erklären zu können.
+\paragraph{Tenant Typ spezifische Ressources}sind Ressourcen, die sich von allen Tenants des selben Tenant Typs geteilt werden.
+Jeder Enterprise Tenant wird hierbei als eigener Tenant Typ betrachtet, um die verwendeten Ressourcen besser darstellen und erklären zu können.
 Die Ressourcen unterteilen sich nochmal in folgende Kategorien:
 \begin{itemize}
-	\item \textbf{Kubernetes} - Innerhalb der annwedungsweiten Kubernetes Engine existiert ein Cluster. Innerhalb des Cluster wird pro Tenant Typ ein neuer Namespace angelegt, in welchem die Services (Property Management \& Parking Management) laufen, welche sich alle Tenants eines Typs teilen.
+	\item \textbf{Kubernetes} - Innerhalb der annwedungsweiten Kubernetes Engine existiert ein Cluster. Innerhalb des Clusters wird pro Tenant Typ ein neuer Namespace angelegt, in welchem die Services (Property Management \& Parking Management) gehostet werden, welche sich alle Tenants eines Typs teilen.
 	\item \textbf{Firestore} - Die Firestore Datenbanken, welche für die Services im Tenant Typ spezifischen Namespace benötigt werden. (Property Management \& Parking Management)
 	\item \textbf{Cloud Storage} - Für den Property Management Service wird ein eigener Bucket angelegt, um die Bilder der Defects speichern zu können.
 \end{itemize}
 
-Um die Interaktionen zwischen den Komponenten als auch den anwendungweiten und Tenant Typ spezifischen Ressourcen zu verdeutlichen, wird in Abbildung~\ref{fig:system-architecture} die gesamte Systemarchitektur dargestellt. Hier sieht man, wie sich alle Komponenten eine Authentication Service und Infrastructure Management Service Instanz teilen.
+Um die Interaktionen zwischen den Komponenten als auch den anwendungweiten und Tenant Typ spezifischen Ressourcen zu verdeutlichen, wird in Abbildung~\ref{fig:system-architecture} die gesamte Systemarchitektur dargestellt.
+Hier sieht man, wie sich alle Komponenten eine Authentication Service und Infrastructure Management Service Instanz teilen.
 
 \begin{figure}[ht]
 	\centering
@@ -43,13 +47,14 @@ Um die Interaktionen zwischen den Komponenten als auch den anwendungweiten und T
 	\label{fig:authentication-sequence}
 \end{figure}
 
-Eine Besonderheit ist hierbei die Authentifizierung mittels Authentication Service und Identity Platform. In Abbildung~\ref{fig:authentication-sequence} wird der Ablauf der Authentifizierung dargestellt. Das heißt wenn sich ein Nutzer in seiner Tenant Typ spezifischen Instanz des Frontends anmeldet, wird zuerst über den Authentication Service abgefragt, ob der Nutzer überhaupt vom richtigen Tenant Typ ist und falls ja die Tenant Id, zu welchem der Nutzer gehört. Anschließend wird der Nutzer Tenant-Aware über die Identity Platform authentifiziert. Wenn die Authentifizierung erfolgreich war, wird der Nutzer auf die entsprechende Home-Seite weitergeleitet und im Hintergrund im Local-Storage ein JWT Token zu Authentifizierung im Backend abgelegt.
-Für den Tenant Typ Enterprise entfällt die Anfrage an den Authentication Service, da diese Frontend Instanz nur von einem Tenant verwendet wird und daher die Tenant Id als Konstante im Environment hinterlegt ist. Durch diese Mechanismen wird sichergestellt, dass Nutzer nur auf die Instanz ihres Tenant Typs bzw. Tenants Zugriff haben.
+Eine Besonderheit ist die Authentifizierung mittels Authentication Service und Identity Platform. In Abbildung~\ref{fig:authentication-sequence} wird der Ablauf der Authentifizierung dargestellt. Das heißt wenn sich ein Nutzer in seiner Tenant Typ spezifischen Instanz des Frontends anmeldet, wird zuerst über den Authentication Service abgefragt, ob der Nutzer überhaupt vom richtigen Tenant Typ ist und falls ja die Tenant Id, zu welchem der Nutzer gehört. Anschließend wird der Nutzer Tenant-Aware über die Identity Platform authentifiziert. Wenn die Authentifizierung erfolgreich war, wird der Nutzer auf die entsprechende Home-Seite weitergeleitet und im Hintergrund im Local-Storage ein JWT Token zu Authentifizierung im Backend abgelegt.
+Bei den Instanzen den Tenant Typs Enterprise entfällt die Anfrage an den Authentication Service, da diese Frontend Instanzen jeweils nur von einem Tenant verwendet werden und daher die Tenant Id als Konstante im Environment hinterlegt ist.
+ Durch diese Mechanismen wird sichergestellt, dass sich Nutzer nur bei den Instanzen ihres Tenant Typs bzw. Tenants anmelden können.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.95\textwidth]{resources/03-runtime-view/pdf/components-frontend-park.pdf}
-	\caption{Alle verwendeten Komponenten, wenn ein Client mit dem Park Frontend interagiert, mit Berücksichtigung von Multitenancy}
+	\caption{Alle verwendeten Komponenten, wenn ein Client mit dem PARK Frontend interagiert, mit Berücksichtigung von Multitenancy}
 	\label{fig:components-park-frontend}
 \end{figure}
 
@@ -62,7 +67,7 @@ Für den Tenant Typ Enterprise entfällt die Anfrage an den Authentication Servi
 
 \subsection{Microservices}
 Im Folgenden gehen wir nun auf die einzelnen Microservices ein, welche in Abbildung~\ref{fig:system-architecture} nochmal übersichtlich mit Components und Runtime Environment aufgelistet sind.
-Auf die Components und das Runtime Environment wird hierbei nicht weiter eingegangen, da diese in den Abbildungen~\ref{fig:components-park-frontend}, \ref{fig:system-architecture} und~\ref{fig:components-signup-frontend} vollständig dargestellt sind.
+Auf die Components und das Runtime Environment wird hierbei nicht weiter eingegangen, da diese in den Abbildungen~\ref{fig:components-park-frontend}, \ref{fig:system-architecture} und~\ref{fig:components-signup-frontend} vollständig dargestellt sind und auch in Kapitel~\ref{sec:development-view} bereits beschrieben wurden.
 
 \subsubsection{Globale Microservices}
 Folgende Microservices werden von allen Tenants gemeinsam genutzt und werden in Google Cloud Run gehostet:
@@ -85,7 +90,7 @@ Folgende Microservices werden von allen Tenants gemeinsam genutzt und werden in 
 	\item Wird mittels Environment-Variablen konfiguriert. Die Environment-Variablen sind in Tabelle~\ref{tab:auth-service-env-vars} aufgelistet.
 	\item Skaliert automatisch, da es in Google Cloud Run gehostet wird mit den Default Scaling Einstellungen.
 	\item Der Microservice ist nicht customizable.
-	\item Security Setup: Der Microservice ist über HTTPS erreichbar und jeder einzelnen Anfrage muss ein Authorization Header angefügt werden (), in welchem das Identity Plattform JWT Token zur Validierung hinterlegt sein muss. Es ist mittels IAM Policy eingestellt, dass nur der Authentication Service auf die Authentication Firestore Datenbanken zugreifen kann.
+	\item Security Setup: Der Microservice ist über HTTPS erreichbar und jeder einzelnen Anfrage muss ein Authorization Header angefügt werden (außer bei Anfragen zum Tenant Typ), in welchem das Identity Plattform JWT Token zur Validierung hinterlegt sein muss. Es ist mittels IAM Policy eingestellt, dass nur der Authentication Service auf die Authentication Firestore Datenbanken zugreifen kann.
 	\item Der Microservice hat eine Verbindung zu seiner eigenen Authentication Firestore Datenbank und der Google Cloud Identity Platform.
 \end{itemize}
 
@@ -102,15 +107,15 @@ Folgende Microservices werden von allen Tenants gemeinsam genutzt und werden in 
 \subsubsection{Tenant Typ spezifische Microservices}
 Folgende Microservices werden von allen Tenants eines Tenant Typs gemeinsam genutzt. Pro Tenant Typ gibt es einen eigenen Namespace in der Google Cloud Kubernetes Engine, in welchem die Services laufen. Besonderheit ist hier der Enterprise Tenant Typ, welcher pro Tenant einen eigenen Namespace hat und deswegen die Services in diesem Abschnitt auch nicht geteilt werden.
 
-\paragraph{Park Frontend}
+\paragraph{PARK Frontend}
 \begin{itemize}
-	\item Wird verwendet um neue Parkhäuser mit Parkplätzen und Ladestationen zu erstellen, um Informationen über Parkhäuser abzufragen, um Defects zu melden und Analytics zu betrachten.
+	\item User Interface wird verwendet um neue Parkhäuser mit Parkplätzen und Ladestationen zu erstellen, um Informationen über Parkhäuser abzufragen, um Defects zu melden und Analytics zu betrachten.
 	\item Wird mittels Environment-Variablen konfiguriert. Die Environment-Variablen sind in Tabelle~\ref{tab:park-frontend-env-vars} aufgelistet.
 	\item Zur Skalierung wird sowohl ein Horizontal Pod Autoscaler, der auf die CPU Auslastung reagiert, als auch ein Vertikales Scaling mittels Container Ressource Requests und Limits verwendet.
   Der Horinzontal Pod Autoscaler skaliert ab 80\% CPU Auslastung und maximal 10 Pods.
 	\item Der Microservice ist nicht customizable. Das Frontend von Premium und Enterprise Tenants unterscheidet sich jedoch in der Darstellung, denn es gibt eine Analyticsseite und man kann zwischen den Sprachen Deutsch und Englisch wechseln.
 	\item Security Setup: Die Nutzer müssen sich über die Identity Platform authentifizieren und der Service ist über HTTPS erreichbar. Es wird durch eine Anfrage an den Authentication Service sichergestellt, dass sich nur Nutzer des richtigen Tenant Typs in der jeweiligen Instanz anmelden können. Alle Anfragen an den Backend Service müssen ein Authorization Header mit dem Identity Platform JWT Token enthalten, damit nur authentifiziert Anfragen geschickt werden können. Alle Routen bis auch Home und Contact sind nur für authentifizierte Nutzer erreichbar.
-	\item Der Service mit allen anderen Mircoservices.
+	\item Der Service kommuniziert mit allen anderen Microservices.
 \end{itemize}
 
 \paragraph{Parking Management Service}
@@ -166,14 +171,22 @@ Folgende Datastores werden von einem Tenant Typ spezifischen Kubernetes Namespac
 \begin{itemize}
 	\item Wird verwendet um Informationen Ladevorgänge, Parkhausbelege usw. zu speichern.
 	\item Integrity Constraints: Die Parkhaus Id, welche durch den Property Management Service generiert wird, ist eindeutig und wird als Primärschlüssel verwendet. Für alle untergeordneten Collections und Daten werden auch eindeutige Primärschlüssel verwendet.
-	\item Security Constraints: Nur der Parking Management Service hat Zugriff (IAM Policy) auf die Datenbank.
+	\item Security Constraints: Nur der Parking Management Service der zugehörigen Tenant Typ Instanz hat Zugriff (IAM Policy) auf die Datenbank.
 \end{itemize}
 
 \paragraph{Property Management Firestore}
 \begin{itemize}
 	\item Wird verwendet um Informationen über Parkhäuser und Defects abzuspeichern.
 	\item Integrity Constraints: Die Parkhaus Id und Defect Id, welche durch den Property Management Service generiert wird, ist eindeutig und wird als Primärschlüssel verwendet.
-	\item Security Constraints: Nur der Property Management Service hat Zugriff (IAM Policy) auf die Datenbank.
+	\item Security Constraints: Nur der Property Management Service der zugehörigen Tenant Typ Instanz hat Zugriff (IAM Policy) auf die Datenbank.
 \end{itemize}
 
-\paragraph{}
+\paragraph{Cloud Storage Defects Bucket}
+\begin{itemize}
+	\item Wird verwendet um die Bilder zu den Defects abzulegen.
+	\item Integrity Constraints: Die Bilder werden mittels einer Signed URL hochgeladen, welche durch die Cloud bereitgestellt wird. Dadurch wird garantiert, dass die Bilder mit einem eindeutigen Primärschlüssel abgelegt werden.
+	\item Security Constraints: Nur der Property Management Service der zugehörigen Tenant Typ Instanz hat Zugriff (IAM Policy) auf die Datenbank und auch nur dieser kann eine Anfrage zum erstellen einer neuen Signed URL stellen.
+\end{itemize}
+
+\subsection{Cloud Functions}
+Pro Tenant gibt es eine Cloud Function, welche bei einem neuen Defect Report in der Property Management Firestore Datenbank getriggert wird. Diese Cloud Function wird verwendet um den Property Management Service zu benachrichtigen, dass ein neuer Defect Report erstellt wurde und dieser sich um den Defect kümmern muss.
