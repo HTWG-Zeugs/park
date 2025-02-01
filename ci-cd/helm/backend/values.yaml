@@ -22,25 +22,25 @@ tenant_type: null
 resources:
   free:
     requests:
-      cpu: "500m"
-      memory: "1Gi"
+      cpu: "3"
+      memory: "3"
     limits:
-      cpu: "2"
-      memory: "3Gi"
+      cpu: "5"
+      memory: "5Gi"
   premium:
     requests:
-      cpu: "500m"
-      memory: "1Gi"
+      cpu: "4"
+      memory: "4Gi"
     limits:
-      cpu: "2"
-      memory: "3Gi"
+      cpu: "8"
+      memory: "8Gi"
   enterprise:
     requests:
-      cpu: "1"
-      memory: "1Gi"
+      cpu: "5"
+      memory: "5Gi"
     limits:
-      cpu: "2"
-      memory: "4Gi"
+      cpu: "10"
+      memory: "10Gi"
 
 authenticationService:
   url: ""
