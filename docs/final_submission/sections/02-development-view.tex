@@ -58,6 +58,7 @@ Während der Entwicklung haben wir mit Feature-Branches angelegt an den Git Flow
 \subsubsection{Components}
 Die Applikation umfasst 4 Microservices für das Backend:
 
+
 \begin{itemize}
     \item \textbf{Authentication Service:} Erweiterung der Authentication-Funktionalität für den Kontext der Anwendung
     \item \textbf{Infrastructure Management Service:} Zentrale Verwaltung der Tenant Creation und Endpunkt zur Konsolidierung von Anwendungsweiten Analytics
@@ -65,6 +66,7 @@ Die Applikation umfasst 4 Microservices für das Backend:
     \item \textbf{Property Management Service:} Bereitstellung der Gesamten Funktionalität für die Verwaltung der Parkinfrastruktur
 \end{itemize}
 
+Alle Backend Services sind in Node.js geschrieben, für die Bereitstellung der Web APIs wird expressjs verwendet.
 Zusätzlich werden 2 Frontend Clients bereitgestellt:
 
 \begin{itemize}
@@ -72,7 +74,7 @@ Zusätzlich werden 2 Frontend Clients bereitgestellt:
     \item \textbf{SignUp Client:} Frontend für die Tenant-Creation/Instanzerstellung
 \end{itemize}
 
-Wie bereits im Kontextdiagram (Figure \ref{fig:context-diagram}) gezeigt, sind zudem verschiedene externe Komponenten angebunden. So werden beispielsweise unterschiedliche Komponenten aus der Google Cloud Infrastruktur verwendet (Object Storage, Firestore, Identity Platform,...). Außerdem werden extern verwaltete Komponenten angebunden, beispielsweise in Form von Schranken, Ladestationen usw. Für das automatisierte Deployment werden GitHub Actions verwendet.
+Die Frontend Clients wurden mit React implementiert. Wie bereits im Kontextdiagram (Figure \ref{fig:context-diagram}) gezeigt, sind zudem verschiedene externe Komponenten angebunden. So werden beispielsweise unterschiedliche Komponenten aus der Google Cloud Infrastruktur verwendet (Object Storage, Firestore, Identity Platform,...). Außerdem werden extern verwaltete Komponenten angebunden, beispielsweise in Form von Schranken, Ladestationen usw. Für das automatisierte Deployment werden GitHub Actions verwendet.
 
 \subsubsection{Libraries}
 Für die Interaktion mit der Google Cloud Infrastruktur wurden unterschiedliche Libraries verwendet. Für den Zugriff auf die Firestore Infrastruktur haben wir das NPM Paket \href{hhttps://www.npmjs.com/package/firebase-admin}{firebase-admin} verwendet, welches verschiedene Methoden, beispielsweise zum Abrufen und Erstellen von Dokumenten in einer Firestore Datenbank zur Verfügung stellt.
@@ -165,7 +167,12 @@ Die Schnittstelle des Authentication Service stellt einige Erweiterungen um die 
 
 \subsection{Data Model}
 
-In Abbildung \ref{fig:data-model} ist die Organisation der Daten dargestellt. Alle Objekte die für die Anwendung persistiert werden müssen, werden in Firestore gespeichert. Das betrifft beispielsweise User, Charging Sessions, Garagen, Tickets, usw. Außerdem werden auch die Analytics Records in in Firestore gespeichert. Für die Analytics wird immer, wenn eine Änderung der entsprechenden Metrik verzeichnet wird ein neuer Record mit Zeitstempel abgespeichert, damit später in der Applikation der historische Verlauf für die Histogramme und rückblickende Analysen abgefragt werden kann. Für die Parking Status Analytics sieht ein solcher Analytics Record dann beispielsweise folgendermaßen aus:
+In Abbildung \ref{fig:data-model} ist die Organisation der Daten dargestellt. Alle Objekte die für die Anwendung persistiert werden müssen, werden in Firestore gespeichert. Das betrifft beispielsweise User, Charging Sessions, Garagen, Tickets, usw. 
+
+In den Figures \ref{fig:garage-object}, \ref{fig:analytics-record}, \ref{fig:charging-session-object}, \ref{fig:ticket-object}, \ref{fig:user-object} im Appendix sind die wichtigsten Objekte mit ihren Properties als JSON Objekte abgebildet.
+
+
+Außerdem werden auch die Analytics Records in in Firestore gespeichert. Für die Analytics wird immer, wenn eine Änderung der entsprechenden Metrik verzeichnet wird ein neuer Record mit Zeitstempel abgespeichert, damit später in der Applikation der historische Verlauf für die Histogramme und rückblickende Analysen abgefragt werden kann. Für die Parking Status Analytics sieht ein solcher Analytics Record dann beispielsweise folgendermaßen aus:
 
 \begin{verbatim}
     {

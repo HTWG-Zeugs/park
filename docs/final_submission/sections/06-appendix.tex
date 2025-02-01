@@ -1,5 +1,111 @@
 \section{Appendix}
 
+\subsection{Firestore Objekte}
+
+\begin{figure}[H]
+	\begin{verbatim}
+		{
+			"id": "511d6f4f-039b-4461-ae24-164547502216",
+			"tenantId": "premium-ea0ww",
+			"name": "Petershausen West",
+			"isOpen": true,
+			"parkingPlacesTotal": "100",
+			"parkingPlacesOccupied": "10",
+			"pricePerHourInEuros": 1,
+			"openingTime": "06:00",
+			"closingTime": "23:00",
+			"chargingStations": [
+				{
+					"id": "1510739d-d2a4-446d-80a6-c9afbb216e87",
+					"name": "Alpitronic Charger",
+					"isOccupied": false,
+					"isCharging": false,
+					"chargingSpeedInKw": 25,
+					"pricePerKwh": 0.2
+				}
+			]
+		}
+	\end{verbatim}
+	\caption{Beispielhaftes Garagen Objekt}
+	\label{fig:garage-object}
+\end{figure}
+
+\begin{figure}[H]
+	\begin{verbatim}
+		{
+			"timestamp": "2025-01-23T15:10:55.391Z",
+			"totalSpaces": 125,
+			"occupiedSpaces": 98
+		}
+	\end{verbatim}
+	\caption{Beispielhafter Analytics Record (Occupancy Status)}
+	\label{fig:analytics-record}
+\end{figure}
+
+\begin{figure}[H]
+	\begin{verbatim}
+		{
+			"chargingStationId": "1510739d-d2a4-446d-80a6-c9afbb216e87",
+			"garageId": "511d6f4f-039b-4461-ae24-164547502216",
+			"id": "164547502216-d2a4-446d-80a6-1510739d",
+			"kWhConsumed": 0.35,
+			"sessionStartedTimestamp": "2025-01-23T15:09:24.271Z",
+			"sessionFinishedTimestamp": "2025-01-23T15:10:14.032Z",
+			"userId": "demo-user"
+		}
+	\end{verbatim}
+	\caption{Beispielhaftes Charging Session Objekt}
+	\label{fig:charging-session-object}
+\end{figure}
+
+\begin{figure}[H]
+	\begin{verbatim}
+		{
+			"entryTimestamp": "2025-01-23T15:09:08.623Z",
+			"garageId": "511d6f4f-039b-4461-ae24-164547502216",
+			"id": "164547502216-d2a4-446d-80a6-1510739d",
+			"paymentTimestamp": "2025-01-23T15:10:53.665Z"
+		}
+	\end{verbatim}
+	\caption{Beispielhaftes Ticket Objekt}
+	\label{fig:ticket-object}
+\end{figure}
+
+\begin{figure}[H]
+	\begin{verbatim}
+		{
+			"id": "7ZGWCqeIQtTQeieeQqtpHdLhzSv2",
+			"mail": "lukas.epple@htwg-konstanz.de",
+			"name": "Lukas Epple",
+			"role": 400,
+			"tenantId": "premium-ea0ww"
+			"tenantType": "premium"
+		}
+	\end{verbatim}
+	\caption{Beispielhaftes User Objekt}
+	\label{fig:user-object}
+\end{figure}
+
+\begin{figure}[H]
+	\begin{verbatim}
+		{
+			"Id": "243c76a6-f081-44b1-a1b4-2e3859e4b8a2",
+			"DetailedDesc": "asdfasdf",
+			"GarageId": "511d6f4f-039b-4461-ae24-164547502216",
+			"ImageNames": ["229194a1-65f1-42ad-8b13-9754efbf0c8f"],
+			"LastModifiedAt": "2025-01-23T12:53:40.447Z",
+			"Location": "3. OG",
+			"Object": "Waschbecken defekt",
+			"ReportingDate": "2025-01-23T12:53:40.447Z",
+			"ShortDesc": "asdf",
+			"Status": "Open"
+		}
+	\end{verbatim}
+	\caption{Beispielhaftes Defect Object}
+	\label{fig:defect-object}
+\end{figure}
+
+
 \subsection{Mircoservice Configuration}
 {\rowcolors{2}{}{gray!20}
 	\begin{longtable}{l p{6cm}}
