@@ -10,11 +10,13 @@ export const options = {
 };
 
 export default function () {
-  const garageId = "bdeec1e1-f6cf-47e9-a4c9-a340a288bc54"
+  const enterpriseGarageId = "bdeec1e1-f6cf-47e9-a4c9-a340a288bc54"
+  const freeGarageId = "1bac896e-443a-4785-a0a6-459a12930baf"
   const enterpriseUrl = "https://mercedes.park-staging-app.tech/parking";
   const freeUrl = "https://free.park-staging-app.tech/parking";
-  const baseUrl = Math.random() < 0.3 ? freeUrl : enterpriseUrl;
-
+  const rand = Math.random();
+  const baseUrl = rand < 0.3 ? freeUrl : enterpriseUrl;
+  const garageId = rand < 0.3 ? freeGarageId : enterpriseGarageId;
   let response;
 
   do {
@@ -49,5 +51,5 @@ export default function () {
     'response time < 400ms': (r) => r.timings.duration < 400,
   });
   
-  sleep(Math.random() * 5);
+  sleep(Math.random() * 10);
 }
