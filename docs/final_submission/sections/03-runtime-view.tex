@@ -22,19 +22,22 @@ In Abbildung~\ref{fig:cloud-ressources} sind alle verwendeten Cloud-Ressourcen i
 \paragraph{Globale Ressourcen}
 Diese Ressourcen werden von allen Tenants gemeinsam genutzt und untergliedern sich in folgende Kategorien:
 \begin{itemize}
-	\item \textbf{Cloud Run} – Enthält alle Microservices, die in Cloud Run betrieben werden (Authentication Service, Infrastructure Management Service und Sign-Up Frontend).
-	\item \textbf{Firestore} – Die Firestore-Datenbanken, die für die Cloud-Run-Services erforderlich sind.
-	\item \textbf{Cloud Functions} – Jede Tenant-Instanz besitzt eine eigene Defect-Report Cloud Function.
-	\item \textbf{Weitere Cloud-Ressourcen} – Sonstige Infrastrukturkomponenten wie Cloud Storage, Identity Platform, Kubernetes Engine, Artifact Registry sowie Ingress/DNS.
+	\item \textbf{Cloud Run} -- Enthält alle Microservices, die in Cloud Run betrieben werden (Authentication Service, Infrastructure Management Service und Sign-Up Frontend).
+	\item \textbf{Firestore} -- Die Firestore-Datenbanken, die für die Cloud-Run-Services erforderlich sind.
+	\item \textbf{Cloud Functions} -- Jede Tenant-Instanz besitzt eine eigene Defect-Report Cloud Function.
+	\item \textbf{Kubernetes} -- Im Kubernetes Cluster wird ein API-Gateway deployed, das alle Requests zentral entgegennimmt und an die entsprechenden Services weiterleitet. Weiterhin 
+	wird ein Cert-Manager-Deployment für die Verwaltung von Let's Encrypt-Zertifikaten bereitgestellt.
+  \item \textbf{Cloud DNS} -- Für die Verwaltung der Domain und Subdomains wird eine eigene Cloud DNS-Zone angelegt und verwaltet.
+	\item \textbf{Weitere Cloud-Ressourcen} -- Sonstige Infrastrukturkomponenten wie Cloud Storage, Identity Platform, Artifact Registry.
 \end{itemize}
 
 \paragraph{Tenant-Typ-spezifische Ressourcen}
 Diese Ressourcen werden von allen Tenants desselben Tenant-Typs gemeinsam genutzt. Jeder Enterprise-Tenant wird als eigenständiger Typ betrachtet, um die verwendeten Ressourcen übersichtlich darzustellen. Die Ressourcen lassen sich in folgende Kategorien einteilen:
 \begin{itemize}
-	\item \textbf{Kubernetes} – Innerhalb des Kubernetes Clusters wird pro Tenant-Typ und pro Enterprise Tenant ein eigener Namespace angelegt wird. 
+	\item \textbf{Kubernetes} -- Innerhalb des Kubernetes Clusters wird pro Tenant-Typ und pro Enterprise Tenant ein eigener Namespace angelegt wird. 
   Innerhalb dieses Namespaces laufen dann die Services (Property Management Service, Parking Management Service, Frontend).
-	\item \textbf{Firestore} – Firestore-Datenbanken für die tenant-typ-spezifischen Services (Property Management Service, Parking Management Service).
-	\item \textbf{Cloud Storage} – Eigene Buckets für den Property Management Service zur Speicherung von Defect-Bildern.
+	\item \textbf{Firestore} -- Firestore-Datenbanken für die tenant-typ-spezifischen Services (Property Management Service, Parking Management Service).
+	\item \textbf{Cloud Storage} -- Eigene Buckets für den Property Management Service zur Speicherung von Defect-Bildern.
 \end{itemize}
 
 Zur Veranschaulichung der Interaktionen zwischen den Komponenten sowie den anwendungsweiten und tenant-typ-spezifischen Ressourcen zeigt Abbildung~\ref{fig:system-architecture} die vollständige Systemarchitektur. Hier ist zu erkennen, dass sich alle Komponenten eine Instanz des Authentication Service und des Infrastructure Management Service teilen.
@@ -111,7 +114,7 @@ Die folgenden Microservices werden von allen Tenants eines bestimmten Tenant-Typ
 	\item Konfigurierbar über Environment-Variablen (siehe Tabelle~\ref{tab:park-frontend-env-vars}).
 	\item Skalierung durch einen Horizontal Pod Autoscaler (HPA), der auf CPU-Auslastung reagiert, sowie durch vertikale Skalierung mittels Container Resource Requests und Limits. Der HPA skaliert ab 80\% CPU-Auslastung mit einem Maximum von 10 Pods.
 	\item Keine Individualisierungsmöglichkeiten. Die Darstellung des Frontends unterscheidet sich jedoch für Premium- und Enterprise-Tenants (z. B. zusätzliche Analyseseite, Sprachwahl zwischen Deutsch und Englisch).
-	\item Sicherheitskonzept: Nutzer müssen sich über die Identity Platform authentifizieren. Der Service ist über HTTPS erreichbar, und durch eine Anfrage an den Authentication Service wird überprüft, ob sich nur Nutzer des entsprechenden Tenant-Typs anmelden können. Alle Anfragen an den Backend-Service erfordern einen Authorization Header mit einem Identity Platform JWT-Token. Alle Routen – mit Ausnahme von „Home“ und „Contact“ – sind nur für authentifizierte Nutzer zugänglich.
+	\item Sicherheitskonzept: Nutzer müssen sich über die Identity Platform authentifizieren. Der Service ist über HTTPS erreichbar, und durch eine Anfrage an den Authentication Service wird überprüft, ob sich nur Nutzer des entsprechenden Tenant-Typs anmelden können. Alle Anfragen an den Backend-Service erfordern einen Authorization Header mit einem Identity Platform JWT-Token. Alle Routen -- mit Ausnahme von „Home“ und „Contact“ -- sind nur für authentifizierte Nutzer zugänglich.
 	\item Kommuniziert mit allen anderen Microservices.
 \end{itemize}
 
