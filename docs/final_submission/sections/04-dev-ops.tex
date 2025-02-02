@@ -208,5 +208,50 @@ vor allem folgende Metriken überwacht:
   \item \textbf{Request Count}: Überwachung der Anzahl der Requests pro Namespace.
 \end{itemize}
 
+Abbildung \ref{fig:monitoring-dashboard} zeigt eines der Dashboards zum Monitoring der Park Anwendung.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{resources/Monitoring.png}
+  \caption{Monitoring Dashboard}
+  \label{fig:monitoring-dashboard}
+\end{figure}
 
 \subsection{Load Testing}
+
+Für das Load Testing wurde Grafana k6\footnote{\url{https://k6.io/}} verwendet. K6 ist ein Open-Source-Tool,
+das für das Load Testing von APIs und Webseiten verwendet werden kann.
+
+Um zu zeigen, dass die Park Anwendung bei steigender Last die Microservices skalieren kann und bei hoher 
+Last stabil bleibt, wurde ein Load Test durchgeführt, der die Anwendung mit 2000 Benutzern für 20 Minuten belastet.
+Der Load Test wurde auf die \textit{staging}-Umgebung durchgeführt. 
+
+Um die Wirkung des Horizontal Pod Autoscalers (HPA) und den Ressource Quotas zu zeigen, wurden die Quotas so gesetzt,
+dass die der HPA die Anzahl der Pods auf maximal 9 erhöhen kann, bevor die Quotas erreicht werden. Außerdem wurde mit 
+dem Load Test überprüft, ob sich die Namespaces gegenseitig beeinflussen oder ob die Quotas das Noisy Neighbor Problem verhindern.
+
+Der Load Test führt folgende drei Schritte aus:
+\begin{enumerate}
+  \item In eine Garage einfahren und ein Ticket ziehen.
+  \item Das Ticket bezahlen.
+  \item Die Garage verlassen.
+\end{enumerate}
+
+Da es sich bei diesen drei Schritten um die häufigsten Aktionen handelt, die ein Benutzer in der Park Anwendung durchführt,
+wurden diese für den Load Test ausgewählt. Der Code für den Load Test ist im Anhang \ref{app:load-test-code} zu finden.
+
+Abbildung \ref{fig:load-testing} zeigt wie die Anwendung auf die steigende Last reagiert und wie die Pods skaliert werden.
+Das untere Diagramm in Abbildung \ref{fig:load-testing} zeigt die Anzahl der Pods des Parking Management Services pro Namespace.
+Die Anzahl der angeforderten Pods steigt im free und im enterprise Namespace auf 10 an, die Anzahl der verfügbaren 
+Pods erreicht jedoch jeweils nur 9. Das liegt daran, dass die Quotas so gesetzt sind, dass der HPA maximal 9 Pods 
+erstellen kann. Der HPA hat also die Pods erfolgreich skaliert, bis die Quotas erreicht wurden.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{resources/LoadTest.png}
+  \caption{Load Testing}
+  \label{fig:load-testing}
+\end{figure}
+
+Die Werte der Quotas und der HPAs sind Werte, die für die Demonstration der Skalierung gewählt wurden und nicht über längere Zeit getestet wurden.
+In einer produktiven Umgebung sollte die Anwendung über längere Zeit getestet werden, um die optimalen Werte für die Quotas und HPAs zu finden. 
