@@ -73,6 +73,8 @@ Das Kostenmodell basiert auf einer optimierten Ressourcennutzung und unterscheid
 	\item \textbf{Geteilte Services:} Drei zentrale Cloud-Run-Services werden von allen Mandanten genutzt.
 \end{itemize}
 
+Für unsere Kalkulation haben wir den Google Cloud Pricing Calculator verwendet, um die Kosten für die verschiedenen Ressourcen zu schätzen. Hier der Link zu unserer Konfiguration \href{https://cloud.google.com/products/calculator?hl=de&dl=CjhDaVExWXpBNE5UUm1OaTA0TUdKaUxUUTFPVFl0T0dGa09DMWxZVEEzTVdZeVlXSm1ZalVRQVE9PRAJGiQzREI3QkJCQS04Nzc0LTQ5RTEtODY5Qy1DQjVCREI5NzlGMDM}{Calculator}. Hier sind jedoch nur die Kosten für eine Umgebung zu sehen, da wir eine identische Production und Staging Umgebung haben, verdoppeln sich die Kosten.  \\
+
 \begin{table}[h!]
 	\centering
 	\caption{Ressourcennutzung und monatliche Kostenschätzung}
@@ -80,7 +82,7 @@ Das Kostenmodell basiert auf einer optimierten Ressourcennutzung und unterscheid
 		\begin{tabularx}{\textwidth}{|l|X|X|X|}
 			\hline
 			\textbf{Ressource}    & \textbf{Free-Plan}              & \textbf{Premium-Plan} & \textbf{Enterprise-Plan (pro Mandant)} \\ \hline
-			Kubernetes Namespace  & 135 €/Monat                     & 135 €/Monat           & 400 €/Monat                            \\ \hline
+			Kubernetes Namespace  & 135 €/Monat                     & 135 €/Monat           & 400 €/Monat (gesamt) = 40 €/Monat (pro Tenant)                          \\ \hline
 			Firestore-Datenbank   & 2 €/Monat                       & 2 €/Monat             & 2 €/Monat                              \\ \hline
 			Cloud Storage         & 4 €/Monat                       & 4 €/Monat             & 4 €/Monat                              \\ \hline
 			Cloud Functions       & 6 €/Monat                       & 6 €/Monat             & 6 €/Monat                              \\ \hline
@@ -89,3 +91,59 @@ Das Kostenmodell basiert auf einer optimierten Ressourcennutzung und unterscheid
 		\end{tabularx}}
 	\label{tab:costmodel}
 \end{table}
+
+In Tabelle \ref{tab:costmodel} werden die geschätzten Kosten für die verschiedenen Pläne dargestellt.
+Diese Kosten sind auf Staging und Production Umgebung zusammen berechnet.
+Dabei wurden die Enterprise Namespace Kosten durch zehn geteilt (Annahme wir haben 10 Enterprise Kunden) und die der Geteilte Services Anteil von 20€ auch nochmal , um die Verteilung der Ausgaben für einzelne Mandanten zu berücksichtigen.
+Unter geteilten Kosten sind die Kosten für die drei Services (Authentication Service mit Datenbank, Infrastructure Management Service mit Datenbank und Sign Up Frontend), die von allen Mandanten gemeinsam genutzt werden, zusammengefasst.
+\\
+Die wichtigsten Punkte sind:
+\begin{itemize}
+	\item \textbf{Free Plan:} Die Gesamtkosten belaufen sich auf geschätzte 167 €/Monat durch die gemeinsame Nutzung von Ressourcen.
+	\item \textbf{Premium Plan:} Die Gesamtkosten belaufen sich auf geschätzte 167 €/Monat durch die gemeinsame Nutzung von Ressourcen.
+	\item \textbf{Enterprise Plan:} Jeder Enterprise-Mandant verursacht individuelle Kosten von rund 54 €/Monat. Dies ist bedingt durch die exklusive Zuweisung von Ressourcen wie Kubernetes-Namespace, Firestore-Datenbank und Cloud Storage.
+\end{itemize}
+
+Dieses Kostenmodell bietet eine klare Grundlage für die wirtschaftliche Planung und Skalierung der Plattform.
+
+\paragraph{Worst-Case-Szenario}
+Wir haben nur Free Kunden, die alle die maximale Anzahl an Backend-Requests verursachen und keine Premium und Enterprise Kunden.
+Das heißt wir Kubernetes Cluster läuft ohne dass die Ressourcen genutzt werden und die geteilten Services bleiben auch gleich teuer.
+Dann fallen folgende Kosten an:
+\begin{itemize}
+	\item \textbf{Kubernetes Namespace:} 135 (free) + 135 (premium) + 400 (enterprise) = 670 €/Monat
+	\item \textbf{Firestore-Datenbank:} 2 €/Monat
+	\item \textbf{Cloud Storage:} 4 €/Monat
+	\item \textbf{Cloud Functions:} 6 €/Monat
+	\item \textbf{Geteilte Services:} 60 €/Monat
+	\item \textbf{Gesamtkosten:} 742 €/Monat
+\end{itemize}
+Das heißt wir würden im Worst Case Szenario 742 €/Monat minus machen.
+
+\paragraph{Realitisches Szenario}
+Über 10 Enterprise Kunden, die alle auch die maximale Anzahl an Backend-Requests verursachen (10.000 für einfachere Rechnung) und über 10 Premium Kunden die auch ebenfalls die maximale Backend-Requests (10.000 für einfachere Rechnung) erreichen und zusammen 40 Nutzer haben.
+Free Kunden und Premium Kunden sind irrelevant da sie monatlich immer die gleichen Fixkosten verursachen.
+Dann fallen folgende Kosten an:
+\begin{itemize}
+	\item \textbf{Kubernetes Namespace:} 135 (free) + 135 (premium) + 400 (enterprise) = 670 €
+	\item \textbf{Firestore:} 2 (free) + 2 (premium) + 20 (enterprise) = 24 €
+	\item \textbf{Cloud Storage:} 4 (free) + 4 (premium) + 40 (enterprise) = 48 €
+	\item \textbf{Cloud Functions:} 6 (free) + 6 (premium) + 60 (enterprise) = 72 €
+	\item \textbf{Geteilte Services:} 60 €
+	\item \textbf{Gesamtkosten:} 874 €/Monat
+\end{itemize}
+Das heißt wir würden im Realistischen Szenario 874 €/Monat an Kosten zahlen.
+Jedoch folgende Einnahmen generieren:
+\begin{itemize}
+	\item \textbf{Enterprise Kunden:} 10 * 129,90 € = 1299 €
+	\item \textbf{Premium Kunden:} 10 * 79,90 € = 799 €
+	\item \textbf{Benutzer:} 40 * 1,00 € = 40 €
+	\item \textbf{Backend-Requests:} 20 * 5,00 € = 50 €
+	\item \textbf{Gesamteinnahmen:} 2238 €
+\end{itemize}
+
+Das heißt wir würden im Realistischen Szenario (Annahme nur 10 Enterprise und 10 Premium Tenants ist eher pessimistisch) 1364 €/Monat an Gewinn machen.
+
+\paragraph{Best-Case-Szenario}
+Das Best-Case-Szenario wäre, wenn wir sehr viele Enterprise Kunden haben, die alle weit über 10.000 Backend-Requests senden und viele Premium Kunden, die viele Nutzer erstellt haben und monatlich viele (über 10.000 pro Tenant) Backend-Requests senden.
+Die Free Kunden sind irrelevant da sie monatlich immer die gleichen Fixkosten verursachen und uns keinen Gewinn einbringen.
