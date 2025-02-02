@@ -25,15 +25,15 @@ resources:
       cpu: "3"
       memory: "3Gi"
     limits:
-      cpu: "5"
-      memory: "5Gi"
+      cpu: "10"
+      memory: "10Gi"
   premium:
     requests:
       cpu: "4"
       memory: "4Gi"
     limits:
-      cpu: "8"
-      memory: "8Gi"
+      cpu: "10"
+      memory: "10Gi"
   enterprise:
     requests:
       cpu: "5"
