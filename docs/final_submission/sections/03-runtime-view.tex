@@ -31,7 +31,8 @@ Diese Ressourcen werden von allen Tenants gemeinsam genutzt und untergliedern si
 \paragraph{Tenant-Typ-spezifische Ressourcen}
 Diese Ressourcen werden von allen Tenants desselben Tenant-Typs gemeinsam genutzt. Jeder Enterprise-Tenant wird als eigenständiger Typ betrachtet, um die verwendeten Ressourcen übersichtlich darzustellen. Die Ressourcen lassen sich in folgende Kategorien einteilen:
 \begin{itemize}
-	\item \textbf{Kubernetes} – Innerhalb der Kubernetes Engine existiert ein Cluster, in dem für jeden Tenant-Typ ein eigener Namespace angelegt wird. Innerhalb dieses Namespaces laufen die gemeinsam genutzten Services (Property Management Service, Parking Management Service).
+	\item \textbf{Kubernetes} – Innerhalb des Kubernetes Clusters wird pro Tenant-Typ und pro Enterprise Tenant ein eigener Namespace angelegt wird. 
+  Innerhalb dieses Namespaces laufen dann die Services (Property Management Service, Parking Management Service, Frontend).
 	\item \textbf{Firestore} – Firestore-Datenbanken für die tenant-typ-spezifischen Services (Property Management Service, Parking Management Service).
 	\item \textbf{Cloud Storage} – Eigene Buckets für den Property Management Service zur Speicherung von Defect-Bildern.
 \end{itemize}
@@ -133,6 +134,20 @@ Die folgenden Microservices werden von allen Tenants eines bestimmten Tenant-Typ
 	\item Sicherheitskonzept: Der Service ist über HTTPS erreichbar. Für alle Anfragen ist ein Authorization Header mit einem Identity Platform JWT-Token erforderlich. Eine IAM-Policy stellt sicher, dass nur der Property Management Service auf die Property Management Firestore-Datenbank und den zugehörigen Cloud Storage Bucket zugreifen kann.
 	\item Verbindung zur eigenen Property Management Firestore-Datenbank, dem zugehörigen Cloud Storage Bucket und dem Parking Management Service.
 \end{itemize}
+
+\subsubsection{Skalierung der Microservices}
+
+Wie für die einzelnen Microservices beschrieben, werden diese mittels einem Horizontal Pod Autoscaler (HPA) und vertikaler Skalierung skaliert. 
+Der HPA reagiert auf die CPU-Auslastung und skaliert ab 80\% CPU-Auslastung mit einem Maximum von 10 Pods. 
+Die vertikale Skalierung erfolgt durch die Definition von Container Resource Requests und Limits. 
+Die Werte für die Ressourcenanforderungen und -limits werden im Helm-Chart für die Kubernetes-Deployments festgelegt und können bei Bedarf angepasst werden.
+
+Da sich alle Tenants ein Cluster teilen und die Trennung über Namespaces erfolgt, kann es zum Noisy-Neighbor-Problem kommen.
+Dabei verbraucht ein Tenant unverhältnismäßig viele Ressourcen und beeinträchtigt dadurch die Performance anderer Tenants.
+Um dies zu vermeiden, wird eine Ressourcen-Quota für jeden Namespace definiert, sodass ein Tenant nicht mehr Ressourcen verbrauchen kann, als ihm zugewiesen wurden.
+Genauer gesagt, wird jeweils ein Limit für CPU und Memory pro Namespace festgelegt, das nicht überschritten werden darf.
+Es gibt also ein Limit für den Namespace der Free-Tenants, ein Limit für den Namespace der Premium-Tenants und ein Limit für 
+jeden Enterprise-Tenant-Namespace. Auch die Werte für diese Limits werden im Helm-Chart festgelegt und können bei Bedarf angepasst werden.
 
 \subsection{Data Stores}
 
