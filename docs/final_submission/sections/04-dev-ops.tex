@@ -11,20 +11,21 @@ das Monitoring und das Load Testing.
 Für die Entwicklung und den Betrieb der Anwendung werden verschiedene Umgebungen (Environments) verwendet.
 Für den Betrieb der Anwendung wird die \glqq{}Production\grqq{}-Umgebung verwendet, für 
 die Entwicklung wird die \glqq{}Staging\grqq{}-Umgebung verwendet. 
-Eine weitere \glqq{}Development\grqq{}-Umgebung wurde aufgrund der geringen Anzahl an Entwicklern 
+Eine weitere \glqq{}Development\grqq{}-Umgebung wird aufgrund der geringen Anzahl an Entwicklern 
 nicht eingerichtet. Werden für die lokale Entwicklung Cloud-Dienste wie Firestore oder 
 Storage Buckets benötigt, werden der Einfachheit halber diese aus der \glqq{}Staging\grqq{}-Umgebung 
 verwendet.
 
-Jede Umgebung wird in einem eigenen Projekt in der Google Cloud Platform betrieben.
+Jede Umgebung wird in einem eigenen Projekt in der Google Cloud Plattform betrieben.
 So wird eine klare Trennung zwischen den Umgebungen gewährleistet.
-Da beide Umgebungen über IAC (Infrastructure as Code) verwaltet werden,
+Da beide Umgebungen über Infrastructure as Code (IAC) verwaltet werden,
 sind die Umgebungen identisch und können außerdem schnell wiederhergestellt werden.
 
 \subsubsection{Ressourcen pro Umgebung}
 
 Tabelle \ref{tab:google-cloud-ressourcen} listet die Google Cloud Ressourcen pro Umgebung auf und
-beschreibt kurz deren Funktion. Da die Umgebungen identisch sind, ist nur eine Tabelle notwendig.
+beschreibt kurz deren Funktion. Da die Umgebungen identisch sind, werden nur die Ressourcen einer 
+Umgebung beschrieben.
 
 \renewcommand{\arraystretch}{1.5}
 {\rowcolors{2}{}{gray!20}
@@ -42,40 +43,42 @@ beschreibt kurz deren Funktion. Da die Umgebungen identisch sind, ist nur eine T
   DNS Zone & DNS Zone zur Verwaltung der Subdomains der einzelnen Tenants. \\ [0.5ex]
 \end{longtable}}
 
+Alle genannten Ressourcen werden über IAC verwaltet. 
+Genauer wird Terraform verwendet, um die Ressourcen zu erstellen, zu aktualisieren und zu löschen.
+
 \subsubsection{Tenant Isolation}
 
 Die Isolation der Tenants im Kubernetes Cluster wird durch die Verwendung von Namespaces erreicht.
 Es gibt einen Namespace für die \textit{free} Tenants und einen für die \textit{premium} Tenants.
-Die Tenants in den \textit{free} bzw. \textit{premium} Namespaces teilen sich die dem Namespace zugewiesenen Ressourcen.
-Enterprise Tenants erhalten einen eigenen Namespace. 
-Die darin enthaltenen Ressourcen sind nur für diesen Tenant verfügbar.
+Die Tenants in den \textit{free} bzw. \textit{premium} Namespaces teilen sich die, dem Namespace zugewiesenen, Ressourcen.
+Enterprise-Tenants erhalten einen eigenen Namespace und somit auch eigene Ressourcen.
 
-Die Isolation der Tenants in der Google Cloud Platform wird durch die Verwendung von 
+Die Isolation der Tenants in der Google Cloud Plattform wird durch die Verwendung von 
 separaten Buckets und Firestore Datenbanken erreicht. Die Ressourcen werden dabei 
 analog zu den Kubernetes Namespaces aufgeteilt. Die \textit{free} und \textit{premium} Tenants
-teilen sich die Ressourcen wie Buckets und Firestore Datenbanken. Die Enterprise Tenants
+teilen sich die Ressourcen wie Buckets und Firestore Datenbanken. Die Enterprise-Tenants
 erhalten eigene Ressourcen.
 
-Für die Isolation innerhalb der geteilten Ressourcen, werden in den Buckets Unterordner und in 
-den Firestore Datenbanken separate Collections für die Tenants angelegt.
+Für die Isolation innerhalb der geteilten Ressourcen, werden in den Buckets Unterordner und in
+Firestore separate Collections für die Tenants angelegt.
 
 \subsection{Roles and Role Mapping}
 
-Da das Team aus nur drei Mitgliedern besteht, wurde auf eine detaillierte Aufteilung der Rollen unter
-den Teammitgliedern verzichtet. Jedes Teammitglied hat Zugriff auf alle Ressourcen in dem jeweiligen Projekt.
-Dafür wurde jedem Teammitglied die Rolle \textit{roles/owner} zugewiesen.
+Da das Team aus nur drei Mitgliedern besteht, wird auf eine detaillierte Aufteilung der Rollen unter
+den Teammitgliedern verzichtet. Jedes Teammitglied hat Zugriff auf alle Ressourcen im Staging- und Production-Projekt.
+Dafür wird jedem Teammitglied die Rolle \textit{roles/owner} zugewiesen.
 
 \subsubsection{Dienstkonten}
 
-Um die einzelnen Services der Park Anwendung zu authentifizieren, wurde pro Service ein Dienstkonto erstellt.
-Genauer wurde pro Service pro Namespace ein Dienstkonto angelegt weil ein Service aus dem \textit{free}
+Um die einzelnen Microservices für Zugriffe auf die Google Cloud Plattform zu autorisieren, wird pro Service ein separates Dienstkonto verwendet.
+Genauer wird pro Service pro Namespace ein Dienstkonto angelegt weil ein Service aus dem \textit{free}
 Namespace nicht auf die Ressourcen eines Services aus dem \textit{premium} Namespace zugreifen darf.
 
 Um keine Credentials in den Services speichern zu müssen, 
-wurde die \glqq{}Workload Identity Federation for GKE\grqq{}\footnote{https://cloud.google.com/kubernetes-engine/docs/concepts/workload-identity} verwendet.
+wird die \glqq{}Workload Identity Federation for GKE\grqq{}\footnote{https://cloud.google.com/kubernetes-engine/docs/concepts/workload-identity} verwendet.
 Diese muss bei der Erstellung des Clusters aktiviert werden und läuft auf den Nodes des Clusters. 
 Die Workload Identity Federation unterscheidet zwischen Dienstkonten 
-der Google Cloud Platform und Dienstkonten des Kubernetes Clusters.
+der Google Cloud Plattform und Dienstkonten des Kubernetes Clusters.
 
 \begin{itemize}
   \item \textbf{Kubernetes-Dienstkonten} sind Kubernetes-Ressourcen, die eine Identität für Prozesse bereitstellen, 
@@ -91,7 +94,7 @@ Damit das Mapping funktioniert, muss das Kubernetes-Dienstkonto in der Annotatio
 
 
 Um den Zugriff auf die Google Cloud Ressourcen aus GitHub Actions zu ermöglichen,
-wurde pro Projekt ein weiteres Dienstkonto erstellt. Dieses Dienstkonto hat nur die minimalen Rechte,
+wird pro Projekt ein weiteres Dienstkonto erstellt. Dieses Dienstkonto hat nur die minimalen Rechte,
 die für die Ausführung der GitHub Actions notwendig sind. Durch die \glqq{}Workload Identity Federation\grqq{}
 (das ist eine andere Workload Identity Federation als die für GKE) müssen keine Credentials
 in den GitHub Secrets gespeichert werden.\footnote{https://cloud.google.com/blog/products/identity-security/enabling-keyless-authentication-from-github-actions?hl=en}
@@ -114,7 +117,7 @@ Die Pipeline für Pull-Requests besteht aus den folgenden Jobs:
 \end{itemize}
 
 Je nachdem, ob es sich um einen Push auf den \textit{dev}- oder \textit{main}-Branch handelt, wird die Pipeline
-für die \textit{staging}- oder \textit{production}-Umgebung ausgeführt. 
+für die \textit{Staging}- oder \textit{Production}-Umgebung ausgeführt. 
 Abbildung \ref{fig:pr-pipeline} zeigt die Pipeline für Pull-Requests.
 
 \begin{figure}[H]
@@ -134,19 +137,19 @@ Die Pipeline besteht aus den folgenden Jobs:
 \begin{itemize}
   \item \textbf{Apply Terraform for the Infrastructure}: Die Änderungen an der Infrastruktur werden angewendet.
   \item \textbf{Build and Push Images}: Die Docker Images aller Services werden gebaut und in die Artifact Registry hochgeladen.
-  \item \textbf{Package Cloud Functions}: Die Cloud-Functions werden in ein Zip-Archiv gepackt.
+  \item \textbf{Package Cloud Functions}: Der Sourcecode der Cloud-Functions wird in ein Zip-Archiv gepackt und in einen Bucket hochgeladen.
   \item \textbf{Apply Terraform for the Application}: Die Änderungen an der Anwendung werden angewendet. Das beinhaltet das Deployment der Docker Images und der Cloud-Functions.
   \item \textbf{Deploy Cloud Run}: Cloud-Run-Services, die nicht im Kubernetes Cluster laufen, werden deployed.
   \item \textbf{Update deployment.json}: Deployment-Informationen wie der Tag der Images werden in einer JSON-Datei in einem Bucket für spätere Pipelines gespeichert.
 \end{itemize}
 
 Da die Park Anwendung Multi-Tenant-fähig ist, müssen die Tenants auch in den Pipelines berücksichtigt werden.
-Viele Ressourcen wie Buckets, Firestore Datenbanken und DNS-Zonen müssen pro Enterprise Tenant erstellt werden.
+Viele Ressourcen wie Buckets, Firestore Datenbanken und DNS-Zonen müssen pro Enterprise-Tenant erstellt werden.
 Um herauszufinden, ob Ressourcen erstellt, aktualisiert oder gelöscht werden müssen, wird eine JSON-Datei 
-aus einem Bucket geladen. Diese Datei enthält die Konfiguration der Enterprise Tenants.
+aus einem Bucket geladen. Diese Datei enthält die Konfiguration der Enterprise-Tenants.
 
 Je nachdem, ob es sich um einen Push auf den \textit{dev}- oder \textit{main}-Branch handelt, wird die Pipeline
-für die \textit{staging}- oder \textit{production}-Umgebung ausgeführt.
+für die \textit{Staging}- oder \textit{Production}-Umgebung ausgeführt.
 Abbildung \ref{fig:cd-pipeline} zeigt die Pipeline für einen Push auf den \textit{dev}- oder \textit{main}-Branch.
 
 \begin{figure}[H]
@@ -159,31 +162,32 @@ Abbildung \ref{fig:cd-pipeline} zeigt die Pipeline für einen Push auf den \text
 
 \subsection{New Tenants}
 
-Wenn ein neuer Client die Park Anwendung verwenden möchte und über das Sign-Up-Frontend(\ref{sec:signup-frontend})
-das Anmeldeformular ausgefüllt hat, wird ein Request an den Authentication Service(\ref{sec:auth-service}) gesendet.
+Wenn ein neuer Kunde die Park Anwendung verwenden möchte und über das Sign-Up-Frontend (siehe \ref{sec:signup-frontend})
+das Anmeldeformular ausgefüllt hat, wird ein Request an den Authentication Service (siehe \ref{sec:auth-service}) gesendet.
 Der Authentication Service erstellt einen neuen Tenant in der Identity Platform und in der Firestore Datenbank.
 Neben dem Tenant wird auch ein Admin-Benutzer für den neuen Tenant erstellt. Der Admin-Benutzer 
-erhält die vom Client angegebene E-Mail-Adresse und das vom Client angegebene Passwort.
+erhält die vom Kunde angegebene E-Mail-Adresse und das vom Kunde angegebene Passwort.
 
 Anschließend wird ein Request an den Infrastructure Service gesendet.
-Handelt es sich um einen \textit{free} oder \textit{premium} werden keine Änderungen an der Infrastruktur vorgenommen.
-Handelt es sich um einen Enterprise Tenant, wird ein Request an GitHub gesendet, der
-den Workflow für die Erstellung der Ressourcen für den neuen Tenant startet.
+Handelt es sich um einen \textit{Free}- oder \textit{Premium}-Tenant werden keine Änderungen an der Infrastruktur vorgenommen.
+Handelt es sich um einen Enterprise-Tenant, wird ein Request an GitHub gesendet, der
+den Workflow für die Erstellung der Ressourcen startet.
 
-\subsubsection{Erstellung der Ressourcen für Enterprise Tenants}
+\subsubsection{Erstellung der Ressourcen für Enterprise-Tenants}
 
-Die Erstellung der Ressourcen für Enterprise Tenants erfolgt über einen GitHub Workflow.
+Die Erstellung der Ressourcen für Enterprise-Tenants erfolgt über einen GitHub Workflow.
 Der Workflow bekommt als Input die Tenant-ID und die Subdomain des Tenants.
-Der im Folgenden etwas genauer beschriebene Workflow ist in Abbildung \ref{fig:tenant-pipeline} dargestellt.
+Der im Folgenden etwas genauer beschriebene Workflow ist zusammen mit den vorherigen Schritten im
+Authentication und Infrastructure Service in Abbildung \ref{fig:tenant-pipeline} dargestellt.
 Der Workflow besteht aus den folgenden Jobs:
 \begin{itemize}
-  \item \textbf{Manage enterprise tenants}: Der Workflow fügt die neue Konfiguration des Enterprise Tenants zur JSON-Datei hinzu.
+  \item \textbf{Manage enterprise tenants}: Der Workflow fügt die neue Konfiguration des Enterprise-Tenants zur JSON-Datei hinzu.
   \item \textbf{Load deployment.json}: Die JSON-Datei mit den Informationen über das aktuelle Deployment wird geladen. Hier wird der
   Tag der Docker Images ausgelesen. Weil die aktuell deployten Services nicht verändert werden sollen, sondern nur neue Services 
   hinzugefügt werden sollen, wird der Tag der Images benötigt.
-  \item \textbf{Load enterprise-tenants.json}: Die im vorherigen Schritt aktualisierte JSON-Datei wird geladen. Der Inhalt der JSON-Datei
+  \item \textbf{Load enterprise-tenants.json}: Die in vorherigen Schritten aktualisierte JSON-Datei wird geladen. Der Inhalt der JSON-Datei
   wird in einer Umgebungsvariable gespeichert, damit die folgenden Jobs darauf zugreifen können.
-  \item \textbf{Apply Terraform for the Application}: Mithilfe von Terraform werden \textbf{alle} Ressourcen für den neuen Tenant erstellt.
+  \item \textbf{Apply Terraform for the Application}: Mithilfe von Terraform werden alle Ressourcen für den neuen Tenant automatisch erstellt.
 \end{itemize}
 
 \begin{figure}[H]
@@ -200,7 +204,7 @@ Einerseits bietet Google Cloud Monitoring eine Vielzahl von Metriken und vorkonf
 andererseits können auch eigene Dashboards erstellt werden.
 
 Für die Überwachung der Anwendung und der durch die Tenants verursachten Last werden 
-vor allem folgende Metriken überwacht:
+vor allem folgende Metriken verwendet:
 
 \begin{itemize}
   \item \textbf{CPU Utilization}: Überwachung der CPU-Auslastung pro Namespace.
@@ -219,32 +223,34 @@ Abbildung \ref{fig:monitoring-dashboard} zeigt eines der Dashboards zum Monitori
 
 \subsection{Load Testing}
 
-Für das Load Testing wurde Grafana k6\footnote{\url{https://k6.io/}} verwendet. K6 ist ein Open-Source-Tool,
-das für das Load Testing von APIs und Webseiten verwendet werden kann.
+Für das Load Testing wird Grafana K6 \footnote{\url{https://k6.io/}} verwendet. K6 ist ein Open-Source-Tool,
+das für das Load Testing von APIs und Webseiten entwickelt wurde.
 
 Um zu zeigen, dass die Park Anwendung bei steigender Last die Microservices skalieren kann und bei hoher 
-Last stabil bleibt, wurde ein Load Test durchgeführt, der die Anwendung mit 2000 Benutzern für 20 Minuten belastet.
-Der Load Test wurde auf die \textit{staging}-Umgebung durchgeführt. 
+Last stabil bleibt, wird ein Load Test durchgeführt, der die Anwendung mit 2000 Benutzern für 20 Minuten belastet.
+Der Load Test wird auf die \textit{Staging}-Umgebung durchgeführt. 
 
-Um die Wirkung des Horizontal Pod Autoscalers (HPA) und den Ressource Quotas zu zeigen, wurden die Quotas so gesetzt,
-dass die der HPA die Anzahl der Pods auf maximal 9 erhöhen kann, bevor die Quotas erreicht werden. Außerdem wurde mit 
+Um die Wirkung des Horizontal Pod Autoscalers (HPA) und den Ressource Quotas zu zeigen, werden die Quotas so gesetzt,
+dass der HPA die Anzahl der Pods auf maximal 9 erhöhen kann, bevor die Quotas erreicht werden. Außerdem wird mit 
 dem Load Test überprüft, ob sich die Namespaces gegenseitig beeinflussen oder ob die Quotas das Noisy Neighbor Problem verhindern.
+Um das Noisy Neighbor Problem zu provozieren, werden 70\% der Anfragen an den 
+\textit{Enterprise}-Namespace und 30\% an den \textit{Free}-Namespace gesendet.
 
-Der Load Test führt folgende drei Schritte aus:
+Der Load Test führt die folgenden drei Schritte aus:
 \begin{enumerate}
   \item In eine Garage einfahren und ein Ticket ziehen.
   \item Das Ticket bezahlen.
   \item Die Garage verlassen.
 \end{enumerate}
 
-Da es sich bei diesen drei Schritten um die häufigsten Aktionen handelt, die ein Benutzer in der Park Anwendung durchführt,
-wurden diese für den Load Test ausgewählt. Der Code für den Load Test ist im Anhang \ref{app:load-test-code} zu finden.
+Da es sich bei diesen drei Schritten um die wahrscheinlich häufigsten Vorgänge handelt, wurden diese für den Load Test ausgewählt. 
+Der Code für den Load Test ist im Anhang \ref{app:load-test-code} zu finden.
 
 Abbildung \ref{fig:load-testing} zeigt wie die Anwendung auf die steigende Last reagiert und wie die Pods skaliert werden.
 Das untere Diagramm in Abbildung \ref{fig:load-testing} zeigt die Anzahl der Pods des Parking Management Services pro Namespace.
-Die Anzahl der angeforderten Pods steigt im free und im enterprise Namespace auf 10 an, die Anzahl der verfügbaren 
+Die Anzahl der angeforderten Pods steigt im \textit{Free}- und im \textit{Enterprise}-Namespace auf 10 an, die Anzahl der verfügbaren 
 Pods erreicht jedoch jeweils nur 9. Das liegt daran, dass die Quotas so gesetzt sind, dass der HPA maximal 9 Pods 
-erstellen kann. Der HPA hat also die Pods erfolgreich skaliert, bis die Quotas erreicht wurden.
+erstellen kann, bevor die Quotas erreicht sind.
 
 \begin{figure}[H]
   \centering
@@ -253,5 +259,7 @@ erstellen kann. Der HPA hat also die Pods erfolgreich skaliert, bis die Quotas e
   \label{fig:load-testing}
 \end{figure}
 
-Die Werte der Quotas und der HPAs sind Werte, die für die Demonstration der Skalierung gewählt wurden und nicht über längere Zeit getestet wurden.
-In einer produktiven Umgebung sollte die Anwendung über längere Zeit getestet werden, um die optimalen Werte für die Quotas und HPAs zu finden. 
+Die Werte der Quotas und der HPAs wurden ohne längere Recherche oder genaue Berechnungen gewählt.
+Sie sollen zeigen, dass die Anwendung skaliert wird und stabil bleibt, wenn die Last steigt.
+In einer produktiven Umgebung sollte die Anwendung über längere Zeit getestet werden, 
+um die optimalen Werte für die Quotas und HPAs zu finden.

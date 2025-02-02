@@ -139,12 +139,12 @@ Die folgenden Microservices werden von allen Tenants eines bestimmten Tenant-Typ
 
 Wie für die einzelnen Microservices beschrieben, werden diese mittels einem Horizontal Pod Autoscaler (HPA) und vertikaler Skalierung skaliert. 
 Der HPA reagiert auf die CPU-Auslastung und skaliert ab 80\% CPU-Auslastung mit einem Maximum von 10 Pods. 
-Die vertikale Skalierung erfolgt durch die Definition von Container Resource Requests und Limits. 
-Die Werte für die Ressourcenanforderungen und -limits werden im Helm-Chart für die Kubernetes-Deployments festgelegt und können bei Bedarf angepasst werden.
+Die vertikale Skalierung erfolgt durch die Definition von Container Resource-Requests und -Limits. 
+Die Werte für die Ressource-Request und -Limits werden im Helm-Chart für die Kubernetes-Deployments festgelegt und können bei Bedarf angepasst werden.
 
-Da sich alle Tenants ein Cluster teilen und die Trennung über Namespaces erfolgt, kann es zum Noisy-Neighbor-Problem kommen.
+Da sich alle Tenants ein Cluster teilen und die Trennung über Namespaces erfolgt, kann es zum Noisy-Neighbor-Problem\footnote{\url{https://learn.microsoft.com/en-us/azure/architecture/antipatterns/noisy-neighbor/noisy-neighbor}} kommen.
 Dabei verbraucht ein Tenant unverhältnismäßig viele Ressourcen und beeinträchtigt dadurch die Performance anderer Tenants.
-Um dies zu vermeiden, wird eine Ressourcen-Quota für jeden Namespace definiert, sodass ein Tenant nicht mehr Ressourcen verbrauchen kann, als ihm zugewiesen wurden.
+Um dies zu vermeiden, wird ein Ressourcen-Quota für jeden Namespace definiert, sodass ein Tenant nicht mehr Ressourcen verbrauchen kann, als ihm zugewiesen wurden.
 Genauer gesagt, wird jeweils ein Limit für CPU und Memory pro Namespace festgelegt, das nicht überschritten werden darf.
 Es gibt also ein Limit für den Namespace der Free-Tenants, ein Limit für den Namespace der Premium-Tenants und ein Limit für 
 jeden Enterprise-Tenant-Namespace. Auch die Werte für diese Limits werden im Helm-Chart festgelegt und können bei Bedarf angepasst werden.
