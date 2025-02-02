@@ -52,7 +52,7 @@ Unter \verb|docs| liegen einige Files für die Dokumentation ab. Darunter Skizze
 Im \verb|frontend| Verzeichnis befindet sich der gesamte Client-Code der Anwendung, in diese Fall ein React Projekt mit allen Komponenten und Services des Frontends.
 Außerdem existiert noch ein weiteres \verb|shared| Verzeichnis auf top-level Ebene für die DTOs zwischen Frontend und Backend.
 
-Für die Tenant-Creation, beziehungsweise der Registrierung und Instanzerstellung für neue Tenants existiert noch ein separater Client, welcher unter \verb|signup-frontend| abgelegt ist. Hierbei handelt es sich ebenfalls um ein React-Projekt.
+Für die Tenant-Creation, beziehungsweise der Registrierung und Instanz-Erstellung für neue Tenants existiert noch ein separater Client, welcher unter \verb|signup-frontend| abgelegt ist. Hierbei handelt es sich ebenfalls um ein React-Projekt.
 
 Während der Entwicklung haben wir mit Feature-Branches angelegt an den Git Flow gearbeitet, um eine möglichst konfliktfreie, parallele Entwicklung der Anwendung zu ermöglichen.
 
@@ -72,10 +72,10 @@ Zusätzlich werden 2 Frontend Clients bereitgestellt:
 
 \begin{itemize}
     \item \textbf{PARK Client:} Frontend für die Bedienung der Anwendung
-    \item \textbf{SignUp Client:} Frontend für die Tenant-Creation/Instanzerstellung
+    \item \textbf{SignUp Client:} Frontend für die Tenant-Creation/Instanz-Erstellung
 \end{itemize}
 
-Die Frontend Clients wurden mit React implementiert. Wie bereits im Kontextdiagram (Figure \ref{fig:context-diagram}) gezeigt, sind zudem verschiedene externe Komponenten angebunden. So werden beispielsweise unterschiedliche Komponenten aus der Google Cloud Infrastruktur verwendet (Object Storage, Firestore, Identity Platform,...). Außerdem werden extern verwaltete Komponenten angebunden, beispielsweise in Form von Schranken, Ladestationen usw. Für das automatisierte Deployment werden GitHub Actions verwendet.
+Die Frontend Clients wurden mit React implementiert. Wie bereits im Kontextdiagramm (Figure \ref{fig:context-diagram}) gezeigt, sind zudem verschiedene externe Komponenten angebunden. So werden beispielsweise unterschiedliche Komponenten aus der Google Cloud Infrastruktur verwendet (Object Storage, Firestore, Identity Platform,...). Außerdem werden extern verwaltete Komponenten angebunden, beispielsweise in Form von Schranken, Ladestationen usw. Für das automatisierte Deployment werden GitHub Actions verwendet.
 
 \subsubsection{Libraries}
 Für die Interaktion mit der Google Cloud Infrastruktur wurden unterschiedliche Libraries verwendet. Für den Zugriff auf die Firestore Infrastruktur haben wir das NPM Paket \href{hhttps://www.npmjs.com/package/firebase-admin}{firebase-admin} verwendet, welches verschiedene Methoden, beispielsweise zum Abrufen und Erstellen von Dokumenten in einer Firestore Datenbank zur Verfügung stellt.
@@ -185,7 +185,7 @@ Außerdem werden auch die Analytics Records in in Firestore gespeichert. Für di
 
 Die Firestore Datenbanken für den Authentication Service und den Infrastructure-Management Service existieren einmal für die gesamte Anwendung, die Datenbanken für das Parking- und Property-Management existieren jeweils einmal für die Free-Tenants, einmal für die Premium-Tenants und für jeden Enterprise-Tenant. Gleich verhält es sich auch für die Collections, die mit dem Suffix \verb|-<tenantId>| versehen sind.
 
-Neben den Firestore Datenbanken werden, wie in Abbildung \ref{fig:data-model} gezeigt, auch verschiedene Cloud Storage Buckets verwendet. Der Bucket \verb|gcf-source| beinhaltet dabei den Quellcode für die Cloud Function zur Erstellung der Defect Reports und wird für das Deployment benötigt. Die Defect Reports, die von dieser Cloud Function erstellt werden, werden wieder entsprechend des Tenants in einem Bucket abgelget (\verb|defect-reports-<tenantId>|). Der \verb|terraform-state| bucket wird ebenfalls für das Deployment benötigt, und umfasst neben den \verb|.tfstate| Files für Terraform auch zwei JSON Files für das Deployment und die Enterprise Tenants.
+Neben den Firestore Datenbanken werden, wie in Abbildung \ref{fig:data-model} gezeigt, auch verschiedene Cloud Storage Buckets verwendet. Der Bucket \verb|gcf-source| beinhaltet dabei den Quellcode für die Cloud Function zur Erstellung der Defect Reports und wird für das Deployment benötigt. Die Defect Reports, die von dieser Cloud Function erstellt werden, werden wieder entsprechend des Tenants in einem Bucket abgelegt (\verb|defect-reports-<tenantId>|). Der \verb|terraform-state| bucket wird ebenfalls für das Deployment benötigt, und umfasst neben den \verb|.tfstate| Files für Terraform auch zwei JSON Files für das Deployment und die Enterprise Tenants.
 Darüber hinaus existiert noch ein Bucket \verb|prop-ma-<tenantId>|, in welchem die Bilder für die Defects abgespeichert werden können.
 
 \begin{figure}[H]
